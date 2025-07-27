@@ -22,13 +22,12 @@ import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useCart } from '../hooks/useCart';
 
-const stringToColor = (string: string) => {
-  console.log(string);
+const stringToColor = (str) => {
   let hash = 0;
   let i;
 
-  for (i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  for (i = 0; i < str.length; i += 1) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
 
   let color = '#';
@@ -38,7 +37,6 @@ const stringToColor = (string: string) => {
     color += `0F0${value.toString(16)}`.slice(-2);
   }
 
-  console.log(color);
   return color;
 };
 
@@ -64,9 +62,9 @@ const Navbar = () => {
     { to: '/addresses', label: 'Addresses', icon: <EmojiNatureIcon /> },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path) => location.pathname === path;
 
-  const navButtonSx = (active: boolean) => ({
+  const navButtonSx = (active) => ({
     fontWeight: 600,
     borderBottom: active ? '4px solid #e6d897' : '4px solid transparent',
     // No background or text color change for active tab
