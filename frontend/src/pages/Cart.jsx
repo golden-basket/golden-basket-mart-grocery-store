@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import {
   Box,
   Typography,
@@ -22,6 +21,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../components/Loading';
+import ApiService from '../services/api';
 
 const Cart = () => {
   const { user, token } = useAuth();
@@ -30,65 +30,46 @@ const Cart = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user || !token) return;
+  const fetchCart = () => {
     setLoading(true);
     setError('');
-    axios
-      .get('http://localhost:3000/api/cart', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    ApiService.getCart()
       .then((res) => {
-        setCart(res.data.items || []);
+        setCart(res.items || []);
         setLoading(false);
       })
       .catch((err) => {
         setError(`Failed to fetch cart: ${err.message}`);
         setLoading(false);
       });
+  };
+  useEffect(() => {
+    if (!user || !token) return;
+    fetchCart();
+    // eslint-disable-next-line
   }, [user, token]);
 
   const increaseQuantity = (productId) => {
     const item = cart.find((item) => item.product._id === productId);
     if (!item) return;
-    axios
-      .put(
-        'http://localhost:3000/api/cart/update',
-        { productId, quantity: item.quantity + 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then((res) => setCart(res.data.items || []))
-      .catch((err) =>
-        setError(err.response?.data?.error || 'Failed to update cart.')
-      );
+    ApiService.updateCartItem(productId, item.quantity + 1)
+      .then((res) => setCart(res.items || []))
+      .catch((err) => setError(err.message || 'Failed to update cart.'));
   };
 
   const decreaseQuantity = (productId) => {
     const item = cart.find((item) => item.product._id === productId);
     if (!item) return;
     if (item.quantity === 1) return removeFromCart(productId);
-    axios
-      .put(
-        'http://localhost:3000/api/cart/update',
-        { productId, quantity: item.quantity - 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then((res) => setCart(res.data.items || []))
-      .catch((err) =>
-        setError(err.response?.data?.error || 'Failed to update cart.')
-      );
+    ApiService.updateCartItem(productId, item.quantity - 1)
+      .then((res) => setCart(res.items || []))
+      .catch((err) => setError(err.message || 'Failed to update cart.'));
   };
 
   const removeFromCart = (productId) => {
-    axios
-      .delete('http://localhost:3000/api/cart/remove', {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { productId },
-      })
-      .then((res) => setCart(res.data.items || []))
-      .catch((err) =>
-        setError(err.response?.data?.error || 'Failed to remove from cart.')
-      );
+    ApiService.removeFromCart(productId)
+      .then((res) => setCart(res.items || []))
+      .catch((err) => setError(err.message || 'Failed to remove from cart.'));
   };
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);

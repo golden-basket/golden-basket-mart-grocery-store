@@ -154,3 +154,53 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 }; 
+
+// List all users (admin only)
+exports.listUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, '-password');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update user (admin only)
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const update = req.body;
+    if (update.password) delete update.password; // Prevent password change here
+    const user = await User.findByIdAndUpdate(id, update, { new: true, select: '-password' });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete user (admin only)
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json({ message: 'User deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Change user role (admin only)
+exports.changeUserRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    if (!['user', 'admin'].includes(role)) return res.status(400).json({ error: 'Invalid role.' });
+    const user = await User.findByIdAndUpdate(id, { role }, { new: true, select: '-password' });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}; 

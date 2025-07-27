@@ -690,4 +690,280 @@ router.put('/addresses/:id', auth, validateObjectId, addressValidation, handleVa
  */
 router.delete('/addresses/:id', auth, validateObjectId, addressController.deleteAddress);
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: List all users (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *       403:
+ *         description: Admin access required
+ */
+router.get('/users', auth, admin, authController.listUsers);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update user (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated
+ *       404:
+ *         description: User not found
+ *       403:
+ *         description: Admin access required
+ */
+router.put('/users/:id', auth, admin, authController.updateUser);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete user (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *       404:
+ *         description: User not found
+ *       403:
+ *         description: Admin access required
+ */
+router.delete('/users/:id', auth, admin, authController.deleteUser);
+
+/**
+ * @swagger
+ * /users/{id}/role:
+ *   patch:
+ *     summary: Change user role (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *     responses:
+ *       200:
+ *         description: User role changed
+ *       400:
+ *         description: Invalid role
+ *       404:
+ *         description: User not found
+ *       403:
+ *         description: Admin access required
+ */
+router.patch('/users/:id/role', auth, admin, authController.changeUserRole);
+
+/**
+ * @swagger
+ * /projects:
+ *   get:
+ *     summary: List all projects (admin only)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of projects
+ *       403:
+ *         description: Admin access required
+ */
+router.get('/projects', auth, admin, require('../controllers/projectController').listProjects);
+
+/**
+ * @swagger
+ * /projects/{id}:
+ *   get:
+ *     summary: Get single project (admin only)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     responses:
+ *       200:
+ *         description: Project details
+ *       404:
+ *         description: Project not found
+ *       403:
+ *         description: Admin access required
+ */
+router.get('/projects/:id', auth, admin, require('../controllers/projectController').getProject);
+
+/**
+ * @swagger
+ * /projects:
+ *   post:
+ *     summary: Create project (admin only)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, completed, on-hold]
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *               members:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: mongoId
+ *     responses:
+ *       201:
+ *         description: Project created
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Admin access required
+ */
+router.post('/projects', auth, admin, require('../controllers/projectController').createProject);
+
+/**
+ * @swagger
+ * /projects/{id}:
+ *   put:
+ *     summary: Update project (admin only)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, completed, on-hold]
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *               members:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: mongoId
+ *     responses:
+ *       200:
+ *         description: Project updated
+ *       404:
+ *         description: Project not found
+ *       403:
+ *         description: Admin access required
+ */
+router.put('/projects/:id', auth, admin, require('../controllers/projectController').updateProject);
+
+/**
+ * @swagger
+ * /projects/{id}:
+ *   delete:
+ *     summary: Delete project (admin only)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     responses:
+ *       200:
+ *         description: Project deleted
+ *       404:
+ *         description: Project not found
+ *       403:
+ *         description: Admin access required
+ */
+router.delete('/projects/:id', auth, admin, require('../controllers/projectController').deleteProject);
+
 module.exports = router;

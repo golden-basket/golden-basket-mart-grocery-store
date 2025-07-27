@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
-import axios from 'axios';
 import {
   Box,
   Typography,
@@ -13,6 +12,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Loading from '../components/Loading';
+import ApiService from '../services/api';
 
 const AddressBook = () => {
   const { token } = useAuth();
@@ -33,11 +33,8 @@ const AddressBook = () => {
 
   const fetchAddresses = () => {
     setLoading(true);
-    axios
-      .get('http://localhost:3000/api/addresses', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setAddresses(res.data))
+    ApiService.getAddresses()
+      .then((data) => setAddresses(data))
       .catch(() => setError('Failed to load addresses.'))
       .finally(() => setLoading(false));
   };
@@ -55,11 +52,9 @@ const AddressBook = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    const method = editingId ? 'put' : 'post';
-    const url = editingId
-      ? `http://localhost:3000/api/addresses/${editingId}`
-      : 'http://localhost:3000/api/addresses';
-    axios[method](url, form, { headers: { Authorization: `Bearer ${token}` } })
+    const method = editingId ? 'updateAddress' : 'addAddress';
+    const args = editingId ? [editingId, form] : [form];
+    ApiService[method](...args)
       .then(() => {
         setSuccess(editingId ? 'Address updated.' : 'Address added.');
         setForm({
@@ -83,10 +78,7 @@ const AddressBook = () => {
   };
 
   const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:3000/api/addresses/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    ApiService.deleteAddress(id)
       .then(() => {
         setSuccess('Address deleted.');
         fetchAddresses();
@@ -136,7 +128,28 @@ const AddressBook = () => {
           {success}
         </Alert>
       )}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper
+        sx={{
+          p: { xs: 3, md: 4 },
+          borderRadius: 4,
+          background:
+            'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
+          border: '2px solid #e6d897',
+          boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background:
+              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+          },
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
             <TextField
@@ -145,14 +158,34 @@ const AddressBook = () => {
               value={form.addressLine1}
               onChange={handleChange}
               required
+              size="small"
               fullWidth
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <TextField
               label="Address Line 2"
               name="addressLine2"
               value={form.addressLine2}
               onChange={handleChange}
+              size="small"
               fullWidth
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <TextField
               label="City"
@@ -160,7 +193,17 @@ const AddressBook = () => {
               value={form.city}
               onChange={handleChange}
               required
+              size="small"
               fullWidth
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <TextField
               label="State"
@@ -168,7 +211,17 @@ const AddressBook = () => {
               value={form.state}
               onChange={handleChange}
               required
+              size="small"
               fullWidth
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <TextField
               label="Country"
@@ -176,7 +229,17 @@ const AddressBook = () => {
               value={form.country}
               onChange={handleChange}
               required
+              size="small"
               fullWidth
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <TextField
               label="Pin Code"
@@ -184,8 +247,18 @@ const AddressBook = () => {
               value={form.pinCode}
               onChange={handleChange}
               required
+              size="small"
               fullWidth
               slotProps={{ input: { maxLength: 6 } }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <TextField
               label="Phone Number"
@@ -193,8 +266,18 @@ const AddressBook = () => {
               value={form.phoneNumber}
               onChange={handleChange}
               required
+              size="small"
               fullWidth
               slotProps={{ input: { maxLength: 6 } }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 2,
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e6d897',
+                  boxShadow: '0 0 0 2px #e6d89744',
+                },
+              }}
             />
             <Button
               type="submit"
@@ -220,7 +303,20 @@ const AddressBook = () => {
       {loading ? (
         <Loading />
       ) : addresses.length === 0 ? (
-        <Typography align="center">No addresses found.</Typography>
+        <Typography
+          align="center"
+          sx={{
+            background:
+              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontWeight: 600,
+            mt: 2,
+            p: 3
+          }}
+        >
+          No addresses found.
+        </Typography>
       ) : (
         addresses.map((addr) => (
           <Paper
@@ -231,6 +327,9 @@ const AddressBook = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              border: '2px solid #e6d897',
+              boxShadow: '0 2px 8px #a3824c22',
+              borderRadius: 3,
             }}
           >
             <Box>

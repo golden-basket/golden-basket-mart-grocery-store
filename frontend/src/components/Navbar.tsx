@@ -8,6 +8,7 @@ import {
   Box,
   Avatar,
   Badge,
+  Stack,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -21,7 +22,27 @@ import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useCart } from '../hooks/useCart';
 
-export default function Navbar() {
+const stringToColor = (string: string) => {
+  console.log(string);
+  let hash = 0;
+  let i;
+
+  for (i = 0; i < string.length; i += 1) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = '#';
+
+  for (i = 0; i < 3; i += 1) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += `0F0${value.toString(16)}`.slice(-2);
+  }
+
+  console.log(color);
+  return color;
+};
+
+const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,7 +126,10 @@ export default function Navbar() {
                 component={Link}
                 to={link.to}
                 startIcon={link.icon}
-                sx={(navButtonSx(isActive(link.to)), { textTransform: 'none' })}
+                sx={{
+                  ...navButtonSx(isActive(link.to)),
+                  textTransform: 'none',
+                }}
               >
                 {link.label}
               </Button>
@@ -123,7 +147,7 @@ export default function Navbar() {
                   <LocalGroceryStoreIcon />
                 </Badge>
               }
-              sx={(navButtonSx(isActive('/cart')), { textTransform: 'none' })}
+              sx={{ ...navButtonSx(isActive('/cart')), textTransform: 'none' }}
             >
               Cart
             </Button>
@@ -137,17 +161,41 @@ export default function Navbar() {
                 component={Link}
                 to={link.to}
                 startIcon={link.icon}
-                sx={(navButtonSx(isActive(link.to)), { textTransform: 'none' })}
+                sx={{
+                  ...navButtonSx(isActive(link.to)),
+                  textTransform: 'none',
+                }}
               >
                 {link.label}
               </Button>
             ))}
+          {user && user.role === 'admin' && (
+            <Button
+              color="inherit"
+              component={Link}
+              to="/admin"
+              startIcon={<InventoryIcon />}
+              sx={{ ...navButtonSx(isActive('/admin')), textTransform: 'none' }}
+            >
+              Admin
+            </Button>
+          )}
           {user ? (
             <>
               <Avatar
-                {...stringAvatar(`${user.firstName} ${user.lastName}`)}
-                sx={{ width: 30, height: 30 }}
-              />
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 12,
+                  mt: 0.5,
+                  width: 30,
+                  height: 30,
+                  background: stringToColor(
+                    user.firstName + ' ' + user.lastName
+                  ),
+                }}
+              >
+                {user.firstName.charAt(0) + user.lastName.charAt(0)}
+              </Avatar>
               <Button
                 color="inherit"
                 onClick={() => {
@@ -155,7 +203,7 @@ export default function Navbar() {
                   navigate('/login');
                 }}
                 startIcon={<LogoutIcon />}
-                sx={(navButtonSx(isActive('')), { textTransform: 'none' })}
+                sx={{ ...navButtonSx(isActive('')), textTransform: 'none' }}
               >
                 Logout
               </Button>
@@ -165,33 +213,6 @@ export default function Navbar() {
       </Toolbar>
     </AppBar>
   );
-}
+};
 
-function stringToColor(string: string) {
-  let hash = 0;
-  let i;
-
-  /* eslint-disable no-bitwise */
-  for (i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  let color = '#';
-
-  for (i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `00${value.toString(16)}`.slice(-2);
-  }
-  /* eslint-enable no-bitwise */
-
-  return color;
-}
-
-function stringAvatar(name: string) {
-  return {
-    sx: {
-      bgcolor: stringToColor(name),
-    },
-    children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
-  };
-}
+export default Navbar;
