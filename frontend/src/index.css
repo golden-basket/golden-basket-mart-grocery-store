@@ -1,0 +1,133 @@
+:root {
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: #2e3a1b;
+  background-color: #f7fbe8;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #388e3c;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #1b5e20;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #fffdf4 0%, #fdf6d1 60%, #f0e3b6 90%, #3e2d14 100%);
+}
+
+h1 {
+  font-size: 3em;
+  line-height: 1.1;
+  color: #388e3c;
+  letter-spacing: 1px;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid #388e3c;
+  padding: 0.7em 1.5em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: #fffde7;
+  color: #388e3c;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(56, 142, 60, 0.08);
+}
+
+button:hover {
+  background-color: #c8e6c9;
+  border-color: #1b5e20;
+  color: #1b5e20;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid #388e3c;
+}
+
+.vegetable {
+  background: #e8f5e9;
+  border-left: 6px solid #388e3c;
+  padding: 1em;
+  border-radius: 8px;
+  margin-bottom: 1em;
+}
+
+.dairy {
+  background: #fffde7;
+  border-left: 6px solid #ffb300;
+  padding: 1em;
+  border-radius: 8px;
+  margin-bottom: 1em;
+}
+
+.cold-drink {
+  background: #e0f7fa;
+  border-left: 6px solid #0288d1;
+  padding: 1em;
+  border-radius: 8px;
+  margin-bottom: 1em;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #e0f2f1;
+    background-color: #263238;
+  }
+
+  h1 {
+    color: #a5d6a7;
+  }
+
+  a {
+    color: #a5d6a7;
+  }
+
+  a:hover {
+    color: #81c784;
+  }
+
+  button {
+    background-color: #37474f;
+    color: #a5d6a7;
+    border-color: #81c784;
+  }
+
+  button:hover {
+    background-color: #263238;
+    color: #fffde7;
+    border-color: #ffb300;
+  }
+
+  .vegetable {
+    background: #33691e;
+    border-left-color: #a5d6a7;
+  }
+
+  .dairy {
+    background: #fffde7;
+    border-left-color: #ffb300;
+    color: #263238;
+  }
+
+  .cold-drink {
+    background: #01579b;
+    border-left-color: #4fc3f7;
+  }
+}
