@@ -5,26 +5,22 @@ const cartController = require('../controllers/cartController');
 const orderController = require('../controllers/orderController');
 const productController = require('../controllers/productController');
 const addressController = require('../controllers/addressController');
-const { auth, admin } = require('../middleware/auth');
-const { 
-  validateObjectId, 
-  registerValidation, 
-  loginValidation, 
-  productValidation, 
-  cartValidation, 
-  addressValidation, 
-  orderValidation, 
-  handleValidationErrors 
+const categoryController = require('../controllers/categoryController');
+const { auth, admin, authLimiter } = require('../middleware/auth');
+
+const {
+  validateObjectId,
+  registerValidation,
+  loginValidation,
+  productValidation,
+  cartValidation,
+  addressValidation,
+  orderValidation,
+  handleValidationErrors,
 } = require('../middleware/validation');
 const { cacheMiddleware, clearCache } = require('../middleware/cache');
-const rateLimit = require('express-rate-limit');
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  message: { error: 'Too many requests, please try again later.' }
-});
-
+// Authentication routes
 /**
  * @swagger
  * /auth/register:
@@ -63,7 +59,13 @@ const authLimiter = rateLimit({
  *       400:
  *         description: Validation error
  */
-router.post('/auth/register', authLimiter, registerValidation, handleValidationErrors, authController.register);
+router.post(
+  '/auth/register',
+  authLimiter,
+  registerValidation,
+  handleValidationErrors,
+  authController.register
+);
 
 /**
  * @swagger
@@ -92,7 +94,13 @@ router.post('/auth/register', authLimiter, registerValidation, handleValidationE
  *       400:
  *         description: Invalid credentials
  */
-router.post('/auth/login', authLimiter, loginValidation, handleValidationErrors, authController.login);
+router.post(
+  '/auth/login',
+  authLimiter,
+  loginValidation,
+  handleValidationErrors,
+  authController.login
+);
 
 /**
  * @swagger
@@ -114,6 +122,7 @@ router.post('/auth/login', authLimiter, loginValidation, handleValidationErrors,
  */
 router.get('/auth/verify/:token', authController.verifyEmail);
 
+// Cart routes
 /**
  * @swagger
  * /cart:
@@ -160,7 +169,13 @@ router.get('/cart', auth, cartController.getCart);
  *       400:
  *         description: Validation error or insufficient stock
  */
-router.post('/cart/add', auth, cartValidation, handleValidationErrors, cartController.addToCart);
+router.post(
+  '/cart/add',
+  auth,
+  cartValidation,
+  handleValidationErrors,
+  cartController.addToCart
+);
 
 /**
  * @swagger
@@ -192,7 +207,13 @@ router.post('/cart/add', auth, cartValidation, handleValidationErrors, cartContr
  *       400:
  *         description: Validation error or insufficient stock
  */
-router.put('/cart/update', auth, cartValidation, handleValidationErrors, cartController.updateCartItem);
+router.put(
+  '/cart/update',
+  auth,
+  cartValidation,
+  handleValidationErrors,
+  cartController.updateCartItem
+);
 
 /**
  * @swagger
@@ -236,6 +257,7 @@ router.delete('/cart/remove', auth, cartController.removeFromCart);
  */
 router.post('/cart/clear', auth, cartController.clearCart);
 
+// Order routes
 /**
  * @swagger
  * /orders/place:
@@ -262,7 +284,13 @@ router.post('/cart/clear', auth, cartController.clearCart);
  *       400:
  *         description: Cart is empty or insufficient stock
  */
-router.post('/orders/place', auth, orderValidation, handleValidationErrors, orderController.placeOrder);
+router.post(
+  '/orders/place',
+  auth,
+  orderValidation,
+  handleValidationErrors,
+  orderController.placeOrder
+);
 
 /**
  * @swagger
@@ -294,6 +322,7 @@ router.get('/orders', auth, orderController.getUserOrders);
  */
 router.get('/orders/all', auth, admin, orderController.getAllOrders);
 
+// Invoices routes
 /**
  * @swagger
  * /invoices:
@@ -329,8 +358,14 @@ router.get('/invoices', auth, orderController.getUserInvoices);
  *       404:
  *         description: Invoice not found
  */
-router.get('/invoice/:invoiceId', auth, validateObjectId, orderController.downloadInvoice);
+router.get(
+  '/invoice/:invoiceId',
+  auth,
+  validateObjectId,
+  orderController.downloadInvoice
+);
 
+// Product routes
 /**
  * @swagger
  * /products:
@@ -392,10 +427,18 @@ router.get('/products', cacheMiddleware(300), productController.getAllProducts);
  *       403:
  *         description: Admin access required
  */
-router.post('/products', auth, admin, productValidation, handleValidationErrors, (req, res, next) => {
-  clearCache('/products');
-  next();
-}, productController.createProduct);
+router.post(
+  '/products',
+  auth,
+  admin,
+  productValidation,
+  handleValidationErrors,
+  (req, res, next) => {
+    clearCache('/products');
+    next();
+  },
+  productController.createProduct
+);
 
 /**
  * @swagger
@@ -433,7 +476,11 @@ router.post('/products', auth, admin, productValidation, handleValidationErrors,
  *       200:
  *         description: Products retrieved successfully
  */
-router.get('/products/search', cacheMiddleware(300), productController.searchProducts);
+router.get(
+  '/products/search',
+  cacheMiddleware(300),
+  productController.searchProducts
+);
 
 /**
  * @swagger
@@ -509,10 +556,19 @@ router.get('/products/:id', validateObjectId, productController.getProduct);
  *       404:
  *         description: Product not found
  */
-router.put('/products/:id', auth, admin, validateObjectId, productValidation, handleValidationErrors, (req, res, next) => {
-  clearCache('/products');
-  next();
-}, productController.updateProduct);
+router.put(
+  '/products/:id',
+  auth,
+  admin,
+  validateObjectId,
+  productValidation,
+  handleValidationErrors,
+  (req, res, next) => {
+    clearCache('/products');
+    next();
+  },
+  productController.updateProduct
+);
 
 /**
  * @swagger
@@ -537,11 +593,19 @@ router.put('/products/:id', auth, admin, validateObjectId, productValidation, ha
  *       404:
  *         description: Product not found
  */
-router.delete('/products/:id', auth, admin, validateObjectId, (req, res, next) => {
-  clearCache('/products');
-  next();
-}, productController.deleteProduct);
+router.delete(
+  '/products/:id',
+  auth,
+  admin,
+  validateObjectId,
+  (req, res, next) => {
+    clearCache('/products');
+    next();
+  },
+  productController.deleteProduct
+);
 
+// Address routes
 /**
  * @swagger
  * /addresses:
@@ -609,7 +673,13 @@ router.get('/addresses', auth, addressController.getAddresses);
  *       400:
  *         description: Validation error
  */
-router.post('/addresses', auth, addressValidation, handleValidationErrors, addressController.addAddress);
+router.post(
+  '/addresses',
+  auth,
+  addressValidation,
+  handleValidationErrors,
+  addressController.addAddress
+);
 
 /**
  * @swagger
@@ -665,7 +735,14 @@ router.post('/addresses', auth, addressValidation, handleValidationErrors, addre
  *       404:
  *         description: Address not found
  */
-router.put('/addresses/:id', auth, validateObjectId, addressValidation, handleValidationErrors, addressController.updateAddress);
+router.put(
+  '/addresses/:id',
+  auth,
+  validateObjectId,
+  addressValidation,
+  handleValidationErrors,
+  addressController.updateAddress
+);
 
 /**
  * @swagger
@@ -688,8 +765,14 @@ router.put('/addresses/:id', auth, validateObjectId, addressValidation, handleVa
  *       404:
  *         description: Address not found
  */
-router.delete('/addresses/:id', auth, validateObjectId, addressController.deleteAddress);
+router.delete(
+  '/addresses/:id',
+  auth,
+  validateObjectId,
+  addressController.deleteAddress
+);
 
+// User routes
 /**
  * @swagger
  * /users:
@@ -806,6 +889,7 @@ router.delete('/users/:id', auth, admin, authController.deleteUser);
  */
 router.patch('/users/:id/role', auth, admin, authController.changeUserRole);
 
+// Projects routes
 /**
  * @swagger
  * /projects:
@@ -820,7 +904,12 @@ router.patch('/users/:id/role', auth, admin, authController.changeUserRole);
  *       403:
  *         description: Admin access required
  */
-router.get('/projects', auth, admin, require('../controllers/projectController').listProjects);
+router.get(
+  '/projects',
+  auth,
+  admin,
+  require('../controllers/projectController').listProjects
+);
 
 /**
  * @swagger
@@ -845,7 +934,12 @@ router.get('/projects', auth, admin, require('../controllers/projectController')
  *       403:
  *         description: Admin access required
  */
-router.get('/projects/:id', auth, admin, require('../controllers/projectController').getProject);
+router.get(
+  '/projects/:id',
+  auth,
+  admin,
+  require('../controllers/projectController').getProject
+);
 
 /**
  * @swagger
@@ -890,7 +984,12 @@ router.get('/projects/:id', auth, admin, require('../controllers/projectControll
  *       403:
  *         description: Admin access required
  */
-router.post('/projects', auth, admin, require('../controllers/projectController').createProject);
+router.post(
+  '/projects',
+  auth,
+  admin,
+  require('../controllers/projectController').createProject
+);
 
 /**
  * @swagger
@@ -939,7 +1038,12 @@ router.post('/projects', auth, admin, require('../controllers/projectController'
  *       403:
  *         description: Admin access required
  */
-router.put('/projects/:id', auth, admin, require('../controllers/projectController').updateProject);
+router.put(
+  '/projects/:id',
+  auth,
+  admin,
+  require('../controllers/projectController').updateProject
+);
 
 /**
  * @swagger
@@ -964,6 +1068,82 @@ router.put('/projects/:id', auth, admin, require('../controllers/projectControll
  *       403:
  *         description: Admin access required
  */
-router.delete('/projects/:id', auth, admin, require('../controllers/projectController').deleteProject);
+router.delete(
+  '/projects/:id',
+  auth,
+  admin,
+  require('../controllers/projectController').deleteProject
+);
+
+// Category routes
+/**
+ * @swagger
+ * /categories:
+ *   get:
+ *     summary: Get all categories
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: Categories retrieved successfully
+ */
+router.get('/categories', categoryController.getCategories);
+
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: Create or update category (admin only)
+ *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 50
+ *               description:
+ *                 type: string
+ *                 maxLength: 200
+ *     responses:
+ *       201:
+ *         description: Category created or updated successfully
+ *       400:
+ *         description: Validation error
+ */
+router.post('/categories', auth, admin, categoryController.createOrUpdateCategory);
+
+/**
+ * @swagger
+ * /categories/{id}:
+ *   get:
+ *     summary: Get category by ID
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     responses:
+ *       200:
+ *         description: Category retrieved successfully
+ *       404:
+ *         description: Category not found
+ */
+router.get(
+  '/categories/:id',
+  auth,
+  validateObjectId,
+  categoryController.getCategoryById
+);
 
 module.exports = router;

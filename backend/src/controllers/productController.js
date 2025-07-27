@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 const logger = require('../utils/logger');
 
 // Get all products
@@ -33,24 +34,36 @@ exports.getProduct = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const { name, description, price, category, stock, images } = req.body;
-    
+
     // Check for duplicate product name
     const exists = await Product.findOne({ name });
     if (exists) {
       logger.warn(`Product creation attempt with existing name: ${name}`);
-      return res.status(409).json({ error: 'Product with this name already exists.' });
+      return res
+        .status(409)
+        .json({ error: 'Product with this name already exists.' });
     }
-    
-    const newProduct = new Product({ 
-      name, 
-      description, 
-      price, 
-      category, 
-      stock, 
-      images: images || [] 
+
+    // Validate category
+    const categoryExists = await Category.findById(category);
+
+    if (!categoryExists) {
+      logger.warn(
+        `Product creation attempt with non-existent category: ${category}`
+      );
+      return res.status(400).json({ error: 'Invalid category.' });
+    }
+
+    const newProduct = new Product({
+      name,
+      description,
+      price,
+      category,
+      stock,
+      images: images || [],
     });
     const product = await newProduct.save();
-    
+
     logger.info(`Product created: ${product.name} by admin`);
     res.status(201).json(product);
   } catch (err) {
@@ -64,13 +77,13 @@ exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const update = req.body;
-    
+
     const product = await Product.findByIdAndUpdate(id, update, { new: true });
     if (!product) {
       logger.warn(`Product update attempt for non-existent product: ${id}`);
       return res.status(404).json({ error: 'Product not found.' });
     }
-    
+
     logger.info(`Product updated: ${product.name} by admin`);
     res.json(product);
   } catch (err) {
@@ -84,12 +97,12 @@ exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findByIdAndDelete(id);
-    
+
     if (!product) {
       logger.warn(`Product deletion attempt for non-existent product: ${id}`);
       return res.status(404).json({ error: 'Product not found.' });
     }
-    
+
     logger.info(`Product deleted: ${product.name} by admin`);
     res.json({ message: 'Product deleted successfully.' });
   } catch (err) {
@@ -102,33 +115,37 @@ exports.deleteProduct = async (req, res) => {
 exports.searchProducts = async (req, res) => {
   try {
     const { q, category, minPrice, maxPrice, inStock } = req.query;
-    
+
     let query = {};
-    
+
     // Text search
     if (q) {
       query.$text = { $search: q };
     }
-    
+
     // Category filter
     if (category) {
       query.category = category;
     }
-    
+
     // Price range filter
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice);
       if (maxPrice) query.price.$lte = parseFloat(maxPrice);
     }
-    
+
     // Stock filter
     if (inStock === 'true') {
       query.stock = { $gt: 0 };
     }
-    
+
     const products = await Product.find(query).sort({ createdAt: -1 });
-    logger.info(`Products searched: ${products.length} results for query: ${JSON.stringify(req.query)}`);
+    logger.info(
+      `Products searched: ${
+        products.length
+      } results for query: ${JSON.stringify(req.query)}`
+    );
     res.json(products);
   } catch (err) {
     logger.error('Error searching products:', err);

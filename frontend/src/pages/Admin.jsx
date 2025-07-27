@@ -97,7 +97,6 @@ export default function Admin() {
   useEffect(fetchProducts, []);
   useEffect(() => {
     if (tab === 1) fetchUsers();
-    // eslint-disable-next-line
   }, [tab]);
 
   const deleteProduct = (id) => {
@@ -106,7 +105,7 @@ export default function Admin() {
         fetchProducts();
       })
       .catch(() => {
-        /* Optionally handle error with a snackbar */
+        console.error('Failed to delete product');
       });
   };
 
@@ -150,11 +149,182 @@ export default function Admin() {
       .catch(() => setUserError('Failed to change user role.'));
   };
 
+  let productTableContent;
+  if (loading) {
+    productTableContent = <Loading />;
+  } else if (filteredProducts.length === 0) {
+    productTableContent = (
+      <Typography colSpan={7} align="center">
+        No products found.
+      </Typography>
+    );
+  } else {
+    productTableContent = (
+      <TableContainer component={Paper} sx={{ mb: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Price</TableCell>
+              <TableCell>Stock</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Images</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {categories.map((cat) => (
+              <React.Fragment key={cat}>
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    sx={{
+                      fontWeight: 700,
+                      background:
+                        'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+                    }}
+                  >
+                    {cat}
+                  </TableCell>
+                </TableRow>
+                {productsByCategory[cat].map((product) => (
+                  <TableRow key={product._id}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.description}</TableCell>
+                    <TableCell>₹{product.price}</TableCell>
+                    <TableCell>{product.stock}</TableCell>
+                    <TableCell>{product.category}</TableCell>
+                    <TableCell>
+                      {Array.isArray(product.images)
+                        ? product.images.join(', ')
+                        : product.images}
+                    </TableCell>
+                    <TableCell>
+                      {/* Add edit functionality if needed */}
+                      <IconButton
+                        onClick={() => deleteProduct(product._id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </React.Fragment>
+            ))}
+            {/* Show uncategorized products if any */}
+            {filteredProducts
+              .filter((p) => !p.category)
+              .map((product) => (
+                <TableRow key={product._id}>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>{product.description}</TableCell>
+                  <TableCell>₹{product.price}</TableCell>
+                  <TableCell>{product.stock}</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>
+                    {Array.isArray(product.images)
+                      ? product.images.join(', ')
+                      : product.images}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={() => deleteProduct(product._id)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  }
+
   return (
     <Container sx={{ mt: 4 }}>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
-        <Tab label="Products" />
-        <Tab label="Users" />
+      <Tabs
+        value={tab}
+        onChange={(_, v) => setTab(v)}
+        centered
+        sx={{
+          mb: 3,
+          '& .MuiTabs-indicator': {
+            background:
+              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+            outline: 'none !important',
+          },
+        }}
+      >
+        <Tab
+          label="Products"
+          sx={{
+            fontWeight: 700,
+            color: tab === 0 ? '#a3824c' : '#7d6033ff',
+            outline: 'none !important',
+            borderRadius: '4px',
+            textTransform: 'none',
+            '&.Mui-selected': {
+              color: '#a3824c',
+            },
+            '&:hover': {
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              color: '#a3824c',
+            },
+            '&.Mui-focusVisible': {
+              outline: 'none !important',
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              color: '#a3824c',
+            },
+          }}
+        />
+        <Tab
+          label="Categories"
+          sx={{
+            fontWeight: 700,
+            color: tab === 1 ? '#a3824c' : '#7d6033ff',
+            outline: 'none !important',
+            borderRadius: '4px',
+            textTransform: 'none',
+            '&.Mui-selected': {
+              color: '#a3824c',
+            },
+            '&:hover': {
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              color: '#a3824c',
+            },
+            '&.Mui-focusVisible': {
+              outline: 'none !important',
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              color: '#a3824c',
+            },
+          }}
+        />
+        <Tab
+          label="Users"
+          sx={{
+            fontWeight: 700,
+            color: tab === 2 ? '#a3824c' : '#7d6033ff',
+            outline: 'none !important',
+            borderRadius: '4px',
+            textTransform: 'none',
+            '&.Mui-selected': {
+              color: '#a3824c',
+            },
+            '&:hover': {
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              color: '#a3824c',
+            },
+            '&.Mui-focusVisible': {
+              outline: 'none !important',
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              color: '#a3824c',
+            },
+          }}
+        />
       </Tabs>
       {tab === 0 && (
         <>
@@ -163,6 +333,8 @@ export default function Admin() {
             alignItems="center"
             justifyContent="space-between"
             mb={2}
+            flexWrap="wrap"
+            gap={2}
           >
             <Typography
               variant="h4"
@@ -173,146 +345,123 @@ export default function Admin() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 700,
+                flex: 1,
+                minWidth: 200,
               }}
             >
               Manage Products
             </Typography>
-            <Button
-              variant="contained"
-              onClick={() => setAddDialogOpen(true)}
-              sx={{
-                fontWeight: 600,
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                color: '#fff',
-                textTransform: 'none',
-                '&:hover': {
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1}
+              flexWrap="wrap"
+              sx={{ mb: { xs: 1, md: 0 } }}
+            >
+              <TextField
+                label="Search by name"
+                size="small"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+                sx={{
+                  minWidth: 160,
+                  '& .MuiOutlinedInput-root': {
+                    background:
+                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                    borderRadius: 1,
+                    transition: 'background 0.3s, box-shadow 0.3s',
+                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+                    '&:hover': {
+                      background:
+                        'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+                      boxShadow: '0 2px 8px 0 rgba(163,130,76,0.12)',
+                    },
+                    '&.Mui-focused': {
+                      background:
+                        'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
+                      boxShadow: '0 0 0 2px #e6d897',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#a3824c !important',
+                      borderWidth: 2,
+                    },
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#e6d897',
+                  },
+                  '& .MuiInputAdornment-root': {
+                    color: '#a3824c',
+                  },
+                }}
+              />
+              <Select
+                value={categoryFilter}
+                size="small"
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                displayEmpty
+                sx={{
+                  minWidth: 120,
                   background:
-                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                  color: '#000',
-                },
-              }}
-            >
-              Add Product
-            </Button>
+                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                  borderRadius: 1,
+                  transition: 'background 0.3s, box-shadow 0.3s',
+                  boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+                  '&:hover': {
+                    background:
+                      'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+                    boxShadow: '0 2px 8px 0 rgba(163,130,76,0.12)',
+                  },
+                  '&.Mui-focused': {
+                    background:
+                      'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
+                    boxShadow: '0 0 0 2px #e6d897',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#a3824c !important',
+                    borderWidth: 2,
+                  },
+                }}
+              >
+                <MenuItem value="">All Categories</MenuItem>
+                {categories.map((cat) => (
+                  <MenuItem key={cat} value={cat}>
+                    {cat}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Button
+                variant="contained"
+                onClick={() => setAddDialogOpen(true)}
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  background:
+                    'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                  color: '#fff',
+                  textTransform: 'none',
+                  boxShadow: 2,
+                  height: 36,
+                  '&:hover': {
+                    background:
+                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                    color: '#000',
+                  },
+                }}
+              >
+                Add Product
+              </Button>
+            </Box>
           </Box>
-          <Box display="flex" gap={2} mb={2}>
-            <TextField
-              label="Search by name"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ minWidth: 220 }}
-            />
-            <Select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              displayEmpty
-              sx={{ minWidth: 180 }}
-            >
-              <MenuItem value="">All Categories</MenuItem>
-              {categories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-          {loading ? (
-            <Loading />
-          ) : filteredProducts.length === 0 ? (
-            <Typography colSpan={7} align="center">
-              No products found.
-            </Typography>
-          ) : (
-            <TableContainer component={Paper} sx={{ mb: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell>Price</TableCell>
-                    <TableCell>Stock</TableCell>
-                    <TableCell>Category</TableCell>
-                    <TableCell>Images</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {categories.map((cat) => (
-                    <React.Fragment key={cat}>
-                      <TableRow>
-                        <TableCell
-                          colSpan={7}
-                          sx={{
-                            fontWeight: 700,
-                            background:
-                              'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
-                          }}
-                        >
-                          {cat}
-                        </TableCell>
-                      </TableRow>
-                      {productsByCategory[cat].map((product) => (
-                        <TableRow key={product._id}>
-                          <TableCell>{product.name}</TableCell>
-                          <TableCell>{product.description}</TableCell>
-                          <TableCell>₹{product.price}</TableCell>
-                          <TableCell>{product.stock}</TableCell>
-                          <TableCell>{product.category}</TableCell>
-                          <TableCell>
-                            {Array.isArray(product.images)
-                              ? product.images.join(', ')
-                              : product.images}
-                          </TableCell>
-                          <TableCell>
-                            {/* Add edit functionality if needed */}
-                            <IconButton
-                              onClick={() => deleteProduct(product._id)}
-                              color="error"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                  {/* Show uncategorized products if any */}
-                  {filteredProducts
-                    .filter((p) => !p.category)
-                    .map((product) => (
-                      <TableRow key={product._id}>
-                        <TableCell>{product.name}</TableCell>
-                        <TableCell>{product.description}</TableCell>
-                        <TableCell>₹{product.price}</TableCell>
-                        <TableCell>{product.stock}</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>
-                          {Array.isArray(product.images)
-                            ? product.images.join(', ')
-                            : product.images}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            onClick={() => deleteProduct(product._id)}
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          {productTableContent}
           <AddProductDialog
             open={addDialogOpen}
             onClose={() => setAddDialogOpen(false)}
@@ -325,14 +474,47 @@ export default function Admin() {
         </>
       )}
       {tab === 1 && (
+        // List all the available categories with actions like edit, and a form to add new category
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={2}
+        >
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{
+              background:
+                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700,
+            }}
+          >
+            Manage Categories
+          </Typography>
+        </Box>
+      )}
+      {tab === 2 && (
         <Box>
-          <Typography variant="h4" gutterBottom>
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{
+              background:
+                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700,
+            }}
+          >
             Manage Users
           </Typography>
           {userError && <Alert severity="error">{userError}</Alert>}
           {userLoading ? (
             <Loading />
-          ) : (
+          ) : users.length > 0 ? (
             <List>
               {users.map((user) => (
                 <ListItem
@@ -345,7 +527,12 @@ export default function Admin() {
                           handleChangeUserRole(user, e.target.value)
                         }
                         size="small"
-                        sx={{ mr: 2, minWidth: 90 }}
+                        sx={{
+                          mr: 2,
+                          minWidth: 90,
+                          background:
+                            'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                        }}
                       >
                         <MenuItem value="user">User</MenuItem>
                         <MenuItem value="admin">Admin</MenuItem>
@@ -353,7 +540,18 @@ export default function Admin() {
                       <Button
                         onClick={() => handleEditUser(user)}
                         size="small"
-                        sx={{ mr: 1 }}
+                        sx={{
+                          mr: 1,
+                          fontWeight: 600,
+                          color: '#a3824c',
+                          border: '1px solid #a3824c',
+                          textTransform: 'none',
+                          background: '#fffbe6',
+                          '&:hover': {
+                            background: '#e6d897',
+                            color: '#3e2d14',
+                          },
+                        }}
                       >
                         Edit
                       </Button>
@@ -367,16 +565,40 @@ export default function Admin() {
                   }
                 >
                   <ListItemText
-                    primary={`${user.firstName} ${user.lastName} (${user.email})`}
-                    secondary={`Role: ${user.role}`}
+                    primary={
+                      <span style={{ color: '#3e2d14', fontWeight: 600 }}>
+                        {user.firstName} {user.lastName} ({user.email})
+                      </span>
+                    }
+                    secondary={
+                      <span style={{ color: '#a3824c' }}>
+                        Role: {user.role}
+                      </span>
+                    }
                   />
                 </ListItem>
               ))}
             </List>
+          ) : (
+            <Typography align="center" color="textSecondary">
+              No users found.
+            </Typography>
           )}
           <Dialog open={userDialogOpen} onClose={handleUserDialogClose}>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogContent>
+            <DialogTitle
+              sx={{
+                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
+                color: '#fff',
+                fontWeight: 700,
+              }}
+            >
+              Edit User
+            </DialogTitle>
+            <DialogContent
+              sx={{
+                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              }}
+            >
               <TextField
                 label="First Name"
                 value={userDialogForm.firstName}
@@ -414,14 +636,36 @@ export default function Admin() {
                   setUserDialogForm((f) => ({ ...f, role: e.target.value }))
                 }
                 fullWidth
+                sx={{
+                  background:
+                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                }}
               >
                 <MenuItem value="user">User</MenuItem>
                 <MenuItem value="admin">Admin</MenuItem>
               </Select>
             </DialogContent>
-            <DialogActions>
+            <DialogActions
+              sx={{
+                background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+              }}
+            >
               <Button onClick={handleUserDialogClose}>Cancel</Button>
-              <Button onClick={handleUserDialogSave} variant="contained">
+              <Button
+                onClick={handleUserDialogSave}
+                variant="contained"
+                sx={{
+                  background:
+                    'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  '&:hover': {
+                    background:
+                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                    color: '#3e2d14',
+                  },
+                }}
+              >
                 Save
               </Button>
             </DialogActions>

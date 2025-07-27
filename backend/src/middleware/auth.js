@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
+const rateLimit = require('express-rate-limit');
 
 exports.auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -22,4 +23,10 @@ exports.admin = (req, res, next) => {
   } else {
     res.status(403).json({ error: 'Admin access required.' });
   }
-}; 
+};
+
+exports.authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+});
