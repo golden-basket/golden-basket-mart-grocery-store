@@ -587,7 +587,6 @@ export default function Admin() {
     setCatLoading(true);
     ApiService.getCategories()
       .then((categories) => {
-        console.log('Categories loaded:', categories);
         setCategories(categories);
       })
       .catch(() => setCatError('Failed to load categories'))
@@ -599,7 +598,6 @@ export default function Admin() {
     setProdLoading(true);
     ApiService.getProducts()
       .then((products) => {
-        console.log('Products loaded:', products);
         setProducts(products);
       })
       .catch(() => setProdError('Failed to load products'))

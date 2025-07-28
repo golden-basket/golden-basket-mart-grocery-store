@@ -21,10 +21,12 @@ app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use(compression()); // Compress responses
 
 // CORS configuration
-app.use(cors({ 
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true 
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: true,
+  })
+);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -71,15 +73,24 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({
+    message: 'The server is running. Welcome to Golden Basket Mart API',
+  });
+});
+
 const routes = require('./routes/routes');
 app.use('/api', routes);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
   logger.error('Unhandled error:', err);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    message:
+      process.env.NODE_ENV === 'development'
+        ? err.message
+        : 'Something went wrong',
   });
 });
 

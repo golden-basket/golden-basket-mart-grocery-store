@@ -16,7 +16,8 @@ const OrderHistory = () => {
       .get('http://localhost:3000/api/orders', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setOrders(res.data))
+      .then((res) => {
+        setOrders(res.data)})
       .catch(() => setError('Failed to load orders.'))
       .finally(() => setLoading(false));
   }, [token]);
@@ -99,7 +100,7 @@ const OrderHistory = () => {
                         color: '#fff',
                       },
                     }}
-                    href={`http://localhost:3000/api/invoice/${order.invoice}`}
+                    href={`http://localhost:3000/api/invoice/${order.invoice._id}`}
                     target="_blank"
                   >
                     Download Invoice

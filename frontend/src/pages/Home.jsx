@@ -10,9 +10,9 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 
 const HomeComponent = () => {
-  const { data: products, isLoading, error } = useProducts();
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = useState({});
+  const { data: products, isLoading, error } = useProducts();
 
   const filterProducts = (category) => {
     return products?.filter((p) =>

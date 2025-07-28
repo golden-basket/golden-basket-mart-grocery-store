@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -78,7 +79,6 @@ class ApiService {
   // Product endpoints
   static async getProducts() {
     const products = await this.request('/products');
-    console.log('Fetched products:', products);
     return products;
   }
 
@@ -207,4 +207,4 @@ class ApiService {
   }
 }
 
-export default ApiService; 
+export default ApiService;

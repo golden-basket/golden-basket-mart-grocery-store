@@ -58,7 +58,6 @@ const OrderCheckout = () => {
     setError('');
     setSuccess('');
     try {
-      console.log('Placing order with address ID:', selectedAddress);
       const res = await ApiService.placeOrder({
         shippingAddressId: selectedAddress,
       });

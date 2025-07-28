@@ -14,7 +14,6 @@ exports.getAddresses = async (req, res) => {
 exports.addAddress = async (req, res) => {
   try {
     const { addressLine1, addressLine2, city, state, pinCode, country, phoneNumber } = req.body;
-    console.log("Request Body: ", req.body);
     if (!addressLine1 || !city || !state || !pinCode || !country || !phoneNumber) {
       return res.status(400).json({ error: 'All required fields must be filled.' });
     }
