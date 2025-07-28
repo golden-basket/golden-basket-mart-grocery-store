@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, createTheme, Box } from '@mui/material';
 
 import Navbar from './components/Navbar';
@@ -67,7 +67,7 @@ ThemeWrapper.propTypes = {
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <Router>
       <ThemeWrapper>
         <CssBaseline />
         <Box
@@ -82,25 +82,61 @@ const App = () => {
             sx={{
               flex: 1,
               boxShadow: '0 2px 8px hsla(0, 0.00%, 0.00%, 0.10)',
-              backgroundColor: 'linear-gradient(90deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
+              backgroundColor:
+                'linear-gradient(90deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
             }}
           >
             <Routes>
               <Route path="/" element={<HomeComponent />} />
               <Route path="/catalogue" element={<Catalogue />} />
-              <Route path="/admin" element={<ProtectedRoute adminOnly={true}><Admin /></ProtectedRoute>} />
-              <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute adminOnly={true}>
+                    <Admin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <Cart />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/addresses" element={<ProtectedRoute><AddressBook /></ProtectedRoute>} />
-              <Route path="/checkout" element={<ProtectedRoute><OrderCheckout /></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+              <Route
+                path="/addresses"
+                element={
+                  <ProtectedRoute>
+                    <AddressBook />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <OrderCheckout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrderHistory />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Box>
           <Footer />
         </Box>
       </ThemeWrapper>
-    </BrowserRouter>
+    </Router>
   );
 };
 
