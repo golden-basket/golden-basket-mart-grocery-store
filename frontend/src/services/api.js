@@ -77,7 +77,9 @@ class ApiService {
 
   // Product endpoints
   static async getProducts() {
-    return this.request('/products');
+    const products = await this.request('/products');
+    console.log('Fetched products:', products);
+    return products;
   }
 
   static async getProduct(id) {
@@ -190,6 +192,17 @@ class ApiService {
   static async deleteAddress(id) {
     return this.request(`/addresses/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  static async getCategories() {
+    return this.request('/categories');
+  }
+
+  static async createOrUpdateCategory(categoryData) {
+    return this.request('/categories', {
+      method: 'POST',
+      data: categoryData,
     });
   }
 }

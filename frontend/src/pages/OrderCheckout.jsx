@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
-import axios from 'axios';
+import ApiService from '../services/api';
 import {
   Box,
   Typography,
@@ -10,6 +10,7 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
+  Divider,
 } from '@mui/material';
 import Loading from '../components/Loading';
 import { useNavigate } from 'react-router-dom';
@@ -27,27 +28,28 @@ const OrderCheckout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
     setLoading(true);
-    Promise.all([
-      axios.get('http://localhost:3000/api/addresses', {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-      axios.get('http://localhost:3000/api/cart', {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-    ])
+    Promise.all([ApiService.getAddresses(), ApiService.getCart()])
       .then(([addrRes, cartRes]) => {
-        setAddresses(addrRes.data);
-        setCart(cartRes.data.items || []);
-        setLoading(false);
+        if (isMounted) {
+          setAddresses(addrRes);
+          setCart(cartRes.items || []);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        setError('Failed to load addresses or cart.');
-        setLoading(false);
+        if (isMounted) {
+          setError('Failed to load addresses or cart.');
+          setLoading(false);
+        }
       });
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       setError('Please select a shipping address.');
       return;
@@ -55,21 +57,19 @@ const OrderCheckout = () => {
     setPlacing(true);
     setError('');
     setSuccess('');
-    axios
-      .post(
-        'http://localhost:3000/api/orders/place',
-        { shippingAddressId: selectedAddress },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then((res) => {
-        setSuccess('Order placed successfully!');
-        setInvoice(res.data.invoice);
-        setCart([]);
-      })
-      .catch((err) =>
-        setError(err.response?.data?.error || 'Failed to place order.')
-      )
-      .finally(() => setPlacing(false));
+    try {
+      console.log('Placing order with address ID:', selectedAddress);
+      const res = await ApiService.placeOrder({
+        shippingAddressId: selectedAddress,
+      });
+      setSuccess('Order placed successfully!');
+      setInvoice(res.invoice);
+      setCart([]);
+    } catch (err) {
+      setError(err.message || 'Failed to place order.');
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
@@ -77,14 +77,13 @@ const OrderCheckout = () => {
       <Typography
         variant="h5"
         fontWeight={700}
-        color="primary"
-        mb={2}
         align="center"
         sx={{
           background:
             'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
+          mb: 2,
         }}
       >
         Checkout
@@ -119,8 +118,17 @@ const OrderCheckout = () => {
         <Loading />
       ) : (
         <>
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography fontWeight={600} mb={1}>
+          <Paper
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: 3,
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              border: '1px solid #e6d897',
+              boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+            }}
+          >
+            <Typography fontWeight={600} mb={1} sx={{ color: '#a3824c' }}>
               Select Shipping Address
             </Typography>
             <RadioGroup
@@ -131,45 +139,89 @@ const OrderCheckout = () => {
                 <FormControlLabel
                   key={addr._id}
                   value={addr._id}
-                  control={<Radio />}
+                  control={<Radio sx={{ color: '#a3824c' }} />}
                   label={
                     <Box>
-                      <Typography fontWeight={600}>
+                      <Typography fontWeight={600} sx={{ color: '#a3824c' }}>
                         {addr.addressLine1}
                       </Typography>
                       {addr.addressLine2 && (
-                        <Typography>{addr.addressLine2}</Typography>
+                        <Typography sx={{ color: '#7d6033' }}>
+                          {addr.addressLine2}
+                        </Typography>
                       )}
-                      <Typography>
+                      <Typography sx={{ color: '#866422' }}>
                         {addr.city}, {addr.state}, {addr.country} -{' '}
                         {addr.pinCode}
                       </Typography>
-                      <Typography>Phone: {addr.phoneNumber}</Typography>
+                      <Typography sx={{ color: '#866422' }}>
+                        Phone: {addr.phoneNumber}
+                      </Typography>
                     </Box>
                   }
+                  sx={{
+                    mb: 1,
+                    alignItems: 'flex-start',
+                  }}
                 />
               ))}
             </RadioGroup>
             <Button
               variant="outlined"
-              sx={{ mt: 2, textTransform: 'none' }}
+              sx={{
+                mt: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                borderColor: '#a3824c',
+                color: '#a3824c',
+                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
+                borderRadius: 2,
+                '&:hover': {
+                  borderColor: '#e6d897',
+                  background:
+                    'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
+                  color: '#866422',
+                },
+              }}
               onClick={() => navigate('/addresses')}
             >
               Manage Addresses
             </Button>
           </Paper>
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography fontWeight={600} mb={1}>
+          <Paper
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: 3,
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              border: '1px solid #e6d897',
+              boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+            }}
+          >
+            <Typography fontWeight={600} mb={1} sx={{ color: '#a3824c' }}>
               Cart Summary
             </Typography>
+            <Divider sx={{ mb: 2 }} />
             {cart.length === 0 ? (
-              <Typography>No items in cart.</Typography>
+              <Typography sx={{ color: '#866422' }}>
+                No items in cart.
+              </Typography>
             ) : (
               cart.map((item) => (
-                <Box key={item.product._id} sx={{ mb: 1 }}>
-                  <Typography>
-                    {item.product.name} × {item.quantity} — ₹
-                    {item.product.price * item.quantity}
+                <Box
+                  key={item.product._id}
+                  sx={{
+                    mb: 1,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography sx={{ color: '#a3824c', fontWeight: 600 }}>
+                    {item.product.name} × {item.quantity}
+                  </Typography>
+                  <Typography sx={{ color: '#7d6033', fontWeight: 600 }}>
+                    ₹{item.product.price * item.quantity}
                   </Typography>
                 </Box>
               ))
@@ -181,15 +233,21 @@ const OrderCheckout = () => {
             onClick={handlePlaceOrder}
             disabled={placing || cart.length === 0}
             sx={{
-              fontWeight: 600,
+              fontWeight: 700,
               background:
                 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
               color: '#fff',
               textTransform: 'none',
+              borderRadius: 2,
+              fontSize: '1rem',
+              boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+              mt: 2,
               '&:hover': {
                 background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                color: '#000',
+                color: '#866422',
+                boxShadow: '0 4px 16px rgba(163,130,76,0.18)',
               },
+              transition: 'all 0.3s ease',
             }}
           >
             {placing ? 'Placing Order...' : 'Place Order'}
@@ -204,6 +262,8 @@ const OrderCheckout = () => {
                 background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
                 color: '#a3824c',
                 border: '1px solid #e6d897',
+                borderRadius: 2,
+                mt: 2,
                 '&:hover': {
                   background:
                     'linear-gradient(90deg, #e6d897 0%, #b59961 100%)',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Grid,
   Card,
@@ -11,7 +11,6 @@ import {
   TextField,
   InputAdornment,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Slider,
@@ -22,7 +21,12 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import Loading from '../components/Loading';
-import { useSearchProducts } from '../hooks/useProducts';
+import { useProducts, useSearchProducts } from '../hooks/useProducts';
+import ApiService from '../services/api';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import { useAuth } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const getStockStatus = (stock) => {
   if (stock === 0) return { label: 'Out of Stock', color: 'error' };
@@ -34,23 +38,68 @@ const getStockStatus = (stock) => {
 };
 
 const Catalogue = () => {
-  const [searchParams, setSearchParams] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceRange, setPriceRange] = useState([5, 1000]);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filtersApplied, setFiltersApplied] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState([
+    { value: '', label: 'All' },
+  ]);
+  const [catLoading, setCatLoading] = useState(true);
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
+  const [actionLoading, setActionLoading] = useState({});
 
-  const { data: products, isLoading, error } = useSearchProducts(searchParams);
+  // Load categories from backend
+  useEffect(() => {
+    setCatLoading(true);
+    ApiService.getCategories()
+      .then((cats) => {
+        const options = [
+          { value: '', label: 'All' },
+          ...cats.map((cat) => ({
+            value: cat._id,
+            label: cat.name,
+          })),
+        ];
+        setCategoryOptions(options);
+      })
+      .catch(() => setCategoryOptions([{ value: '', label: 'All' }]))
+      .finally(() => setCatLoading(false));
+  }, []);
+
+  // Load all products initially
+  const { data: allProducts = [], isLoading, error } = useProducts();
+
+  // For filtered search
+  const {
+    data: searchedProducts = [],
+    isLoading: isSearching,
+    error: searchError,
+  } = useSearchProducts(
+    filtersApplied
+      ? {
+          ...(searchQuery && { q: searchQuery }),
+          ...(selectedCategory && { category: selectedCategory }),
+          ...(priceRange[0] > 0 && { minPrice: priceRange[0] }),
+          ...(priceRange[1] < 1000 && { maxPrice: priceRange[1] }),
+          ...(inStockOnly && { inStock: true }),
+        }
+      : null
+  );
+
+  useEffect(() => {
+    if (!filtersApplied) {
+      setFilteredProducts(allProducts);
+    } else {
+      setFilteredProducts(searchedProducts);
+    }
+  }, [allProducts, searchedProducts, filtersApplied]);
 
   const handleSearch = () => {
-    const params = {};
-    if (searchQuery) params.q = searchQuery;
-    if (selectedCategory) params.category = selectedCategory;
-    if (priceRange[0] > 0) params.minPrice = priceRange[0];
-    if (priceRange[1] < 1000) params.maxPrice = priceRange[1];
-    if (inStockOnly) params.inStock = true;
-
-    setSearchParams(params);
+    setFiltersApplied(true);
   };
 
   const clearFilters = () => {
@@ -58,14 +107,37 @@ const Catalogue = () => {
     setSelectedCategory('');
     setPriceRange([5, 1000]);
     setInStockOnly(false);
-    setSearchParams({});
+    setFiltersApplied(false);
   };
 
   const handleStockAvailability = (stock) => {
-    if (stock === 0) return '#f44336'; // Red for out of stock
-    if (stock <= 5) return '#ff9800'; // Orange for low stock
-    if (stock <= 15) return '#2196f3'; // Blue for limited stock
-    return '#4caf50'; // Green for in stock
+    if (stock === 0) return '#f44336';
+    if (stock <= 5) return '#ff9800';
+    if (stock <= 15) return '#2196f3';
+    return '#4caf50';
+  };
+
+  const handleAddToCart = async (productId) => {
+    if (!user || !token) {
+      navigate('/login');
+      return;
+    }
+    setActionLoading((prev) => ({ ...prev, [productId]: true }));
+    try {
+      await ApiService.addToCart(productId, 1);
+      // Optionally show a snackbar or refresh cart state
+    } catch (err) {
+      // Optionally show error
+      console.error('Error adding to cart:', err);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  // Buy now handler
+  const handleBuyNow = async (productId) => {
+    await handleAddToCart(productId);
+    navigate('/checkout');
   };
 
   return (
@@ -80,7 +152,6 @@ const Catalogue = () => {
           mb: 4,
           background:
             'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-          backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           textShadow: '0 2px 8px rgba(163,130,76,0.1)',
@@ -88,248 +159,225 @@ const Catalogue = () => {
       >
         Product Catalogue
       </Typography>
-
-      {/* Compact Single-Line Filter Bar */}
-      {products?.length > 0 && (
-        <Box
+      {/* Filter Bar */}
+      <Box
+        sx={{
+          mb: 3,
+          p: 1,
+          background: 'linear-gradient(90deg, #fffbe6 0%, #f7ecd0 100%)',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(163,130,76,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          flexWrap: 'wrap',
+          width: 'fit-content',
+          ml: { xs: 0, sm: 'auto' },
+          justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+        }}
+      >
+        <FilterListIcon sx={{ color: '#a3824c', fontSize: 18 }} />
+        <TextField
+          size="small"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           sx={{
-            mb: 3,
-            p: 1,
-            bgcolor: 'linear-gradient(90deg, #fffbe6 0%, #f7ecd0 100%)',
-            borderRadius: 1.5,
-            boxShadow: '0 1px 6px rgba(163,130,76,0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            flexWrap: 'wrap',
-            width: 'fit-content',
-            ml: { xs: 0, sm: 'auto' },
-            justifyContent: { xs: 'flex-start', sm: 'flex-end' },
-          }}
-        >
-          <FilterListIcon sx={{ color: '#a3824c', fontSize: 18 }} />
-          {/* Search Field */}
-          <TextField
-            size="small"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{
-              minWidth: 120,
-              maxWidth: 200,
-              '& .MuiOutlinedInput-root': {
-                height: 32,
-                fontSize: '0.8rem',
-                '&:hover fieldset': { borderColor: '#a3824c' },
-                '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-              },
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#a3824c', fontSize: 16 }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-
-          {/* Category Dropdown */}
-          <FormControl
-            variant="outlined"
-            size="small"
-            sx={{ minWidth: 100, maxWidth: 140 }}
-          >
-            <Select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              displayEmpty
-              sx={{
-                height: 32,
-                fontSize: '0.8rem',
-                color: '#a3824c',
-                fontWeight: 500,
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(163,130,76,0.3)',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#a3824c',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#a3824c',
-                },
-                '& .MuiSelect-icon': { color: '#a3824c', fontSize: 16 },
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    backgroundColor: '#fffbe8',
-                    color: '#a3824c',
-                    fontWeight: 500,
-                    maxHeight: 200,
-                  },
-                },
-              }}
-            >
-              <MenuItem value="" sx={{ fontSize: '0.8rem' }}>
-                All
-              </MenuItem>
-              <MenuItem value="vegetable" sx={{ fontSize: '0.8rem' }}>
-                Vegetables
-              </MenuItem>
-              <MenuItem value="dairy" sx={{ fontSize: '0.8rem' }}>
-                Dairy
-              </MenuItem>
-              <MenuItem value="fruit" sx={{ fontSize: '0.8rem' }}>
-                Fruits
-              </MenuItem>
-              <MenuItem value="grain" sx={{ fontSize: '0.8rem' }}>
-                Grains
-              </MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* Price Range */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              minWidth: 120,
-              maxWidth: 160,
-            }}
-          >
-            <Typography
-              sx={{ color: '#a3824c', fontSize: '0.75rem', fontWeight: 500 }}
-            >
-              ₹{priceRange[0]}
-            </Typography>
-            <Slider
-              size="small"
-              value={priceRange}
-              onChange={(e, newValue) => setPriceRange(newValue)}
-              min={5}
-              max={1000}
-              step={5}
-              sx={{
-                color: '#a3824c',
-                height: 3,
-                mx: 1.5, // Add horizontal margin to separate from labels
-                flexGrow: 1, // Allow slider to take available space
-                '& .MuiSlider-thumb': {
-                  backgroundColor: '#a3824c',
-                  width: 12,
-                  height: 12,
-                  '&:hover': { boxShadow: '0 0 0 4px rgba(163,130,76,0.16)' },
-                },
-                '& .MuiSlider-track': { backgroundColor: '#e6d897', height: 3 },
-                '& .MuiSlider-rail': { backgroundColor: '#f0f0f0', height: 3 },
-              }}
-            />
-            <Typography
-              sx={{ color: '#a3824c', fontSize: '0.75rem', fontWeight: 500 }}
-            >
-              ₹{priceRange[1]}
-            </Typography>
-          </Box>
-
-          {/* In Stock Checkbox */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
-                size="small"
-                sx={{
-                  color: '#a3824c',
-                  '&.Mui-checked': { color: '#a3824c' },
-                }}
-              />
-            }
-            label="In Stock"
-            sx={{
-              color: '#a3824c',
-              fontWeight: 500,
-              fontSize: '0.75rem',
-              '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
-            }}
-          />
-
-          {/* Search Button */}
-          <Button
-            variant="contained"
-            onClick={handleSearch}
-            size="small"
-            sx={{
+            minWidth: 120,
+            maxWidth: 200,
+            '& .MuiOutlinedInput-root': {
               height: 32,
-              fontWeight: 600,
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              color: '#fff',
-              textTransform: 'none',
+              fontSize: '0.8rem',
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
               borderRadius: 1,
-              fontSize: '0.75rem',
-              px: 1.5,
-              '&:hover': {
-                background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                color: '#866422',
-                transform: 'translateY(-1px)',
-                boxShadow: '0 2px 6px rgba(163,130,76,0.3)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Search
-          </Button>
-
-          {/* Clear Button */}
-          <Button
-            variant="outlined"
-            onClick={clearFilters}
-            size="small"
-            sx={{
-              height: 32,
-              borderColor: '#a3824c',
-              color: '#a3824c',
-              borderRadius: 1,
-              fontSize: '0.75rem',
-              px: 1.5,
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: '#e6d897',
-                backgroundColor: 'rgba(163,130,76,0.05)',
-                transform: 'translateY(-1px)',
-                boxShadow: '0 2px 6px rgba(163,130,76,0.3)',
-                color: '#866422',
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Clear
-          </Button>
-        </Box>
-      )}
-
-      {isLoading && <Loading />}
-      {error && (
-        <Alert
-          severity="error"
-          sx={{
-            mb: 3,
-            borderRadius: 2,
-            '& .MuiAlert-icon': {
-              color: '#f44336',
+              boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+              '&:hover fieldset': { borderColor: '#a3824c' },
+              '&.Mui-focused fieldset': { borderColor: '#a3824c' },
             },
           }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: '#a3824c', fontSize: 16 }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <FormControl
+          variant="outlined"
+          size="small"
+          sx={{ minWidth: 100, maxWidth: 140 }}
         >
-          {error.message || 'Failed to load products. Please try again later.'}
-        </Alert>
-      )}
-
+          <Select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            displayEmpty
+            sx={{
+              height: 32,
+              fontSize: '0.8rem',
+              color: '#a3824c',
+              fontWeight: 500,
+              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+              borderRadius: 1,
+              boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(163,130,76,0.3)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#a3824c',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#a3824c',
+              },
+              '& .MuiSelect-icon': { color: '#a3824c', fontSize: 16 },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: '#fffbe8',
+                  color: '#a3824c',
+                  fontWeight: 500,
+                  maxHeight: 200,
+                },
+              },
+            }}
+          >
+            {catLoading ? (
+              <MenuItem value="" disabled>
+                Loading...
+              </MenuItem>
+            ) : (
+              categoryOptions.map((opt) => (
+                <MenuItem
+                  key={opt.value}
+                  value={opt.value}
+                  sx={{ fontSize: '0.8rem' }}
+                >
+                  {opt.label}
+                </MenuItem>
+              ))
+            )}
+          </Select>
+        </FormControl>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            minWidth: 120,
+            maxWidth: 160,
+          }}
+        >
+          <Typography
+            sx={{ color: '#a3824c', fontSize: '0.75rem', fontWeight: 500 }}
+          >
+            ₹{priceRange[0]}
+          </Typography>
+          <Slider
+            size="small"
+            value={priceRange}
+            onChange={(_, newValue) => setPriceRange(newValue)}
+            min={5}
+            max={1000}
+            step={5}
+            sx={{
+              color: '#a3824c',
+              height: 3,
+              mx: 1.5,
+              flexGrow: 1,
+              '& .MuiSlider-thumb': {
+                backgroundColor: '#a3824c',
+                width: 12,
+                height: 12,
+                '&:hover': { boxShadow: '0 0 0 4px rgba(163,130,76,0.16)' },
+              },
+              '& .MuiSlider-track': { backgroundColor: '#e6d897', height: 3 },
+              '& .MuiSlider-rail': { backgroundColor: '#f0f0f0', height: 3 },
+            }}
+          />
+          <Typography
+            sx={{ color: '#a3824c', fontSize: '0.75rem', fontWeight: 500 }}
+          >
+            ₹{priceRange[1]}
+          </Typography>
+        </Box>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={inStockOnly}
+              onChange={(e) => setInStockOnly(e.target.checked)}
+              size="small"
+              sx={{
+                color: '#a3824c',
+                '&.Mui-checked': { color: '#a3824c' },
+              }}
+            />
+          }
+          label="In Stock"
+          sx={{
+            color: '#a3824c',
+            fontWeight: 500,
+            fontSize: '0.75rem',
+            '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          size="small"
+          sx={{
+            height: 32,
+            fontWeight: 600,
+            background:
+              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+            color: '#fff',
+            textTransform: 'none',
+            borderRadius: 1,
+            fontSize: '0.75rem',
+            px: 1.5,
+            '&:hover': {
+              background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+              color: '#866422',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 2px 6px rgba(163,130,76,0.3)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          Search
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={clearFilters}
+          size="small"
+          sx={{
+            height: 32,
+            borderColor: '#a3824c',
+            color: '#a3824c',
+            borderRadius: 1,
+            fontSize: '0.75rem',
+            px: 1.5,
+            textTransform: 'none',
+            '&:hover': {
+              borderColor: '#e6d897',
+              backgroundColor: 'rgba(163,130,76,0.05)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 2px 6px rgba(163,130,76,0.3)',
+              color: '#866422',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          Clear
+        </Button>
+      </Box>
+      {/* Product Grid */}
       {!isLoading &&
-        !error &&
-        (products?.length > 0 ? (
+        !isSearching &&
+        !(error || searchError) &&
+        (filteredProducts.length > 0 ? (
           <>
             <Typography
               variant="h6"
@@ -340,7 +388,8 @@ const Catalogue = () => {
                 mb: 3,
               }}
             >
-              Found {products.length} product{products.length !== 1 ? 's' : ''}
+              Found {filteredProducts.length} product
+              {filteredProducts.length !== 1 ? 's' : ''}
             </Typography>
             <Grid
               container
@@ -348,13 +397,12 @@ const Catalogue = () => {
               alignItems="stretch"
               justifyContent="flex-start"
             >
-              {products.map((p, idx) => {
+              {filteredProducts.map((p, idx) => {
                 const stockStatus = getStockStatus(p.stock);
                 const stockPercent = Math.min(
                   100,
                   Math.round(((p.stock || 0) / 30) * 100)
                 );
-
                 return (
                   <Grid
                     item
@@ -377,8 +425,8 @@ const Catalogue = () => {
                         height: '100%',
                         width: '100%',
                         borderRadius: 3,
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                        border: '1px solid rgba(163,130,76,0.1)',
+                        boxShadow: '0 4px 20px rgba(163,130,76,0.08)',
+                        border: '1px solid #e6d897',
                         transition: 'all 0.3s ease',
                         '&:hover': {
                           boxShadow: '0 8px 30px rgba(163,130,76,0.15)',
@@ -388,6 +436,8 @@ const Catalogue = () => {
                         opacity: p.stock === 0 ? 0.6 : 1,
                         position: 'relative',
                         overflow: 'hidden',
+                        background:
+                          'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                       }}
                     >
                       <Box
@@ -416,7 +466,7 @@ const Catalogue = () => {
                       >
                         <img
                           src={
-                            p.image ||
+                            p.images?.[0] ||
                             `https://via.placeholder.com/200x200?text=${encodeURIComponent(
                               p.name
                             )}`
@@ -442,13 +492,14 @@ const Catalogue = () => {
                           }}
                         />
                       </Box>
-
                       <CardContent
                         sx={{
                           flexGrow: 1,
                           display: 'flex',
                           flexDirection: 'column',
                           p: { xs: 2, sm: 2.5 },
+                          background:
+                            'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                         }}
                       >
                         <Box
@@ -465,7 +516,7 @@ const Catalogue = () => {
                             sx={{
                               fontWeight: 700,
                               flex: 1,
-                              color: '#2c3e50',
+                              color: '#a3824c',
                               lineHeight: 1.3,
                               fontSize: {
                                 xs: '0.9rem',
@@ -485,10 +536,12 @@ const Catalogue = () => {
                               fontWeight: 600,
                               fontSize: { xs: '0.65rem', sm: '0.7rem' },
                               height: { xs: 20, sm: 24 },
+                              background:
+                                'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
+                              color: '#a3824c',
                             }}
                           />
                         </Box>
-
                         <Typography
                           variant="body2"
                           color="text.secondary"
@@ -501,12 +554,12 @@ const Catalogue = () => {
                             overflow: 'hidden',
                             lineHeight: 1.4,
                             fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                            color: '#7d6033',
                           }}
                         >
                           {p.description ||
                             'This is a high quality product available at the best price. Order now and enjoy fast delivery!'}
                         </Typography>
-
                         <Box sx={{ mt: 'auto' }}>
                           <Typography
                             sx={{
@@ -522,28 +575,26 @@ const Catalogue = () => {
                           >
                             ₹{p.price}
                           </Typography>
-
                           {p.category && (
                             <Typography
                               variant="body2"
                               sx={{
                                 mb: 1.5,
-                                color: '#666',
+                                color: '#866422',
                                 fontWeight: 500,
                                 textTransform: 'capitalize',
                                 fontSize: { xs: '0.75rem', sm: '0.8rem' },
                               }}
                             >
-                              Category: {p.category}
+                              Category: {p.category.name || p.category}
                             </Typography>
                           )}
-
                           <Box sx={{ mb: 1 }}>
                             <Typography
                               variant="body2"
                               sx={{
                                 mb: 0.5,
-                                color: '#666',
+                                color: '#866422',
                                 fontWeight: 500,
                                 fontSize: { xs: '0.75rem', sm: '0.8rem' },
                               }}
@@ -556,7 +607,7 @@ const Catalogue = () => {
                               sx={{
                                 height: { xs: 4, sm: 6 },
                                 borderRadius: 2,
-                                backgroundColor: '#f0f0f0',
+                                backgroundColor: '#f0e6d0',
                                 '& .MuiLinearProgress-bar': {
                                   backgroundColor: handleStockAvailability(
                                     p.stock
@@ -566,6 +617,56 @@ const Catalogue = () => {
                               }}
                             />
                           </Box>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<ShoppingCartIcon />}
+                            disabled={p.stock === 0 || actionLoading[p._id]}
+                            onClick={() => handleAddToCart(p._id)}
+                            sx={{
+                              fontWeight: 600,
+                              background:
+                                'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
+                              color: '#fff',
+                              textTransform: 'none',
+                              borderRadius: 1,
+                              px: 2,
+                              '&:hover': {
+                                background:
+                                  'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                                color: '#000',
+                              },
+                            }}
+                          >
+                            {actionLoading[p._id] ? 'Adding...' : 'Add to Cart'}
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<FlashOnIcon />}
+                            disabled={p.stock === 0 || actionLoading[p._id]}
+                            onClick={() => handleBuyNow(p._id)}
+                            sx={{
+                              fontWeight: 600,
+                              borderColor: '#a3824c',
+                              color: '#a3824c',
+                              textTransform: 'none',
+                              borderRadius: 1,
+                              px: 2,
+                              background:
+                                'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                              '&:hover': {
+                                borderColor: '#e6d897',
+                                background:
+                                  'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
+                                color: '#866422',
+                              },
+                            }}
+                          >
+                            Buy Now
+                          </Button>
                         </Box>
                       </CardContent>
                     </Card>
@@ -589,7 +690,7 @@ const Catalogue = () => {
             <Typography
               variant="body1"
               sx={{
-                color: '#666',
+                color: '#866422',
                 maxWidth: 400,
                 mx: 'auto',
               }}

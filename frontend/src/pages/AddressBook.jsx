@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import {
   Box,
@@ -41,7 +41,6 @@ const AddressBook = () => {
 
   useEffect(() => {
     if (token) fetchAddresses();
-    // eslint-disable-next-line
   }, [token]);
 
   const handleChange = (e) => {
@@ -85,6 +84,96 @@ const AddressBook = () => {
       })
       .catch(() => setError('Failed to delete address.'));
   };
+
+  // Extracted ternary logic for clarity
+  let addressContent;
+  if (loading) {
+    addressContent = <Loading />;
+  } else if (addresses.length === 0) {
+    addressContent = (
+      <Typography
+        align="center"
+        sx={{
+          background:
+            'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          fontWeight: 600,
+          mt: 2,
+          p: 3,
+        }}
+      >
+        No addresses found.
+      </Typography>
+    );
+  } else {
+    addressContent = addresses.map((addr) => (
+      <Paper
+        key={addr._id}
+        sx={{
+          p: 2,
+          mb: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          border: '2px solid #e6d897',
+          boxShadow: '0 2px 8px #a3824c22',
+          borderRadius: 3,
+          background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+        }}
+      >
+        <Box>
+          <Typography fontWeight={700} sx={{ color: '#a3824c', mb: 0.5 }}>
+            {addr.addressLine1}
+          </Typography>
+          {addr.addressLine2 && (
+            <Typography sx={{ color: '#7d6033', mb: 0.5 }}>
+              {addr.addressLine2}
+            </Typography>
+          )}
+          <Typography sx={{ color: '#866422', mb: 0.5 }}>
+            {addr.city}, {addr.state}, {addr.country} - {addr.pinCode}
+          </Typography>
+          <Typography sx={{ color: '#866422', fontSize: '0.95rem' }}>
+            Phone: {addr.phoneNumber}
+          </Typography>
+        </Box>
+        <Box>
+          <Button
+            size="small"
+            onClick={() => handleEdit(addr)}
+            sx={{
+              mr: 1,
+              fontWeight: 600,
+              background:
+                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              color: '#fff',
+              textTransform: 'none',
+              borderRadius: 2,
+              px: 2,
+              '&:hover': {
+                background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                color: '#000',
+              },
+            }}
+          >
+            Edit
+          </Button>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(addr._id)}
+            sx={{
+              background: '#fffbe6',
+              borderRadius: 2,
+              '&:hover': { background: '#e6d897' },
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </Paper>
+    ));
+  }
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
@@ -161,9 +250,7 @@ const AddressBook = () => {
               size="small"
               fullWidth
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -178,9 +265,7 @@ const AddressBook = () => {
               size="small"
               fullWidth
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -196,9 +281,7 @@ const AddressBook = () => {
               size="small"
               fullWidth
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -214,9 +297,7 @@ const AddressBook = () => {
               size="small"
               fullWidth
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -232,9 +313,7 @@ const AddressBook = () => {
               size="small"
               fullWidth
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -249,11 +328,9 @@ const AddressBook = () => {
               required
               size="small"
               fullWidth
-              slotProps={{ input: { maxLength: 6 } }}
+              inputProps={{ maxLength: 6 }}
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -268,11 +345,9 @@ const AddressBook = () => {
               required
               size="small"
               fullWidth
-              slotProps={{ input: { maxLength: 6 } }}
+              inputProps={{ maxLength: 10 }}
               sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: 2,
-                },
+                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e6d897',
                   boxShadow: '0 0 0 2px #e6d89744',
@@ -288,6 +363,8 @@ const AddressBook = () => {
                   'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 color: '#fff',
                 textTransform: 'none',
+                borderRadius: 2,
+                px: 2,
                 '&:hover': {
                   background:
                     'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
@@ -300,75 +377,7 @@ const AddressBook = () => {
           </Stack>
         </form>
       </Paper>
-      {loading ? (
-        <Loading />
-      ) : addresses.length === 0 ? (
-        <Typography
-          align="center"
-          sx={{
-            background:
-              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 600,
-            mt: 2,
-            p: 3
-          }}
-        >
-          No addresses found.
-        </Typography>
-      ) : (
-        addresses.map((addr) => (
-          <Paper
-            key={addr._id}
-            sx={{
-              p: 2,
-              mb: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              border: '2px solid #e6d897',
-              boxShadow: '0 2px 8px #a3824c22',
-              borderRadius: 3,
-            }}
-          >
-            <Box>
-              <Typography fontWeight={600}>{addr.addressLine1}</Typography>
-              {addr.addressLine2 && (
-                <Typography>{addr.addressLine2}</Typography>
-              )}
-              <Typography>
-                {addr.city}, {addr.state}, {addr.country} - {addr.pinCode}
-              </Typography>
-              <Typography>Phone: {addr.phoneNumber}</Typography>
-            </Box>
-            <Box>
-              <Button
-                size="small"
-                onClick={() => handleEdit(addr)}
-                sx={{
-                  mr: 1,
-                  fontWeight: 600,
-                  background:
-                    'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                  color: '#fff',
-                  textTransform: 'none',
-                  '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                    color: '#000',
-                  },
-                }}
-              >
-                Edit
-              </Button>
-              <IconButton color="error" onClick={() => handleDelete(addr._id)}>
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-          </Paper>
-        ))
-      )}
+      {addressContent}
     </Box>
   );
 };

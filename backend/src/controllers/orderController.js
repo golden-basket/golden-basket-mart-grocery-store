@@ -6,7 +6,6 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 
 function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
-  const PDFDocument = require('pdfkit');
   const fs = require('fs');
   const filePath = `./invoices/invoice-${invoice._id}.pdf`;
   const doc = new PDFDocument({ margin: 40 });
@@ -15,7 +14,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
 
   // Header
   doc
-    .image('backend/src/assets/logo.png', 40, 30, { width: 60 })
+    .image(require('path').resolve(__dirname, '../assets/golden-basket-rounded.png'), 40, 30, { width: 60 })
     .fontSize(22)
     .text('Golden Basket Mart', 110, 30)
     .fontSize(10)

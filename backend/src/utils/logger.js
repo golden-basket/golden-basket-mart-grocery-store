@@ -1,5 +1,17 @@
 const winston = require('winston');
 
+// Define custom colors for log levels
+const colors = {
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  http: 'magenta',
+  verbose: 'cyan',
+  debug: 'blue',
+  silly: 'gray',
+};
+winston.addColors(colors);
+
 // Winston logger configuration
 const logger = winston.createLogger({
   level: 'info',
@@ -16,9 +28,14 @@ const logger = winston.createLogger({
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    })
+  );
 }
 
-module.exports = logger; 
+module.exports = logger;

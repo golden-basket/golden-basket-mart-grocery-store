@@ -1,3 +1,6 @@
+const logger = require('../utils/logger'); // Added logger import
+const Category = require('../models/Category'); // Assuming you have a Category model
+
 // Create or update a category
 exports.createOrUpdateCategory = async (req, res) => {
   try {

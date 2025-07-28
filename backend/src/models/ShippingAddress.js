@@ -8,13 +8,19 @@ const shippingAddressSchema = new mongoose.Schema(
     city: { type: String, required: true },
     state: { type: String, required: true },
     country: { type: String, required: true },
-    pinCode: { type: String, required: true },
-    phoneNumber: {
+    pinCode: {
       type: String,
       required: true,
       minlength: 6,
       maxlength: 6,
       match: [/^\d{6}$/, 'Pin code must be exactly 6 digits'],
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      minlength: 10,
+      maxlength: 10,
+      match: [/^\d{10}$/, 'Pin code must be exactly 6 digits'],
     },
   },
   { timestamps: true }

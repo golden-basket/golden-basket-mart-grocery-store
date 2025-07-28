@@ -5,7 +5,10 @@ const logger = require('../utils/logger');
 // Get all products
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    // Populate category reference
+    const products = await Product.find()
+      .sort({ createdAt: -1 })
+      .populate('category');
     logger.info(`Products retrieved: ${products.length} products`);
     res.json(products);
   } catch (err) {
@@ -17,7 +20,8 @@ exports.getAllProducts = async (req, res) => {
 // Get single product
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    // Populate category reference
+    const product = await Product.findById(req.params.id).populate('category');
     if (!product) {
       logger.warn(`Product not found: ${req.params.id}`);
       return res.status(404).json({ error: 'Product not found.' });
@@ -140,7 +144,11 @@ exports.searchProducts = async (req, res) => {
       query.stock = { $gt: 0 };
     }
 
-    const products = await Product.find(query).sort({ createdAt: -1 });
+    // Populate category reference
+    const products = await Product.find(query)
+      .sort({ createdAt: -1 })
+      .populate('category');
+      
     logger.info(
       `Products searched: ${
         products.length

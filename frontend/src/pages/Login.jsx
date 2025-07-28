@@ -14,6 +14,7 @@ import {
   Fade,
   Slide,
 } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
 import Loading from '../components/Loading';
 import axios from 'axios';
 import EmailIcon from '@mui/icons-material/Email';
@@ -22,6 +23,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LoginIcon from '@mui/icons-material/Login';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import JumpingCartAvatar from './JumpingCartAvatar';
 
 const Login = () => {
   const { login } = useAuth();
@@ -88,18 +90,7 @@ const Login = () => {
           {/* Header Section */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <ShoppingCartIcon
-                sx={{
-                  fontSize: 48,
-                  color: '#a3824c',
-                  animation: 'bounce 2s ease-in-out infinite',
-                  '@keyframes bounce': {
-                    '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
-                    '40%': { transform: 'translateY(-8px)' },
-                    '60%': { transform: 'translateY(-4px)' },
-                  },
-                }}
-              />
+              <JumpingCartAvatar />
             </Box>
             <Typography
               variant="h4"
