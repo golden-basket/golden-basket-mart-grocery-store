@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../AuthContext';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import axios from 'axios';
 import { Box, Typography, Paper, Button, Alert, Stack } from '@mui/material';
 import Loading from '../components/Loading';
@@ -17,7 +17,8 @@ const OrderHistory = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setOrders(res.data)})
+        setOrders(res.data);
+      })
       .catch(() => setError('Failed to load orders.'))
       .finally(() => setLoading(false));
   }, [token]);

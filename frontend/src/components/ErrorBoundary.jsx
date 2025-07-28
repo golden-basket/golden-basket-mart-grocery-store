@@ -1,6 +1,6 @@
-import React from 'react';
 import { Box, Typography, Button, Alert } from '@mui/material';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
+import PropTypes from 'prop-types';
 
 const ErrorFallback = ({ error, resetErrorBoundary }) => {
   return (
@@ -60,6 +60,16 @@ const ErrorBoundary = ({ children }) => {
       {children}
     </ReactErrorBoundary>
   );
+};
+
+// Props validation
+ErrorFallback.propTypes = {
+  error: PropTypes.object.isRequired,
+  resetErrorBoundary: PropTypes.func.isRequired,
+};
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default ErrorBoundary;

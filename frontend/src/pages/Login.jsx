@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useAuth } from '../AuthContext';
+import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Box,
@@ -40,7 +40,12 @@ const Login = () => {
         email,
         password,
       });
-      login(res.data.user, res.data.token);
+      const user = res.data.user;
+      const authToken = res.data.token;
+      if (!user || !authToken) {
+        setError('Invalid response from server');
+      }
+      login(user, authToken);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed.');

@@ -1,6 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+// AuthProvider.js
+import React, { createContext, useState, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -31,11 +33,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      login,
+      logout,
+      loading,
+    }),
+    [user, token, loading]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => useContext(AuthContext); 
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

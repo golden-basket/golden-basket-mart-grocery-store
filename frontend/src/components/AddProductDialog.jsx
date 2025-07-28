@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -7,11 +7,12 @@ import {
   TextField,
   Button,
   Alert,
-  Box
+  Box,
 } from '@mui/material';
 import ApiService from '../services/api';
+import PropTypes from 'prop-types';
 
-export default function AddProductDialog({ open, onClose, onSuccess }) {
+const AddProductDialog = ({ open, onClose, onSuccess }) => {
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -41,7 +42,14 @@ export default function AddProductDialog({ open, onClose, onSuccess }) {
     };
     ApiService.createProduct(productData)
       .then(() => {
-        setForm({ name: '', description: '', price: '', category: '', stock: '', images: '' });
+        setForm({
+          name: '',
+          description: '',
+          price: '',
+          category: '',
+          stock: '',
+          images: '',
+        });
         onSuccess();
       })
       .catch((err) => setError(err.message))
@@ -63,7 +71,11 @@ export default function AddProductDialog({ open, onClose, onSuccess }) {
       </DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Box display="flex" flexDirection="column" gap={2}>
             <TextField
               label="Name"
@@ -111,7 +123,9 @@ export default function AddProductDialog({ open, onClose, onSuccess }) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} disabled={loading}>Cancel</Button>
+          <Button onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
           <Button
             type="submit"
             variant="contained"
@@ -134,4 +148,13 @@ export default function AddProductDialog({ open, onClose, onSuccess }) {
       </form>
     </Dialog>
   );
-} 
+};
+
+// Props validation
+AddProductDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+};
+
+export default AddProductDialog;

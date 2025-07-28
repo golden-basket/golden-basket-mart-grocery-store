@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
@@ -53,7 +52,8 @@ const Loading = () => {
             width: 80,
             height: 80,
             borderRadius: '50%',
-            background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+            background:
+              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
             opacity: 0.3,
             animation: 'pulse 2s ease-in-out infinite',
             '@keyframes pulse': {
@@ -79,12 +79,13 @@ const Loading = () => {
         variant="h6"
         sx={{
           fontWeight: 600,
-          background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+          background:
+            'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           animation: 'fadeInOut 2s ease-in-out infinite',
-          '@keyframes fadeInOut': { 
+          '@keyframes fadeInOut': {
             '0%, 100%': {
               opacity: 0.7,
             },

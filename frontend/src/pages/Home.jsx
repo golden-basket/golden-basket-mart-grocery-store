@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Stack } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import HeroBanner from '../components/HeroBanner';
 import ProductCarousel from '../components/ProductCarousel';
 import Loading from '../components/Loading';

@@ -5,7 +5,6 @@ import {
   CardContent,
   Typography,
   Box,
-  Alert,
   Chip,
   LinearProgress,
   TextField,
@@ -25,7 +24,7 @@ import { useProducts, useSearchProducts } from '../hooks/useProducts';
 import ApiService from '../services/api';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 const getStockStatus = (stock) => {

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -15,8 +14,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalGroceryStoreIcon from '@mui/icons-material/LocalGroceryStore';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import EmojiNatureIcon from '@mui/icons-material/EmojiNature';
-import { useAuth } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';

@@ -1,7 +1,7 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import Loading from './Loading';
+import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
@@ -11,4 +11,9 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   return children;
 };
 
-export default ProtectedRoute; 
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  adminOnly: PropTypes.bool,
+};
+
+export default ProtectedRoute;
