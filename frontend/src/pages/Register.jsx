@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Box,
@@ -14,15 +14,14 @@ import {
   Slide,
   Grid,
 } from '@mui/material';
-import axios from 'axios';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import JumpingCartAvatar from './JumpingCartAvatar';
+import ApiService from '../services/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -47,10 +46,7 @@ const Register = () => {
     setError('');
     setSuccess('');
     try {
-      const res = await axios.post(
-        'http://localhost:3000/api/auth/register',
-        form
-      );
+      const res = await ApiService.register(form);
       setSuccess(
         res.data.message ||
           'Registration successful! Please check your email to verify your account.'

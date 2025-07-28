@@ -14,16 +14,13 @@ import {
   Fade,
   Slide,
 } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import Loading from '../components/Loading';
-import axios from 'axios';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LoginIcon from '@mui/icons-material/Login';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import JumpingCartAvatar from './JumpingCartAvatar';
+import ApiService from '../services/api';
 
 const Login = () => {
   const { login } = useAuth();
@@ -39,7 +36,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:3000/api/auth/login', {
+      const res = await ApiService.login({
         email,
         password,
       });
