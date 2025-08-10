@@ -1,19 +1,23 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, createTheme, Box } from '@mui/material';
+import { Suspense, lazy } from 'react';
 
 import Navbar from './components/Navbar';
-import Catalogue from './pages/Catalogue';
-import Admin from './pages/Admin';
-import HomeComponent from './pages/Home';
+import Loading from './components/Loading';
 import PropTypes from 'prop-types';
 import Footer from './components/Footer';
-import Cart from './pages/Cart';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
-import AddressBook from './pages/AddressBook';
-import OrderCheckout from './pages/OrderCheckout';
-import OrderHistory from './pages/OrderHistory';
+
+// Lazy load components for better performance
+const Catalogue = lazy(() => import('./pages/Catalogue'));
+const Admin = lazy(() => import('./pages/Admin'));
+const HomeComponent = lazy(() => import('./pages/Home'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const AddressBook = lazy(() => import('./pages/AddressBook'));
+const OrderCheckout = lazy(() => import('./pages/OrderCheckout'));
+const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 
 const ThemeWrapper = ({ children }) => {
   const theme = createTheme({
@@ -86,52 +90,54 @@ const App = () => {
                 'linear-gradient(90deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
             }}
           >
-            <Routes>
-              <Route path="/" element={<HomeComponent />} />
-              <Route path="/catalogue" element={<Catalogue />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute adminOnly={true}>
-                    <Admin />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/cart"
-                element={
-                  <ProtectedRoute>
-                    <Cart />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/addresses"
-                element={
-                  <ProtectedRoute>
-                    <AddressBook />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/checkout"
-                element={
-                  <ProtectedRoute>
-                    <OrderCheckout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <OrderHistory />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
+            <Suspense fallback={<Loading />}>
+              <Routes>
+                <Route path="/" element={<HomeComponent />} />
+                <Route path="/catalogue" element={<Catalogue />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute adminOnly={true}>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cart"
+                  element={
+                    <ProtectedRoute>
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/addresses"
+                  element={
+                    <ProtectedRoute>
+                      <AddressBook />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <OrderCheckout />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <ProtectedRoute>
+                      <OrderHistory />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </Suspense>
           </Box>
           <Footer />
         </Box>

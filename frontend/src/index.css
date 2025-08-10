@@ -11,123 +11,711 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Enhanced responsive typography scale for foldable displays */
+  --font-size-xs: clamp(0.75rem, 1.5vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 2vw, 1rem);
+  --font-size-base: clamp(1rem, 2.5vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 3vw, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 3.5vw, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 4vw, 2rem);
+  --font-size-3xl: clamp(2rem, 5vw, 3rem);
+  --font-size-4xl: clamp(2.5rem, 6vw, 4rem);
+
+  /* Enhanced responsive spacing for foldable displays */
+  --spacing-xs: clamp(0.25rem, 0.8vw, 0.5rem);
+  --spacing-sm: clamp(0.5rem, 1.5vw, 1rem);
+  --spacing-md: clamp(1rem, 2.5vw, 1.5rem);
+  --spacing-lg: clamp(1.5rem, 3vw, 2rem);
+  --spacing-xl: clamp(2rem, 4vw, 3rem);
+  --spacing-2xl: clamp(3rem, 5vw, 4rem);
+
+  /* Enhanced responsive container widths */
+  --container-padding: clamp(1rem, 3vw, 2rem);
+  --container-max-width: 1200px;
+
+  /* Foldable display specific variables */
+  --foldable-breakpoint: 768px;
+  --foldable-aspect-ratio: 16/10;
+  --foldable-min-width: 280px;
+  --foldable-max-width: 100vw;
+
+  /* Project-specific color palette - Golden Basket Mart Theme */
+  --color-primary: #a3824c;
+  --color-primary-light: #e6d897;
+  --color-primary-medium: #b59961;
+  --color-primary-dark: #866422;
+  --color-primary-darker: #7d6033;
+  --color-primary-muted: #c1b17a;
+  --color-cream-light: #fffbe6;
+  --color-cream-medium: #f7e7c1;
+  --color-background-light: #f7fbe8;
+  --color-background-light-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%);
+  --color-background-gradient: linear-gradient(180deg, #fffdf4 0%, #fdf6d1 60%, #f0e3b6 90%, #3e2d14 100%);
+  --color-text-primary: #2e3a1b;
+  --color-text-secondary: #7d6033;
+  --color-accent: #388e3c;
+  --color-accent-light: #4caf50;
+  --color-accent-dark: #1b5e20;
+  --color-warning: #ffb300;
+  --color-error: #d32f2f;
+  --color-success: #388e3c;
+  --color-info: #0288d1;
 }
 
 a {
   font-weight: 500;
-  color: #388e3c;
+  color: var(--color-primary);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 a:hover {
-  color: #1b5e20;
+  color: var(--color-primary-dark);
 }
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #fffdf4 0%, #fdf6d1 60%, #f0e3b6 90%, #3e2d14 100%);
+  background: var(--color-background-gradient);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1 {
-  font-size: 3em;
+  font-size: var(--font-size-3xl);
   line-height: 1.1;
-  color: #388e3c;
+  color: var(--color-primary);
   letter-spacing: 1px;
+  margin: var(--spacing-md) 0;
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+  line-height: 1.2;
+  color: var(--color-primary);
+  margin: var(--spacing-sm) 0;
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+  line-height: 1.3;
+  color: var(--color-primary);
+  margin: var(--spacing-sm) 0;
+}
+
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-lg);
+  line-height: 1.4;
+  color: var(--color-primary-medium);
+  margin: var(--spacing-xs) 0;
 }
 
 button {
   border-radius: 8px;
-  border: 1px solid #388e3c;
-  padding: 0.7em 1.5em;
-  font-size: 1em;
+  border: 1px solid var(--color-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
   font-weight: 600;
   font-family: inherit;
-  background-color: #fffde7;
-  color: #388e3c;
+  background: linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%);
+  color: var(--color-primary);
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(56, 142, 60, 0.08);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(163, 130, 76, 0.08);
+  min-height: 44px;
+  /* Touch-friendly minimum height */
 }
 
 button:hover {
-  background-color: #c8e6c9;
-  border-color: #1b5e20;
-  color: #1b5e20;
+  background: linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  border-color: var(--color-primary-dark);
+  color: var(--color-cream-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(163, 130, 76, 0.15);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 3px solid #388e3c;
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Touch-friendly button sizes for mobile */
+@media (max-width: 768px) {
+  button {
+    min-height: 48px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Specific support for foldable displays like Asus Zenbook Fold */
+@media (max-width: 768px) and (min-aspect-ratio: 1/1) {
+
+  /* Landscape orientation on foldable devices */
+  .foldable-landscape {
+    --container-padding: clamp(0.75rem, 2vw, 1.5rem);
+    --spacing-md: clamp(0.75rem, 2vw, 1.25rem);
+    --spacing-lg: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+
+  button {
+    min-height: 44px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) and (max-aspect-ratio: 1/1) {
+
+  /* Portrait orientation on foldable devices */
+  .foldable-portrait {
+    --container-padding: clamp(1rem, 3vw, 2rem);
+    --spacing-md: clamp(1rem, 2.5vw, 1.5rem);
+    --spacing-lg: clamp(1.5rem, 3vw, 2rem);
+  }
+}
+
+/* Ultra-wide and foldable display support */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .foldable-tablet {
+    --container-padding: clamp(1.5rem, 4vw, 2.5rem);
+    --spacing-lg: clamp(2rem, 4vw, 3rem);
+  }
 }
 
 .vegetable {
-  background: #e8f5e9;
-  border-left: 6px solid #388e3c;
-  padding: 1em;
+  background: linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%);
+  border-left: 6px solid var(--color-primary);
+  padding: var(--spacing-md);
   border-radius: 8px;
-  margin-bottom: 1em;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
 }
 
 .dairy {
-  background: #fffde7;
-  border-left: 6px solid #ffb300;
-  padding: 1em;
+  background: linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%);
+  border-left: 6px solid var(--color-warning);
+  padding: var(--spacing-md);
   border-radius: 8px;
-  margin-bottom: 1em;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
 }
 
 .cold-drink {
-  background: #e0f7fa;
-  border-left: 6px solid #0288d1;
-  padding: 1em;
+  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+  border-left: 6px solid var(--color-info);
+  padding: var(--spacing-md);
   border-radius: 8px;
-  margin-bottom: 1em;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
+}
+
+/* Responsive container */
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+/* Responsive grid system */
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive breakpoints */
+@media (max-width: 640px) {
+
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 {
+    font-size: var(--font-size-3xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* Touch-friendly spacing for mobile */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mobile-padding {
+    padding: var(--spacing-sm);
+  }
+
+  .mobile-margin {
+    margin: var(--spacing-sm);
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-padding {
+    padding: var(--spacing-md);
+  }
+
+  .tablet-margin {
+    margin: var(--spacing-md);
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .desktop-padding {
+    padding: var(--spacing-lg);
+  }
+
+  .desktop-margin {
+    margin: var(--spacing-lg);
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+  button {
+    box-shadow: 0 1px 4px rgba(163, 130, 76, 0.12);
+  }
+
+  /* High-DPI foldable display optimization */
+  .foldable-high-dpi {
+    --font-size-base: clamp(1rem, 2.2vw, 1.125rem);
+    --spacing-md: clamp(1rem, 2.2vw, 1.5rem);
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .landscape-optimized {
+    padding: var(--spacing-xs);
+  }
+}
+
+/* Enhanced foldable display landscape optimization */
+@media (max-width: 768px) and (orientation: landscape) and (min-aspect-ratio: 1.5/1) {
+  .foldable-landscape-wide {
+    --container-padding: clamp(0.5rem, 1.5vw, 1rem);
+    --spacing-md: clamp(0.5rem, 1.5vw, 1rem);
+    --spacing-lg: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .foldable-landscape-wide button {
+    min-height: 40px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-medium);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #e0f2f1;
+    color: var(--color-cream-light);
     background-color: #263238;
   }
 
   h1 {
-    color: #a5d6a7;
+    color: var(--color-primary);
   }
 
   a {
-    color: #a5d6a7;
+    color: var(--color-primary-light);
   }
 
   a:hover {
-    color: #81c784;
+    color: var(--color-primary);
   }
 
   button {
-    background-color: #37474f;
-    color: #a5d6a7;
-    border-color: #81c784;
+    background: transparent;
+    color: var(--color-primary-light);
+    border-color: var(--color-primary);
   }
 
   button:hover {
-    background-color: #263238;
-    color: #fffde7;
-    border-color: #ffb300;
+    color: var(--color-primary-dark);
+    border-color: var(--color-primary-light);
   }
 
   .vegetable {
-    background: #33691e;
-    border-left-color: #a5d6a7;
+    background: linear-gradient(135deg, #33691e 0%, #4a7c59 100%);
+    border-left-color: var(--color-primary-light);
+    color: var(--color-cream-light);
   }
 
   .dairy {
-    background: #fffde7;
-    border-left-color: #ffb300;
+    background: linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%);
+    border-left-color: var(--color-warning);
     color: #263238;
   }
 
   .cold-drink {
-    background: #01579b;
+    background: linear-gradient(135deg, #01579b 0%, #0277bd 100%);
     border-left-color: #4fc3f7;
+    color: var(--color-cream-light);
   }
+
+  ::-webkit-scrollbar-track {
+    background: #37474f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary-medium);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
+}
+
+/* ========================================
+   COMPREHENSIVE FOLDABLE DISPLAY SUPPORT
+   ======================================== */
+
+/* Asus Zenbook Fold and similar foldable devices */
+@media (max-width: 768px) and (min-width: 280px) {
+
+  /* Base foldable optimization */
+  .foldable-base {
+    --container-padding: clamp(0.75rem, 2.5vw, 1.5rem);
+    --spacing-xs: clamp(0.25rem, 0.8vw, 0.5rem);
+    --spacing-sm: clamp(0.5rem, 1.5vw, 0.75rem);
+    --spacing-md: clamp(0.75rem, 2vw, 1.25rem);
+    --spacing-lg: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+
+  /* Optimize touch targets for foldable */
+  .foldable-base button,
+  .foldable-base .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    border-radius: 8px;
+  }
+
+  /* Optimize navigation for foldable */
+  .foldable-base nav {
+    padding: var(--spacing-sm);
+  }
+
+  /* Optimize cards and containers */
+  .foldable-base .card,
+  .foldable-base .container {
+    border-radius: 12px;
+    margin: var(--spacing-sm);
+  }
+}
+
+/* Ultra-wide foldable displays (like unfolded Zenbook) */
+@media (min-width: 769px) and (max-width: 1200px) and (min-aspect-ratio: 1.8/1) {
+  .foldable-ultra-wide {
+    --container-padding: clamp(2rem, 5vw, 3rem);
+    --spacing-lg: clamp(2.5rem, 5vw, 4rem);
+    --spacing-xl: clamp(3rem, 6vw, 5rem);
+  }
+
+  /* Optimize grid layouts for ultra-wide */
+  .foldable-ultra-wide .grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+  }
+
+  /* Optimize navigation spacing */
+  .foldable-ultra-wide nav {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+}
+
+/* Foldable device orientation changes */
+@media (orientation: portrait) and (max-width: 768px) {
+  .foldable-portrait-mode {
+    --container-padding: clamp(1rem, 3vw, 2rem);
+    --spacing-md: clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  /* Stack elements vertically in portrait */
+  .foldable-portrait-mode .horizontal-layout {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (orientation: landscape) and (max-width: 768px) {
+  .foldable-landscape-mode {
+    --container-padding: clamp(0.5rem, 2vw, 1.5rem);
+    --spacing-md: clamp(0.75rem, 2vw, 1.25rem);
+  }
+
+  /* Optimize horizontal layouts */
+  .foldable-landscape-mode .horizontal-layout {
+    flex-direction: row;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* High-DPI foldable displays */
+@media (-webkit-min-device-pixel-ratio: 2) and (max-width: 1200px),
+(min-resolution: 192dpi) and (max-width: 1200px) {
+  .foldable-high-dpi-enhanced {
+    --font-size-base: clamp(1rem, 2vw, 1.125rem);
+    --font-size-lg: clamp(1.125rem, 2.5vw, 1.25rem);
+    --spacing-md: clamp(0.75rem, 2vw, 1.25rem);
+    --spacing-lg: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+
+  /* Enhanced shadows for high-DPI */
+  .foldable-high-dpi-enhanced button,
+  .foldable-high-dpi-enhanced .card {
+    box-shadow: 0 2px 8px rgba(163, 130, 76, 0.08);
+  }
+}
+
+/* Foldable device specific optimizations */
+@media (max-width: 768px) and (min-height: 400px) and (max-height: 800px) {
+  .foldable-compact {
+    --container-padding: clamp(0.5rem, 1.5vw, 1rem);
+    --spacing-md: clamp(0.5rem, 1.5vw, 1rem);
+    --spacing-lg: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  /* Compact navigation */
+  .foldable-compact nav {
+    padding: var(--spacing-xs);
+  }
+
+  /* Compact buttons */
+  .foldable-compact button {
+    min-height: 40px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+/* Ensure smooth transitions for foldable orientation changes */
+.foldable-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Utility classes for foldable displays */
+.foldable-responsive {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.foldable-safe-area {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ========================================
+   PROJECT-SPECIFIC STYLES - Golden Basket Mart
+   ======================================== */
+
+/* Golden gradient text effects */
+.golden-text {
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.golden-text-light {
+  background: linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Golden button styles */
+.btn-golden-primary {
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%);
+  color: var(--color-cream-light);
+  border: 1px solid var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-golden-primary:hover {
+  background: linear-gradient(90deg, var(--color-primary-medium) 0%, var(--color-primary) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(163, 130, 76, 0.25);
+}
+
+.btn-golden-secondary {
+  background: linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-primary-light);
+  transition: all 0.3s ease;
+}
+
+.btn-golden-secondary:hover {
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-cream-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(163, 130, 76, 0.25);
+}
+
+/* Golden card styles */
+.card-golden {
+  background: linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%);
+  border: 2px solid var(--color-primary-light);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(163, 130, 76, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-golden:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(163, 130, 76, 0.2);
+  border-color: var(--color-primary);
+}
+
+/* Golden navigation styles */
+.nav-golden {
+  background: linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%);
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.nav-golden-active {
+  border-bottom: 4px solid var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+/* Golden form styles */
+.form-golden input:focus,
+.form-golden textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(163, 130, 76, 0.1);
+}
+
+.form-golden label {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Golden alert styles */
+.alert-golden-success {
+  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+  border: 1px solid var(--color-success);
+  color: #22543d;
+}
+
+.alert-golden-error {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border: 1px solid var(--color-error);
+  color: #c53030;
+}
+
+.alert-golden-warning {
+  background: linear-gradient(135deg, #fffaf0 0%, #feebc8 100%);
+  border: 1px solid var(--color-warning);
+  color: #744210;
+}
+
+.alert-golden-info {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid var(--color-info);
+  color: #1e40af;
 }

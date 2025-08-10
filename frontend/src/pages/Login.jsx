@@ -40,8 +40,10 @@ const Login = () => {
         email,
         password,
       });
-      const user = res.data.user;
-      const authToken = res.data.token;
+      console.log('API response:', res);
+      const user = res.user;
+      const authToken = res.token;
+      console.log('Extracted data:', { user, authToken });
       if (!user || !authToken) {
         setError('Invalid response from server');
       }

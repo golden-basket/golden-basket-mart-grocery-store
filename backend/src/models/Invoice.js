@@ -20,6 +20,7 @@ const invoiceSchema = new mongoose.Schema(
       default: 'unpaid',
     },
     orderDate: { type: Date, required: true },
+    pdfPath: { type: String }, // Path to the generated PDF file
   },
   { timestamps: true }
 );

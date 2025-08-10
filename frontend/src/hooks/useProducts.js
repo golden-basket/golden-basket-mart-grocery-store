@@ -10,14 +10,29 @@ export const productKeys = {
   detail: (id) => [...productKeys.details(), id],
 };
 
-// Get all products
-export const useProducts = () => {
+// Get all products with pagination
+export const useProducts = (page = 1, limit = 20, filters = {}) => {
+  const queryParams = { page, limit, ...filters };
+  
+  return useQuery({
+    queryKey: productKeys.list(queryParams),
+    queryFn: async () => {
+      const queryString = new URLSearchParams(queryParams).toString();
+      const response = await ApiService.getProducts(queryString);
+      return response;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    keepPreviousData: true, // Keep previous data while fetching new data
+  });
+};
+
+// Get all products (backward compatibility)
+export const useAllProducts = () => {
   return useQuery({
     queryKey: productKeys.lists(),
     queryFn: async () => {
-      // ApiService.getProducts returns an array
-      const products = await ApiService.getProducts();
-      return products;
+      const response = await ApiService.getProducts();
+      return response.products || response; // Handle both paginated and non-paginated responses
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

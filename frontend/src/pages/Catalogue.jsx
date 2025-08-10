@@ -16,11 +16,12 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
+  Pagination,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import Loading from '../components/Loading';
-import { useProducts, useSearchProducts } from '../hooks/useProducts';
+import { useProducts } from '../hooks/useProducts';
 import ApiService from '../services/api';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
@@ -42,7 +43,6 @@ const Catalogue = () => {
   const [priceRange, setPriceRange] = useState([5, 1000]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [filtersApplied, setFiltersApplied] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([
     { value: '', label: 'All' },
   ]);
@@ -50,6 +50,10 @@ const Catalogue = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = useState({});
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   // Load categories from backend
   useEffect(() => {
@@ -69,36 +73,44 @@ const Catalogue = () => {
       .finally(() => setCatLoading(false));
   }, []);
 
-  // Load all products initially
-  const { data: allProducts = [], isLoading, error } = useProducts();
+  // Build filters for pagination
+  const filters = {
+    page,
+    limit: 12, // Fixed limit for catalogue view
+    ...(selectedCategory && { category: selectedCategory }),
+    ...(priceRange[0] > 5 && { minPrice: priceRange[0] }),
+    ...(priceRange[1] < 1000 && { maxPrice: priceRange[1] }),
+    ...(inStockOnly && { inStock: 'true' })
+  };
 
-  // For filtered search
-  const {
-    data: searchedProducts = [],
-    isLoading: isSearching,
-    error: searchError,
-  } = useSearchProducts(
-    filtersApplied
-      ? {
-          ...(searchQuery && { q: searchQuery }),
-          ...(selectedCategory && { category: selectedCategory }),
-          ...(priceRange[0] > 0 && { minPrice: priceRange[0] }),
-          ...(priceRange[1] < 1000 && { maxPrice: priceRange[1] }),
-          ...(inStockOnly && { inStock: true }),
-        }
-      : null
-  );
+  // Load products with pagination
+  const { data: productsData, isLoading, error } = useProducts(page, 12, filters);
 
+  // Update products and pagination when data changes
   useEffect(() => {
-    if (!filtersApplied) {
-      setFilteredProducts(allProducts);
-    } else {
-      setFilteredProducts(searchedProducts);
+    if (productsData) {
+      if (productsData.products && productsData.pagination) {
+        // New paginated response
+        setFilteredProducts(productsData.products);
+        setTotalPages(productsData.pagination.totalPages);
+      } else {
+        // Fallback for non-paginated response
+        setFilteredProducts(productsData);
+        setTotalPages(1);
+      }
     }
-  }, [allProducts, searchedProducts, filtersApplied]);
+  }, [productsData]);
+
+  // Handle page change
+  const handlePageChange = (_, newPage) => {
+    setPage(newPage);
+    // Scroll to top when page changes
+    window.scrollTo(0, 0);
+  };
 
   const handleSearch = () => {
-    setFiltersApplied(true);
+    setPage(1); // Reset to first page when searching
+    // The useProducts hook will automatically refetch with new filters
   };
 
   const clearFilters = () => {
@@ -106,7 +118,7 @@ const Catalogue = () => {
     setSelectedCategory('');
     setPriceRange([5, 1000]);
     setInStockOnly(false);
-    setFiltersApplied(false);
+    setPage(1); // Reset to first page when clearing filters
   };
 
   const handleStockAvailability = (stock) => {
@@ -140,7 +152,7 @@ const Catalogue = () => {
   };
 
   return (
-    <Box sx={{ mt: 1, px: { xs: 2, md: 5 } }}>
+    <Box sx={{ mt: 1, p: { xs: 2, md: 5 } }}>
       <Typography
         variant="h4"
         gutterBottom
@@ -373,28 +385,76 @@ const Catalogue = () => {
         </Button>
       </Box>
       {/* Product Grid */}
-      {!isLoading &&
-        !isSearching &&
-        !(error || searchError) &&
-        (filteredProducts.length > 0 ? (
-          <>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                color: '#a3824c',
-                fontWeight: 600,
-                mb: 3,
-              }}
-            >
-              Found {filteredProducts.length} product
-              {filteredProducts.length !== 1 ? 's' : ''}
-            </Typography>
+      {isLoading ? (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          <Loading />
+          <Typography sx={{ color: '#a3824c', fontWeight: 500 }}>
+            Loading products...
+          </Typography>
+        </Box>
+      ) : error ? (
+        <Box sx={{ 
+          textAlign: 'center', 
+          mt: 6, 
+          py: 4,
+          color: '#d32f2f'
+        }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Error loading products
+          </Typography>
+          <Typography variant="body1">
+            Please try again later or contact support if the problem persists.
+          </Typography>
+        </Box>
+      ) : filteredProducts.length > 0 ? (
+        <>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              color: '#a3824c',
+              fontWeight: 600,
+              mb: 3,
+            }}
+          >
+            Found {filteredProducts.length} product
+            {filteredProducts.length !== 1 ? 's' : ''}
+          </Typography>
+          <Box sx={{ 
+            width: '100%',
+            overflow: 'hidden',
+            '& .MuiGrid-container': {
+              margin: 0,
+              padding: 0,
+              width: '100%'
+            },
+            '& .MuiGrid-item': {
+              padding: '12px !important',
+              display: 'flex',
+              justifyContent: 'center'
+            }
+          }}>
             <Grid
               container
               spacing={3}
               alignItems="stretch"
               justifyContent="flex-start"
+              sx={{ 
+                width: '100%',
+                margin: 0,
+                padding: 0,
+                '& > .MuiGrid-item': {
+                  display: 'flex',
+                  justifyContent: 'center'
+                }
+              }}
             >
               {filteredProducts.map((p, idx) => {
                 const stockStatus = getStockStatus(p.stock);
@@ -415,6 +475,22 @@ const Catalogue = () => {
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'stretch',
+                      minHeight: 'fit-content',
+                      '& .MuiCard-root': {
+                        height: '100%',
+                        width: '100%',
+                      },
+                      // Ensure proper spacing on mobile
+                      '&:nth-of-type(odd)': {
+                        '@media (max-width: 600px)': {
+                          paddingLeft: '6px'
+                        }
+                      },
+                      '&:nth-of-type(even)': {
+                        '@media (max-width: 600px)': {
+                          paddingRight: '6px'
+                        }
+                      }
                     }}
                   >
                     <Card
@@ -437,6 +513,7 @@ const Catalogue = () => {
                         overflow: 'hidden',
                         background:
                           'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                        minHeight: { xs: '400px', sm: '450px', md: '500px' },
                       }}
                     >
                       <Box
@@ -499,6 +576,9 @@ const Catalogue = () => {
                           p: { xs: 2, sm: 2.5 },
                           background:
                             'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                          '&:last-child': {
+                            pb: { xs: 2, sm: 2.5 }
+                          }
                         }}
                       >
                         <Box
@@ -673,32 +753,83 @@ const Catalogue = () => {
                 );
               })}
             </Grid>
-          </>
-        ) : (
-          <Box sx={{ textAlign: 'center', mt: 6, py: 4 }}>
-            <Typography
-              variant="h6"
-              sx={{
-                color: '#a3824c',
-                fontWeight: 600,
-                mb: 2,
-              }}
-            >
-              No products found
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: '#866422',
-                maxWidth: 400,
-                mx: 'auto',
-              }}
-            >
-              No products match your current search criteria. Try adjusting your
-              filters or search terms.
-            </Typography>
           </Box>
-        ))}
+          {totalPages > 1 && (
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              mt: 4, 
+              mb: 2,
+              '& .MuiPagination-root': {
+                '& .MuiPaginationItem-root': {
+                  color: '#a3824c',
+                  fontWeight: 600,
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  '&.Mui-selected': {
+                    background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                    color: '#fff',
+                    '&:hover': {
+                      background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                    }
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(163,130,76,0.1)',
+                    transform: 'translateY(-1px)',
+                    transition: 'all 0.2s ease'
+                  },
+                },
+              }
+            }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    color: '#a3824c',
+                    fontWeight: 600,
+                    '&.Mui-selected': {
+                      backgroundColor: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                      color: '#fff',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(163,130,76,0.1)',
+                    },
+                  },
+                }}
+              />
+            </Box>
+          )}
+        </>
+      ) : (
+        <Box sx={{ textAlign: 'center', mt: 6, py: 4 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: '#a3824c',
+              fontWeight: 600,
+              mb: 2,
+            }}
+          >
+            No products found
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: '#866422',
+              maxWidth: 400,
+              mx: 'auto',
+            }}
+          >
+            No products match your current search criteria. Try adjusting your
+            filters or search terms.
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

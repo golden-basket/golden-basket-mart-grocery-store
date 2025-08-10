@@ -134,3 +134,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# invoice pdfs
+backend/public/invoices
+.DS_Store
+*/.DS_Store
+**/.DS_Store

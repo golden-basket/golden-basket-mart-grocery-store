@@ -28,6 +28,15 @@ productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ ratings: -1 });
 
+// Add compound indexes for common query patterns
+productSchema.index({ category: 1, price: 1, stock: 1 });
+productSchema.index({ category: 1, createdAt: -1 });
+productSchema.index({ price: 1, stock: 1 });
+productSchema.index({ ratings: -1, createdAt: -1 });
+
+// Add sparse index for optional fields
+productSchema.index({ images: 1 }, { sparse: true });
+
 // Virtual for stock status
 productSchema.virtual('stockStatus').get(function() {
   if (this.stock === 0) return 'out_of_stock';

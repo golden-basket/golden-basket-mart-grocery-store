@@ -359,7 +359,7 @@ router.get('/invoices', auth, orderController.getUserInvoices);
  *         description: Invoice not found
  */
 router.get(
-  '/invoice/:invoiceId',
+  '/invoice/:id',
   auth,
   validateObjectId,
   orderController.downloadInvoice

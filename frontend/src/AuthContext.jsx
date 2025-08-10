@@ -12,18 +12,25 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
+    console.log('Loading stored auth data:', { storedToken, storedUser });
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      console.log('Restored auth state:', { token: storedToken, user: JSON.parse(storedUser) });
     }
     setLoading(false);
   }, []);
 
   const login = (user, token) => {
+    console.log('Login called with:', { user, token });
     setUser(user);
     setToken(token);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    console.log('Data stored in localStorage:', {
+      token: localStorage.getItem('token'),
+      user: localStorage.getItem('user')
+    });
   };
 
   const logout = () => {

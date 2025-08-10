@@ -77,8 +77,9 @@ class ApiService {
   }
 
   // Product endpoints
-  static async getProducts() {
-    const products = await this.request('/products');
+  static async getProducts(queryParams = '') {
+    const endpoint = queryParams ? `/products?${queryParams}` : '/products';
+    const products = await this.request(endpoint);
     return products;
   }
 
@@ -164,10 +165,17 @@ class ApiService {
   }
 
   static async downloadInvoice(invoiceId) {
-    return this.request(`/invoice/${invoiceId}`, {
-      method: 'GET',
-      responseType: 'blob',
-    });
+    try {
+      const response = await apiClient({
+        url: `/invoice/${invoiceId}`,
+        method: 'GET',
+        responseType: 'blob',
+      });
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.error || 'Failed to download invoice';
+      throw new Error(message);
+    }
   }
 
   // Address endpoints
