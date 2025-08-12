@@ -12,6 +12,7 @@ const {
   validateObjectId,
   registerValidation,
   loginValidation,
+  createUserValidation,
   productValidation,
   cartValidation,
   addressValidation,
@@ -776,6 +777,57 @@ router.delete(
 /**
  * @swagger
  * /users:
+ *   post:
+ *     summary: Create new user (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 50
+ *               lastName:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 50
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 default: user
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Admin access required
+ */
+router.post(
+  '/users',
+  auth,
+  admin,
+  createUserValidation,
+  handleValidationErrors,
+  authController.createUser
+);
+
+/**
+ * @swagger
+ * /users:
  *   get:
  *     summary: List all users (admin only)
  *     tags: [Users]
@@ -888,6 +940,119 @@ router.delete('/users/:id', auth, admin, authController.deleteUser);
  *         description: Admin access required
  */
 router.patch('/users/:id/role', auth, admin, authController.changeUserRole);
+
+/**
+ * @swagger
+ * /users/{id}/invite:
+ *   patch:
+ *     summary: Send invitation email to user (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     responses:
+ *       200:
+ *         description: Invitation email sent successfully
+ *       400:
+ *         description: User already verified
+ *       404:
+ *         description: User not found
+ *       403:
+ *         description: Admin access required
+ */
+router.patch('/users/:id/invite', auth, admin, authController.sendInvitationEmail);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 description: Current password
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 8
+ *                 description: New password (minimum 8 characters)
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Current password incorrect or new password invalid
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/auth/change-password', auth, authController.changePassword);
+
+/**
+ * @swagger
+ * /auth/profile:
+ *   get:
+ *     summary: Get user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/auth/profile', auth, authController.getProfile);
+
+/**
+ * @swagger
+ * /auth/profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 50
+ *               lastName:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 50
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/auth/profile', auth, authController.updateProfile);
 
 // Projects routes
 /**

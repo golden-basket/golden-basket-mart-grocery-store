@@ -76,6 +76,24 @@ class ApiService {
     });
   }
 
+  static async changePassword(passwordData) {
+    return this.request('/auth/change-password', {
+      method: 'POST',
+      data: passwordData,
+    });
+  }
+
+  static async getProfile() {
+    return this.request('/auth/profile');
+  }
+
+  static async updateProfile(profileData) {
+    return this.request('/auth/profile', {
+      method: 'PUT',
+      data: profileData,
+    });
+  }
+
   // Product endpoints
   static async getProducts(queryParams = '') {
     const endpoint = queryParams ? `/products?${queryParams}` : '/products';
@@ -211,6 +229,14 @@ class ApiService {
     return this.request('/categories', {
       method: 'POST',
       data: categoryData,
+    });
+  }
+
+  // User endpoints
+  static async createUser(userData) {
+    return this.request('/users', {
+      method: 'POST',
+      data: userData,
     });
   }
 }

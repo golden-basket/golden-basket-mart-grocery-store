@@ -1,6 +1,7 @@
 // AuthProvider.js
 import React, { createContext, useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import ApiService from './services/api';
 
 export const AuthContext = createContext();
 
@@ -12,25 +13,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    console.log('Loading stored auth data:', { storedToken, storedUser });
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
-      console.log('Restored auth state:', { token: storedToken, user: JSON.parse(storedUser) });
     }
     setLoading(false);
   }, []);
 
   const login = (user, token) => {
-    console.log('Login called with:', { user, token });
     setUser(user);
     setToken(token);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
-    console.log('Data stored in localStorage:', {
-      token: localStorage.getItem('token'),
-      user: localStorage.getItem('user')
-    });
   };
 
   const logout = () => {
@@ -40,6 +34,30 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  const getProfile = async () => {
+    try {
+      const profileData = await ApiService.getProfile();
+      setUser(profileData);
+      localStorage.setItem('user', JSON.stringify(profileData));
+      return profileData;
+    } catch (error) {
+      console.error('Failed to get profile:', error);
+      throw error;
+    }
+  };
+
+  const updateProfile = async (profileData) => {
+    try {
+      const updatedProfile = await ApiService.updateProfile(profileData);
+      setUser(updatedProfile);
+      localStorage.setItem('user', JSON.stringify(updatedProfile));
+      return updatedProfile;
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -47,6 +65,8 @@ export const AuthProvider = ({ children }) => {
       login,
       logout,
       loading,
+      getProfile,
+      updateProfile,
     }),
     [user, token, loading]
   );

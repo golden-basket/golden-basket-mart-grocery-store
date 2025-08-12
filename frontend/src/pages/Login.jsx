@@ -40,15 +40,24 @@ const Login = () => {
         email,
         password,
       });
-      console.log('API response:', res);
       const user = res.user;
       const authToken = res.token;
-      console.log('Extracted data:', { user, authToken });
       if (!user || !authToken) {
         setError('Invalid response from server');
+        return;
       }
-      login(user, authToken);
-      navigate('/');
+      
+      // Check if user has a default password and redirect accordingly
+      if (user.isDefaultPassword) {
+        // Store user and token temporarily for password change
+        localStorage.setItem('tempUser', JSON.stringify(user));
+        localStorage.setItem('tempToken', authToken);
+        navigate('/change-password');
+      } else {
+        // Normal login flow
+        login(user, authToken);
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed.');
     } finally {

@@ -1,13 +1,10 @@
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 
 const Loading = () => {
-  const { 
-    isFoldable, 
-    getFoldableClasses, 
-    getResponsiveValue 
-  } = useFoldableDisplay();
+  const { isFoldable, getFoldableClasses, getResponsiveValue } =
+    useFoldableDisplay();
 
   return (
     <Box
@@ -24,9 +21,7 @@ const Loading = () => {
         alignItems: 'center',
         zIndex: 9999,
         gap: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined),
-        background: isFoldable 
-          ? 'rgba(26, 26, 26, 0.95)'
-          : 'rgba(26, 26, 26, 0.9)',
+        background: 'rgba(249, 226, 176, 0.14)',
         backdropFilter: isFoldable ? 'blur(8px)' : 'blur(4px)',
         transition: 'all 0.3s ease',
       }}
@@ -35,19 +30,25 @@ const Loading = () => {
       <Box
         sx={{
           position: 'relative',
+          padding: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'transform 0.3s ease',
           '&:hover': {
             transform: isFoldable ? 'scale(1.05)' : 'none',
-          }
+          },
         }}
       >
         <ShoppingCartIcon
           sx={{
-            fontSize: getResponsiveValue(48, 56, 64, isFoldable ? 56 : undefined),
-            color: '#a3824c',
+            fontSize: getResponsiveValue(
+              32,
+              40,
+              48,
+              isFoldable ? 40 : undefined
+            ),
+            color: '#D4AF37',
             animation: 'bounce 1.5s ease-in-out infinite',
             transition: 'color 0.2s ease',
             '@keyframes bounce': {
@@ -94,7 +95,12 @@ const Loading = () => {
 
       {/* Loading text with golden gradient */}
       <Typography
-        variant={getResponsiveValue("h6", "h5", "h4", isFoldable ? "h5" : undefined)}
+        variant={getResponsiveValue(
+          'h6',
+          'h5',
+          'h4',
+          isFoldable ? 'h5' : undefined
+        )}
         sx={{
           fontWeight: 600,
           background:
@@ -103,7 +109,7 @@ const Loading = () => {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           animation: 'fadeInOut 2s ease-in-out infinite',
-          fontSize: isFoldable 
+          fontSize: isFoldable
             ? 'clamp(1.125rem, 3.5vw, 1.375rem)'
             : getResponsiveValue('1.25rem', '1.5rem', '1.75rem', undefined),
           textAlign: 'center',
@@ -118,24 +124,8 @@ const Loading = () => {
           },
         }}
       >
-        Loading...
+        Processing...
       </Typography>
-
-      {/* Subtle progress indicator */}
-      <CircularProgress
-        size={getResponsiveValue(20, 22, 24, isFoldable ? 22 : undefined)}
-        thickness={getResponsiveValue(3, 3.5, 4, isFoldable ? 3.5 : undefined)}
-        sx={{
-          color: '#e6d897',
-          transition: 'all 0.2s ease',
-          '& .MuiCircularProgress-circle': {
-            strokeLinecap: 'round',
-          },
-          '&:hover': {
-            transform: isFoldable ? 'scale(1.1)' : 'none',
-          }
-        }}
-      />
     </Box>
   );
 };

@@ -57,8 +57,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: cart } = useCart();
-  const { isMobile, isTablet, isFoldable, isUltraWide, getFoldableClasses } =
-    useFoldableDisplay();
+  const { 
+    isMobile, 
+    isTablet, 
+    isFoldable, 
+    isUltraWide, 
+    isExtraSmall,
+    isSmall,
+    getFoldableClasses,
+    getResponsiveButtonSize,
+    getResponsiveTextClasses
+  } = useFoldableDisplay();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
 
@@ -85,13 +94,13 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navButtonSx = (active) => ({
-    fontWeight: 400, // Reduced from 600
+    fontWeight: 700,
     borderBottom: active
       ? '4px solid var(--color-primary-light)'
       : '4px solid transparent',
     textTransform: 'none',
     minHeight: isFoldable ? '44px' : { xs: '48px', md: '40px' },
-    fontSize: isFoldable ? '0.875rem' : { xs: '0.875rem', md: '0.9rem' },
+    fontSize: isFoldable ? '0.75rem' : { xs: '0.75rem', md: '0.875rem' },
     px: isFoldable ? 1.5 : { xs: 1, md: 1.5 },
     borderRadius: isFoldable ? 2 : 1,
     transition: 'all 0.3s ease',
@@ -167,7 +176,7 @@ const Navbar = () => {
         />
         <Typography
           sx={{
-            fontWeight: 500, // Reduced from 700
+            fontWeight: 500,
             ml: 1.5,
             background:
               'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%)',
@@ -229,7 +238,7 @@ const Navbar = () => {
               <ListItemText
                 primary={link.label}
                 primaryTypographyProps={{
-                  fontWeight: isActive(link.to) ? 500 : 400, // Reduced from 600/500
+                  fontWeight: isActive(link.to) ? 500 : 400,
                   fontSize: {
                     xs: 'clamp(0.875rem, 2.5vw, 1rem)',
                     sm: 'clamp(1rem, 2vw, 1.125rem)',
@@ -280,7 +289,7 @@ const Navbar = () => {
               <ListItemText
                 primary={link.label}
                 primaryTypographyProps={{
-                  fontWeight: isActive(link.to) ? 500 : 400, // Reduced from 600/500
+                  fontWeight: isActive(link.to) ? 500 : 400,
                   fontSize: {
                     xs: 'clamp(0.875rem, 2.5vw, 1rem)',
                     sm: 'clamp(1rem, 2vw, 1.125rem)',
@@ -329,19 +338,19 @@ const Navbar = () => {
                   <LocalGroceryStoreIcon />
                 </Badge>
               </ListItemIcon>
-                              <ListItemText
-                  primary="Cart"
-                  primaryTypographyProps={{
-                    fontWeight: isActive('/cart') ? 500 : 400, // Reduced from 600/500
-                    fontSize: {
-                      xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                      sm: 'clamp(1rem, 2vw, 1.125rem)',
-                    },
-                    color: isActive('/cart')
-                      ? 'var(--color-primary-dark)'
-                      : 'var(--color-primary-darker)',
-                  }}
-                />
+              <ListItemText
+                primary="Cart"
+                primaryTypographyProps={{
+                  fontWeight: isActive('/cart') ? 500 : 400,
+                  fontSize: {
+                    xs: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    sm: 'clamp(1rem, 2vw, 1.125rem)',
+                  },
+                  color: isActive('/cart')
+                    ? 'var(--color-primary-dark)'
+                    : 'var(--color-primary-darker)',
+                }}
+              />
             </ListItemButton>
           </ListItem>
         )}
@@ -384,7 +393,7 @@ const Navbar = () => {
                 <ListItemText
                   primary={link.label}
                   primaryTypographyProps={{
-                    fontWeight: isActive(link.to) ? 500 : 400, // Reduced from 600/500
+                    fontWeight: isActive(link.to) ? 500 : 400,
                     fontSize: {
                       xs: 'clamp(0.875rem, 2.5vw, 1rem)',
                       sm: 'clamp(1rem, 2vw, 1.125rem)',
@@ -431,19 +440,19 @@ const Navbar = () => {
               >
                 <InventoryIcon />
               </ListItemIcon>
-                              <ListItemText
-                  primary="Admin"
-                  primaryTypographyProps={{
-                    fontWeight: isActive('/admin') ? 500 : 400, // Reduced from 600/500
-                    fontSize: {
-                      xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                      sm: 'clamp(1rem, 2vw, 1.125rem)',
-                    },
-                    color: isActive('/admin')
-                      ? 'var(--color-primary-dark)'
-                      : 'var(--color-primary-darker)',
-                  }}
-                />
+              <ListItemText
+                primary="Admin"
+                primaryTypographyProps={{
+                  fontWeight: isActive('/admin') ? 500 : 400,
+                  fontSize: {
+                    xs: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    sm: 'clamp(1rem, 2vw, 1.125rem)',
+                  },
+                  color: isActive('/admin')
+                    ? 'var(--color-primary-dark)'
+                    : 'var(--color-primary-darker)',
+                }}
+              />
             </ListItemButton>
           </ListItem>
         )}
@@ -485,7 +494,7 @@ const Navbar = () => {
                 <ListItemText
                   primary="Logout"
                   primaryTypographyProps={{
-                    fontWeight: 400, // Reduced from 500
+                    fontWeight: 400,
                     fontSize: {
                       xs: 'clamp(0.875rem, 2.5vw, 1rem)',
                       sm: 'clamp(1rem, 2vw, 1.125rem)',
@@ -505,7 +514,7 @@ const Navbar = () => {
     <>
       <AppBar
         position="static"
-        className={getFoldableClasses()}
+        className={`${getFoldableClasses()}}`}
         sx={{
           background:
             'linear-gradient(90deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
@@ -516,6 +525,7 @@ const Navbar = () => {
           sx={{
             justifyContent: 'space-between',
             minHeight: { xs: '64px', md: '56px' },
+            px: { xs: 1, sm: 2, md: 3 },
           }}
         >
           <Box display="flex" alignItems="center" gap={1}>
@@ -523,16 +533,17 @@ const Navbar = () => {
               src="/golden-basket-rounded.png"
               alt="Golden Basket Mart"
               style={{
-                width: 50,
-                height: 50,
+                width: isExtraSmall ? 40 : isSmall ? 45 : 50,
+                height: isExtraSmall ? 40 : isSmall ? 45 : 50,
                 objectFit: 'contain',
                 borderRadius: '10px',
               }}
             />
             <Typography
               variant={isMobile ? 'h6' : 'h5'}
+              className={getResponsiveTextClasses()}
               sx={{
-                fontWeight: 500, // Reduced from 700
+                fontWeight: 500,
                 letterSpacing: 1,
                 textShadow: '1px 1px 4px #00000055',
                 background:
@@ -540,6 +551,11 @@ const Navbar = () => {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 display: { xs: 'none', sm: 'inline-block' },
+                fontSize: {
+                  xs: 'clamp(1rem, 3.5vw, 1.25rem)',
+                  sm: 'clamp(1.25rem, 3vw, 1.5rem)',
+                  md: 'clamp(1.5rem, 2.5vw, 1.75rem)',
+                },
               }}
             >
               Golden Basket Mart
@@ -547,14 +563,19 @@ const Navbar = () => {
             {isMobile && (
               <Typography
                 variant="h6"
+                className={getResponsiveTextClasses()}
                 sx={{
-                  fontWeight: 500, // Reduced from 700
+                  fontWeight: 500,
                   letterSpacing: 1,
                   textShadow: '1px 1px 4px #00000055',
                   background:
                     'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
+                  fontSize: {
+                    xs: 'clamp(1rem, 3.5vw, 1.25rem)',
+                    sm: 'clamp(1.125rem, 3vw, 1.375rem)',
+                  },
                 }}
               >
                 Golden Basket
@@ -572,6 +593,7 @@ const Navbar = () => {
                   component={Link}
                   to={link.to}
                   startIcon={link.icon}
+                  className={getResponsiveButtonSize()}
                   sx={navButtonSx(isActive(link.to))}
                 >
                   {link.label}
@@ -588,13 +610,12 @@ const Navbar = () => {
                       <LocalGroceryStoreIcon />
                     </Badge>
                   }
+                  className={getResponsiveButtonSize()}
                   sx={{ ...navButtonSx(isActive('/cart')) }}
                 >
                   Cart
                 </Button>
               )}
-
-              {/* User-specific navigation items moved to Profile dropdown */}
 
               {/* Profile Menu */}
               {user ? (
@@ -614,7 +635,7 @@ const Navbar = () => {
                   >
                     <Avatar
                       sx={{
-                        fontWeight: 500, // Reduced from 600
+                        fontWeight: 500,
                         fontSize: 12,
                         width: 32,
                         height: 32,
@@ -767,6 +788,7 @@ const Navbar = () => {
                     component={Link}
                     to="/login"
                     startIcon={<LoginIcon />}
+                    className={getResponsiveButtonSize()}
                     sx={{ ...navButtonSx(false) }}
                   >
                     Login
@@ -776,6 +798,7 @@ const Navbar = () => {
                     component={Link}
                     to="/register"
                     startIcon={<PersonAddAltIcon />}
+                    className={getResponsiveButtonSize()}
                     sx={{ ...navButtonSx(false) }}
                   >
                     Register
@@ -792,6 +815,7 @@ const Navbar = () => {
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
+              className={getResponsiveButtonSize()}
               sx={{
                 ml: 'auto',
                 minWidth: '48px',

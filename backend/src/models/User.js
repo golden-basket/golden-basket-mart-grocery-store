@@ -7,8 +7,11 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    phone: { type: String, default: '' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     isVerified: { type: Boolean, default: false },
+    isDefaultPassword: { type: Boolean, default: false },
+    inviter: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,
@@ -20,6 +23,7 @@ userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isVerified: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ inviter: 1 });
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();

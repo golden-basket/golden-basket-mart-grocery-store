@@ -83,7 +83,6 @@ const OrderHistory = () => {
     setLoading(true);
     ApiService.getUserOrders()
       .then((orderList) => {
-        console.log('Order List', orderList);
         setOrders(orderList || []);
       })
       .catch((err) => {

@@ -22,32 +22,47 @@ import {
   MenuItem,
   IconButton,
   Alert,
-  CircularProgress,
   InputAdornment,
-  List,
-  ListItem,
-  ListItemText,
   FormControl,
   FormControlLabel,
   Checkbox,
   Slider,
   Pagination,
-  FormGroup,
+  useTheme,
+  useMediaQuery,
+  Drawer,
+  Chip,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Stack,
+  Divider,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import Loading from '../components/Loading';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ApiService from '../services/api';
 import { useProducts } from '../hooks/useProducts';
+import Loading from '../components/Loading';
 
 export default function Admin() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+
   const [tab, setTab] = useState(() => {
     // Get the saved tab from localStorage, default to 0 (Products)
     const savedTab = localStorage.getItem('adminActiveTab');
     return savedTab ? parseInt(savedTab) : 0;
   });
+
+  // Mobile drawer state
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   // Save tab to localStorage whenever it changes
   const handleTabChange = (_, newTab) => {
@@ -61,6 +76,7 @@ export default function Admin() {
   const [userError, setUserError] = useState('');
   const [editUser, setEditUser] = useState(null);
   const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [userDialogMode, setUserDialogMode] = useState('add'); // 'add' or 'edit'
   const [userDialogForm, setUserDialogForm] = useState({
     firstName: '',
     lastName: '',
@@ -108,14 +124,14 @@ export default function Admin() {
     ...(search && { search }),
     ...(priceRange[0] > 5 && { minPrice: priceRange[0] }),
     ...(priceRange[1] < 1000 && { maxPrice: priceRange[1] }),
-    ...(inStockOnly && { inStock: 'true' })
+    ...(inStockOnly && { inStock: 'true' }),
   };
 
   // Use the paginated products hook
-  const { 
-    data: productsData, 
-    isLoading: prodLoading, 
-    error: prodError 
+  const {
+    data: productsData,
+    isLoading: prodLoading,
+    error: prodError,
   } = useProducts(page, 10, filters);
 
   // Update pagination when data changes
@@ -176,30 +192,54 @@ export default function Admin() {
   };
 
   // User management handlers
-  const handleEditUser = (user) => {
+  const handleUserDialogOpen = (mode, user = null) => {
+    setUserDialogMode(mode);
     setEditUser(user);
-    setUserDialogForm({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-    });
+    setUserDialogForm(
+      user
+        ? {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+          }
+        : {
+            firstName: '',
+            lastName: '',
+            email: '',
+            role: 'user',
+          }
+    );
     setUserDialogOpen(true);
+  };
+
+  const handleEditUser = (user) => {
+    handleUserDialogOpen('edit', user);
   };
   const handleUserDialogClose = () => {
     setUserDialogOpen(false);
     setEditUser(null);
+    setUserDialogMode('add');
   };
   const handleUserDialogSave = () => {
-    ApiService.request(`/users/${editUser._id}`, {
-      method: 'PUT',
-      data: userDialogForm,
-    })
-      .then(() => {
-        fetchUsers();
-        handleUserDialogClose();
+    if (userDialogMode === 'add') {
+      ApiService.createUser(userDialogForm)
+        .then(() => {
+          fetchUsers();
+          handleUserDialogClose();
+        })
+        .catch(() => setUserError('Failed to create user.'));
+    } else {
+      ApiService.request(`/users/${editUser._id}`, {
+        method: 'PUT',
+        data: userDialogForm,
       })
-      .catch(() => setUserError('Failed to update user.'));
+        .then(() => {
+          fetchUsers();
+          handleUserDialogClose();
+        })
+        .catch(() => setUserError('Failed to update user.'));
+    }
   };
   const handleDeleteUser = (id) => {
     ApiService.request(`/users/${id}`, { method: 'DELETE' })
@@ -213,6 +253,17 @@ export default function Admin() {
     })
       .then(() => fetchUsers())
       .catch(() => setUserError('Failed to change user role.'));
+  };
+
+  const handleInviteUser = (userId) => {
+    ApiService.request(`/users/${userId}/invite`, {
+      method: 'PATCH',
+    })
+      .then(() => {
+        fetchUsers();
+        setUserError('');
+      })
+      .catch(() => setUserError('Failed to send invitation email.'));
   };
 
   // Fetch users
@@ -278,7 +329,7 @@ export default function Admin() {
       price: Number(prodForm.price),
       stock: Number(prodForm.stock),
     };
-    
+
     if (prodDialogMode === 'add') {
       ApiService.createProduct(payload)
         .then(() => {
@@ -320,7 +371,6 @@ export default function Admin() {
     return urlString.split(',').map((url) => url.trim());
   };
 
-  console.log(productsData);
   // Filtered products
   const filteredProducts = productsData?.products
     ? productsData.products.filter(
@@ -333,22 +383,256 @@ export default function Admin() {
       )
     : [];
 
-  return (
-    <Container
-      sx={{
-        mt: 2,
-        mb: 2,
-        background:
-          'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 50%, #fffbe6 100%)',
-        borderRadius: 3,
-        py: 4,
-        px: 3,
-        boxShadow: '0 4px 20px 0 rgba(163,130,76,0.15)',
-        border: '1px solid #e6d897',
-      }}
+  // Common styles for consistent UI
+  const containerStyles = {
+    mt: isMobile ? 1 : 2,
+    mb: isMobile ? 1 : 2,
+    px: isMobile ? 1 : 3,
+    py: isMobile ? 2 : 4,
+    background:
+      'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 50%, #fffbe6 100%)',
+    borderRadius: isMobile ? 2 : 3,
+    boxShadow: '0 4px 20px 0 rgba(163,130,76,0.15)',
+    border: '1px solid #e6d897',
+  };
+
+  const sectionStyles = {
+    background:
+      'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
+    borderRadius: isMobile ? 2 : 3,
+    p: isMobile ? 2 : 4,
+    border: '2px solid #e6d897',
+    boxShadow: '0 6px 24px 0 rgba(163,130,76,0.15)',
+    position: 'relative',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '4px',
+      background:
+        'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+      borderRadius: isMobile ? '8px 8px 0 0' : '12px 12px 0 0',
+    },
+  };
+
+  const buttonStyles = {
+    fontWeight: 700,
+    background:
+      'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+    color: '#fff',
+    textTransform: 'none',
+    boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
+    borderRadius: isMobile ? 1 : 2,
+    '&:hover': {
+      background: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
+    },
+    transition: 'all 0.3s ease',
+  };
+
+  const inputStyles = {
+    '& .MuiOutlinedInput-root': {
+      background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+      borderRadius: isMobile ? 1 : 2,
+      boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+      '&:hover fieldset': { borderColor: '#a3824c' },
+      '&.Mui-focused fieldset': { borderColor: '#a3824c' },
+    },
+    '& .MuiInputLabel-root': {
+      color: '#a3824c',
+      fontWeight: 500,
+      '&.Mui-focused': {
+        color: '#a3824c',
+      },
+    },
+    '& .MuiFormHelperText-root': {
+      color: '#b59961',
+      fontSize: '0.75rem',
+      marginLeft: 0,
+    },
+    '& .MuiSelect-icon': {
+      color: '#a3824c',
+    },
+  };
+
+  const tabStyles = {
+    fontWeight: 700,
+    outline: 'none !important',
+    borderRadius: isMobile ? '6px' : '8px',
+    textTransform: 'none',
+    px: isMobile ? 2 : 4,
+    py: isMobile ? 1 : 2,
+    fontSize: isMobile ? '0.9rem' : '1.1rem',
+    transition: 'all 0.3s ease',
+    border: '2px solid transparent',
+    '&.Mui-selected': {
+      color: '#a3824c',
+      background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
+      border: '2px solid #e6d897',
+      boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
+      transform: 'translateY(-2px)',
+    },
+    '&:hover': {
+      background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
+      color: '#a3824c',
+      border: '2px solid #e6d897',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 2px 12px rgba(163,130,76,0.15)',
+    },
+  };
+
+  // Filter component for reusability
+  const FilterControls = ({ showInDrawer = false }) => (
+    <Stack
+      direction={isMobile && !showInDrawer ? 'column' : 'row'}
+      spacing={isMobile ? 2 : 1}
+      flexWrap="wrap"
+      sx={{ width: '100%' }}
     >
+      <TextField
+        size={isMobile ? 'medium' : 'small'}
+        placeholder="Search products..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        sx={{
+          minWidth: isMobile ? '100%' : 200,
+          ...inputStyles,
+        }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon
+                  sx={{ color: '#a3824c', fontSize: isMobile ? 20 : 16 }}
+                />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+
+      <FormControl
+        variant="outlined"
+        size={isMobile ? 'medium' : 'small'}
+        sx={{ minWidth: isMobile ? '100%' : 140 }}
+      >
+        <Select
+          value={filterCat}
+          onChange={(e) => setFilterCat(e.target.value)}
+          displayEmpty
+          sx={{
+            fontSize: isMobile ? '1rem' : '0.8rem',
+            color: '#a3824c',
+            fontWeight: 500,
+            ...inputStyles['& .MuiOutlinedInput-root'],
+            '& .MuiSelect-icon': { color: '#a3824c' },
+          }}
+        >
+          <MenuItem value="">All Categories</MenuItem>
+          {categories.map((cat) => (
+            <MenuItem key={cat._id} value={cat._id}>
+              {cat.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          minWidth: isMobile ? '100%' : 160,
+          px: isMobile ? 2 : 0,
+        }}
+      >
+        <Typography
+          sx={{
+            color: '#a3824c',
+            fontSize: isMobile ? '0.9rem' : '0.75rem',
+            fontWeight: 500,
+          }}
+        >
+          ₹{priceRange[0]}
+        </Typography>
+        <Slider
+          size={isMobile ? 'medium' : 'small'}
+          value={priceRange}
+          onChange={(_, newValue) => setPriceRange(newValue)}
+          min={5}
+          max={1000}
+          step={5}
+          sx={{
+            color: '#a3824c',
+            height: isMobile ? 4 : 3,
+            mx: 1.5,
+            flexGrow: 1,
+            '& .MuiSlider-thumb': {
+              backgroundColor: '#a3824c',
+              width: isMobile ? 16 : 12,
+              height: isMobile ? 16 : 12,
+            },
+          }}
+        />
+        <Typography
+          sx={{
+            color: '#a3824c',
+            fontSize: isMobile ? '0.9rem' : '0.75rem',
+            fontWeight: 500,
+          }}
+        >
+          ₹{priceRange[1]}
+        </Typography>
+      </Box>
+
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={inStockOnly}
+            onChange={(e) => setInStockOnly(e.target.checked)}
+            size={isMobile ? 'medium' : 'small'}
+            sx={{ color: '#a3824c', '&.Mui-checked': { color: '#a3824c' } }}
+          />
+        }
+        label="In Stock Only"
+        sx={{
+          color: '#a3824c',
+          fontWeight: 500,
+          '& .MuiFormControlLabel-label': {
+            fontSize: isMobile ? '1rem' : '0.75rem',
+          },
+        }}
+      />
+
+      <Button
+        variant="outlined"
+        onClick={handleResetFilters}
+        size={isMobile ? 'medium' : 'small'}
+        sx={{
+          borderColor: '#a3824c',
+          color: '#a3824c',
+          fontSize: isMobile ? '0.9rem' : '0.75rem',
+          px: isMobile ? 3 : 1.5,
+          py: isMobile ? 1 : 0.5,
+          '&:hover': {
+            borderColor: '#e6d897',
+            backgroundColor: 'rgba(163,130,76,0.05)',
+          },
+        }}
+        fullWidth={isMobile}
+      >
+        Clear Filters
+      </Button>
+    </Stack>
+  );
+
+  return (
+    <Container maxWidth="xl" sx={containerStyles}>
       <Typography
-        variant="h3"
+        variant={isMobile ? 'h4' : 'h3'}
         align="center"
         gutterBottom
         sx={{
@@ -357,18 +641,20 @@ export default function Admin() {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           fontWeight: 800,
-          mb: 4,
-          textShadow: '0 2px 4px rgba(163,130,76,0.1)',
+          mb: isMobile ? 2 : 4,
         }}
       >
         Admin Dashboard
       </Typography>
+
       <Tabs
         value={tab}
         onChange={handleTabChange}
-        centered
+        centered={!isMobile}
+        variant={isMobile ? 'scrollable' : 'standard'}
+        scrollButtons={isMobile ? 'auto' : false}
         sx={{
-          mb: 4,
+          mb: isMobile ? 2 : 4,
           '& .MuiTabs-indicator': {
             background:
               'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
@@ -377,625 +663,418 @@ export default function Admin() {
             boxShadow: '0 2px 8px rgba(163,130,76,0.3)',
           },
           '& .MuiTabs-flexContainer': {
-            gap: 2,
+            gap: isMobile ? 1 : 2,
           },
         }}
       >
         <Tab
           label="Products"
-          sx={{
-            fontWeight: 700,
-            color: tab === 0 ? '#a3824c' : '#7d6033ff',
-            outline: 'none !important',
-            borderRadius: '8px',
-            textTransform: 'none',
-            px: 4,
-            py: 2,
-            fontSize: '1.1rem',
-            transition: 'all 0.3s ease',
-            border: '2px solid transparent',
-            '&.Mui-selected': {
-              color: '#a3824c',
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-              boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
-              transform: 'translateY(-2px)',
-            },
-            '&:hover': {
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              color: '#a3824c',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-              transform: 'translateY(-1px)',
-              boxShadow: '0 2px 12px rgba(163,130,76,0.15)',
-            },
-            '&.Mui-focusVisible': {
-              outline: 'none !important',
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              color: '#a3824c',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-            },
-          }}
+          sx={{ ...tabStyles, color: tab === 0 ? '#a3824c' : '#7d6033ff' }}
         />
         <Tab
           label="Categories"
-          sx={{
-            fontWeight: 700,
-            color: tab === 1 ? '#a3824c' : '#7d6033ff',
-            outline: 'none !important',
-            borderRadius: '8px',
-            textTransform: 'none',
-            px: 4,
-            py: 2,
-            fontSize: '1.1rem',
-            transition: 'all 0.3s ease',
-            border: '2px solid transparent',
-            '&.Mui-selected': {
-              color: '#a3824c',
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-              boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
-              transform: 'translateY(-2px)',
-            },
-            '&:hover': {
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              color: '#a3824c',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-              transform: 'translateY(-1px)',
-              boxShadow: '0 2px 12px rgba(163,130,76,0.15)',
-            },
-            '&.Mui-focusVisible': {
-              outline: 'none !important',
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              color: '#a3824c',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-            },
-          }}
+          sx={{ ...tabStyles, color: tab === 1 ? '#a3824c' : '#7d6033ff' }}
         />
         <Tab
           label="Users"
-          sx={{
-            fontWeight: 700,
-            color: tab === 2 ? '#a3824c' : '#7d6033ff',
-            outline: 'none !important',
-            borderRadius: '8px',
-            textTransform: 'none',
-            px: 4,
-            py: 2,
-            fontSize: '1.1rem',
-            transition: 'all 0.3s ease',
-            border: '2px solid transparent',
-            '&.Mui-selected': {
-              color: '#a3824c',
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-              boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
-              transform: 'translateY(-2px)',
-            },
-            '&:hover': {
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              color: '#a3824c',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-              transform: 'translateY(-1px)',
-              boxShadow: '0 2px 12px rgba(163,130,76,0.15)',
-            },
-            '&.Mui-focusVisible': {
-              outline: 'none !important',
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-              color: '#a3824c',
-              borderRadius: '8px',
-              border: '2px solid #e6d897',
-            },
-          }}
+          sx={{ ...tabStyles, color: tab === 2 ? '#a3824c' : '#7d6033ff' }}
         />
       </Tabs>
+
       {/* Product Management */}
       {tab === 0 && (
-        <Box
-          sx={{
-            background:
-              'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
-            borderRadius: 3,
-            p: 4,
-            border: '2px solid #e6d897',
-            boxShadow: '0 6px 24px 0 rgba(163,130,76,0.15)',
-            position: 'relative',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              borderRadius: '12px 12px 0 0',
-            },
-          }}
-        >
-          <Box
-            display="flex"
-            alignItems="center"
+        <Box sx={sectionStyles}>
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
             justifyContent="space-between"
+            alignItems={isMobile ? 'stretch' : 'center'}
             mb={3}
-            flexWrap="wrap"
-            gap={2}
+            spacing={2}
           >
             <Typography
-              variant="h4"
-              gutterBottom
+              variant={isMobile ? 'h5' : 'h4'}
               sx={{
                 background:
                   'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 700,
-                flex: 1,
-                minWidth: 200,
               }}
             >
               Manage Products
             </Typography>
-            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-              <TextField
-                size="small"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                sx={{
-                  minWidth: 120,
-                  maxWidth: 200,
-                  '& .MuiOutlinedInput-root': {
-                    height: 32,
-                    fontSize: '0.8rem',
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: '#a3824c', fontSize: 16 }} />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-              <Button
-                size="small"
-                onClick={handleResetFilters}
-                sx={{
-                  height: 32,
-                  px: 2,
-                  fontSize: '0.75rem',
-                  color: '#a3824c',
-                  border: '1px solid #a3824c',
-                  borderRadius: 1,
-                  '&:hover': {
-                    backgroundColor: 'rgba(163,130,76,0.1)',
-                  },
-                }}
-              >
-                Reset
-              </Button>
-              <FormControl
-                variant="outlined"
-                size="small"
-                sx={{ minWidth: 100, maxWidth: 140 }}
-              >
-                <Select
-                  value={filterCat}
-                  onChange={(e) => setFilterCat(e.target.value)}
-                  displayEmpty
+
+            <Stack
+              direction={isMobile ? 'column' : 'row'}
+              spacing={1}
+              alignItems="stretch"
+            >
+              {isMobile && (
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterListIcon />}
+                  onClick={() => setFilterDrawerOpen(true)}
                   sx={{
-                    height: 32,
-                    fontSize: '0.8rem',
+                    borderColor: '#a3824c',
                     color: '#a3824c',
-                    fontWeight: 500,
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(163,130,76,0.3)',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#a3824c',
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#a3824c',
-                    },
-                    '& .MuiSelect-icon': { color: '#a3824c', fontSize: 16 },
-                  }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        backgroundColor: '#fffbe8',
-                        color: '#a3824c',
-                        fontWeight: 500,
-                        maxHeight: 200,
-                      },
+                    '&:hover': {
+                      borderColor: '#e6d897',
+                      backgroundColor: 'rgba(163,130,76,0.05)',
                     },
                   }}
                 >
-                  <MenuItem value="">All Categories</MenuItem>
-                  {categories.map((cat) => (
-                    <MenuItem key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5,
-                  minWidth: 120,
-                  maxWidth: 160,
-                }}
-              >
-                <Typography
-                  sx={{
-                    color: '#a3824c',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                  }}
-                >
-                  ₹{priceRange[0]}
-                </Typography>
-                <Slider
-                  size="small"
-                  value={priceRange}
-                  onChange={(_, newValue) => setPriceRange(newValue)}
-                  min={5}
-                  max={1000}
-                  step={5}
-                  sx={{
-                    color: '#a3824c',
-                    height: 3,
-                    mx: 1.5,
-                    flexGrow: 1,
-                    '& .MuiSlider-thumb': {
-                      backgroundColor: '#a3824c',
-                      width: 12,
-                      height: 12,
-                      '&:hover': {
-                        boxShadow: '0 0 0 4px rgba(163,130,76,0.16)',
-                      },
-                    },
-                    '& .MuiSlider-track': {
-                      backgroundColor: '#e6d897',
-                      height: 3,
-                    },
-                    '& .MuiSlider-rail': {
-                      backgroundColor: '#f0f0f0',
-                      height: 3,
-                    },
-                  }}
-                />
-                <Typography
-                  sx={{
-                    color: '#a3824c',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                  }}
-                >
-                  ₹{priceRange[1]}
-                </Typography>
-              </Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={inStockOnly}
-                    onChange={(e) => setInStockOnly(e.target.checked)}
-                    size="small"
-                    sx={{
-                      color: '#a3824c',
-                      '&.Mui-checked': { color: '#a3824c' },
-                    }}
-                  />
-                }
-                label="In Stock"
-                sx={{
-                  color: '#a3824c',
-                  fontWeight: 500,
-                  fontSize: '0.75rem',
-                  '& .MuiFormControlLabel-label': { fontSize: '0.75rem' },
-                }}
-              />
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setSearch('');
-                  setFilterCat('');
-                  setPriceRange([5, 1000]);
-                  setInStockOnly(false);
-                }}
-                size="small"
-                sx={{
-                  height: 32,
-                  borderColor: '#a3824c',
-                  color: '#a3824c',
-                  borderRadius: 1,
-                  fontSize: '0.75rem',
-                  px: 1.5,
-                  textTransform: 'none',
-                  '&:hover': {
-                    borderColor: '#e6d897',
-                    backgroundColor: 'rgba(163,130,76,0.05)',
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 2px 6px rgba(163,130,76,0.3)',
-                    color: '#866422',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                Clear
-              </Button>
+                  Filters
+                </Button>
+              )}
+
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => handleProdDialogOpen('add')}
-                size="small"
+                size={isMobile ? 'medium' : 'small'}
                 sx={{
-                  fontWeight: 700,
-                  background:
-                    'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                  color: '#fff',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-                  height: 32,
-                  px: 2,
-                  borderRadius: 1,
-                  fontSize: '0.75rem',
-                  '&:hover': {
-                    background:
-                      'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
-                    color: '#000',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
-                  },
-                  transition: 'all 0.3s ease',
+                  ...buttonStyles,
+                  height: isMobile ? 48 : 32,
+                  px: isMobile ? 3 : 2,
+                  fontSize: isMobile ? '1rem' : '0.75rem',
                 }}
               >
                 Add Product
               </Button>
+            </Stack>
+          </Stack>
+
+          {/* Desktop filters */}
+          {!isMobile && (
+            <Box sx={{ mb: 3 }}>
+              <FilterControls />
             </Box>
-          </Box>
+          )}
+
+          {/* Mobile filter drawer */}
+          <Drawer
+            anchor="right"
+            open={filterDrawerOpen}
+            onClose={() => setFilterDrawerOpen(false)}
+            PaperProps={{
+              sx: {
+                width: '100%',
+                maxWidth: 400,
+                background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+              },
+            }}
+          >
+            <Box sx={{ p: 3 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={3}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ color: '#a3824c', fontWeight: 700 }}
+                >
+                  Filter Products
+                </Typography>
+                <IconButton onClick={() => setFilterDrawerOpen(false)}>
+                  <CloseIcon />
+                </IconButton>
+              </Stack>
+              <FilterControls showInDrawer={true} />
+            </Box>
+          </Drawer>
+
           {prodLoading ? (
             <Box display="flex" justifyContent="center" my={4}>
-              <CircularProgress />
+              <Loading />
             </Box>
           ) : prodError ? (
-            <Alert severity="error">{prodError}</Alert>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {prodError}
+            </Alert>
           ) : (
-            <TableContainer
-              component={Paper}
-              sx={{
-                borderRadius: 3,
-                boxShadow: '0 4px 20px 0 rgba(163,130,76,0.2)',
-                border: '2px solid #e6d897',
-                overflow: 'hidden',
-                background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
-              }}
-            >
-              <Table>
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      background:
-                        'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                      boxShadow: '0 2px 8px rgba(163,130,76,0.3)',
-                    }}
-                  >
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Name
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Description
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Price
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Category
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Stock
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Images
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredProducts?.length > 0 ? (
-                    filteredProducts.map((prod) => (
+            <>
+              {/* Desktop Table View */}
+              {!isMobile && (
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: '0 4px 20px 0 rgba(163,130,76,0.2)',
+                    border: '2px solid #e6d897',
+                    overflow: 'hidden',
+                    background:
+                      'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                  }}
+                >
+                  <Table>
+                    <TableHead>
                       <TableRow
-                        key={prod._id}
                         sx={{
-                          '&:nth-of-type(even)': {
-                            background:
-                              'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
-                          },
-                          '&:nth-of-type(odd)': {
-                            background:
-                              'linear-gradient(135deg, #f7e7c4 0%, #fffbe6 100%)',
-                          },
-                          '&:hover': {
-                            background:
-                              'linear-gradient(135deg, #e6d897 0%, #f7e7c4 100%)',
-                            transform: 'scale(1.01)',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
-                            border: '1px solid #a3824c',
-                          },
-                          transition: 'all 0.3s ease',
-                          border: '1px solid transparent',
+                          background:
+                            'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                         }}
                       >
-                        <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
-                          {prod.name}
-                        </TableCell>
-                        <TableCell sx={{ color: '#b59961' }}>
-                          {prod.description}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
-                          ₹{prod.price}
-                        </TableCell>
-                        <TableCell sx={{ color: '#b59961' }}>
-                          {categories.find(
-                            (cat) => cat._id === prod.category._id
-                          )?.name || 'N/A'}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            fontWeight: 600,
-                            color:
-                              prod.stock > 10
-                                ? '#4caf50'
-                                : prod.stock > 0
-                                ? '#ff9800'
-                                : '#f44336',
-                          }}
-                        >
-                          {prod.stock}
-                        </TableCell>
-                        <TableCell sx={{ color: '#b59961' }}>
-                          {prod.images && prod.images.length > 0 ? (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                              }}
-                            >
-                              <span>{prod.images.length}</span>
-                              <span
-                                style={{ fontSize: '0.8rem', opacity: 0.7 }}
-                              >
-                                ({prod.images.length === 1 ? 'image' : 'images'}
-                                )
-                              </span>
-                            </Box>
-                          ) : (
-                            <span
-                              style={{ color: '#999', fontStyle: 'italic' }}
-                            >
-                              No images
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            onClick={() => handleProdDialogOpen('edit', prod)}
+                        {[
+                          'Name',
+                          'Description',
+                          'Price',
+                          'Category',
+                          'Stock',
+                          'Images',
+                          'Actions',
+                        ].map((header) => (
+                          <TableCell
+                            key={header}
                             sx={{
-                              color: '#a3824c',
-                              '&:hover': {
-                                background:
-                                  'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                                transform: 'scale(1.1)',
-                              },
-                              transition: 'all 0.2s ease',
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '1.1rem',
+                              textShadow: '0 1px 2px rgba(0,0,0,0.2)',
                             }}
                           >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => handleProdDelete(prod._id)}
-                            sx={{
-                              color: '#f44336',
-                              '&:hover': {
-                                background:
-                                  'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                                transform: 'scale(1.1)',
-                              },
-                              transition: 'all 0.2s ease',
-                            }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
+                            {header}
+                          </TableCell>
+                        ))}
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                        <Box
+                    </TableHead>
+                    <TableBody>
+                      {filteredProducts?.length > 0 ? (
+                        filteredProducts.map((prod) => (
+                          <TableRow
+                            key={prod._id}
+                            sx={{
+                              '&:nth-of-type(even)': {
+                                background:
+                                  'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                              },
+                              '&:nth-of-type(odd)': {
+                                background:
+                                  'linear-gradient(135deg, #f7e7c4 0%, #fffbe6 100%)',
+                              },
+                              '&:hover': {
+                                background:
+                                  'linear-gradient(135deg, #e6d897 0%, #f7e7c4 100%)',
+                                transform: 'scale(1.01)',
+                                boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
+                                border: '1px solid #a3824c',
+                              },
+                              transition: 'all 0.3s ease',
+                            }}
+                          >
+                            <TableCell
+                              sx={{ fontWeight: 600, color: '#a3824c' }}
+                            >
+                              {prod.name}
+                            </TableCell>
+                            <TableCell sx={{ color: '#b59961', maxWidth: 200 }}>
+                              {prod.description.length > 50
+                                ? `${prod.description.substring(0, 50)}...`
+                                : prod.description}
+                            </TableCell>
+                            <TableCell
+                              sx={{ fontWeight: 600, color: '#a3824c' }}
+                            >
+                              ₹{prod.price}
+                            </TableCell>
+                            <TableCell sx={{ color: '#b59961' }}>
+                              {categories.find(
+                                (cat) => cat._id === prod.category._id
+                              )?.name || 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={prod.stock}
+                                size="small"
+                                sx={{
+                                  backgroundColor:
+                                    prod.stock > 10
+                                      ? '#4caf50'
+                                      : prod.stock > 0
+                                      ? '#ff9800'
+                                      : '#f44336',
+                                  color: '#fff',
+                                  fontWeight: 600,
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ color: '#b59961' }}>
+                              <Chip
+                                label={`${prod.images?.length || 0} images`}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  borderColor: '#a3824c',
+                                  color: '#a3824c',
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Stack direction="row" spacing={1}>
+                                <IconButton
+                                  onClick={() =>
+                                    handleProdDialogOpen('edit', prod)
+                                  }
+                                  sx={{
+                                    color: '#a3824c',
+                                    '&:hover': {
+                                      background: 'rgba(163,130,76,0.1)',
+                                    },
+                                  }}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                  onClick={() => handleProdDelete(prod._id)}
+                                  sx={{
+                                    color: '#f44336',
+                                    '&:hover': {
+                                      background: 'rgba(244,67,54,0.1)',
+                                    },
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                            <Typography
+                              variant="h6"
+                              color="#a3824c"
+                              fontWeight={700}
+                              mb={2}
+                            >
+                              No products found
+                            </Typography>
+                            <Typography variant="body2" color="#b59961">
+                              {search || filterCat
+                                ? 'Try adjusting your search or filter criteria'
+                                : 'Start by adding your first product'}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              {/* Mobile Card View */}
+              {isMobile && (
+                <Grid container spacing={2}>
+                  {filteredProducts?.length > 0 ? (
+                    filteredProducts.map((prod) => (
+                      <Grid item xs={12} key={prod._id} sx={{ width: '100%' }}>
+                        <Card
                           sx={{
                             background:
                               'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
-                            borderRadius: 3,
-                            p: 4,
                             border: '2px solid #e6d897',
-                            boxShadow: '0 4px 16px rgba(163,130,76,0.1)',
+                            borderRadius: 2,
+                            '&:hover': {
+                              boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
+                              transform: 'translateY(-2px)',
+                            },
+                            transition: 'all 0.3s ease',
                           }}
                         >
+                          <CardContent>
+                            <Stack spacing={2}>
+                              <Typography
+                                variant="h6"
+                                sx={{ color: '#a3824c', fontWeight: 700 }}
+                              >
+                                {prod.name}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{ color: '#b59961' }}
+                              >
+                                {prod.description}
+                              </Typography>
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                flexWrap="wrap"
+                              >
+                                <Chip
+                                  label={`₹${prod.price}`}
+                                  sx={{
+                                    backgroundColor: '#a3824c',
+                                    color: '#fff',
+                                  }}
+                                />
+                                <Chip
+                                  label={
+                                    categories.find(
+                                      (cat) => cat._id === prod.category._id
+                                    )?.name || 'N/A'
+                                  }
+                                  variant="outlined"
+                                  sx={{
+                                    borderColor: '#a3824c',
+                                    color: '#a3824c',
+                                  }}
+                                />
+                                <Chip
+                                  label={`Stock: ${prod.stock}`}
+                                  sx={{
+                                    backgroundColor:
+                                      prod.stock > 10
+                                        ? '#4caf50'
+                                        : prod.stock > 0
+                                        ? '#ff9800'
+                                        : '#f44336',
+                                    color: '#fff',
+                                  }}
+                                />
+                                <Chip
+                                  label={`${prod.images?.length || 0} images`}
+                                  variant="outlined"
+                                  sx={{
+                                    borderColor: '#e6d897',
+                                    color: '#b59961',
+                                  }}
+                                />
+                              </Stack>
+                            </Stack>
+                          </CardContent>
+                          <CardActions>
+                            <Button
+                              startIcon={<EditIcon />}
+                              onClick={() => handleProdDialogOpen('edit', prod)}
+                              sx={{ color: '#a3824c' }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleProdDelete(prod._id)}
+                              sx={{ color: '#f44336' }}
+                            >
+                              Delete
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </Grid>
+                    ))
+                  ) : (
+                    <Grid item xs={12}>
+                      <Card
+                        sx={{
+                          background:
+                            'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                          border: '2px solid #e6d897',
+                          textAlign: 'center',
+                          py: 4,
+                        }}
+                      >
+                        <CardContent>
                           <Typography
                             variant="h6"
                             color="#a3824c"
@@ -1004,30 +1083,34 @@ export default function Admin() {
                           >
                             No products found
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            color="#b59961"
-                            sx={{ fontSize: '1.1rem' }}
-                          >
+                          <Typography variant="body2" color="#b59961">
                             {search || filterCat
                               ? 'Try adjusting your search or filter criteria'
                               : 'Start by adding your first product'}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
+                        </CardContent>
+                      </Card>
+                    </Grid>
                   )}
-                </TableBody>
-              </Table>
-              {/* Pagination Controls */}
+                </Grid>
+              )}
+
+              {/* Pagination */}
               {totalPages > 1 && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    mt: 3,
+                    mb: 2,
+                  }}
+                >
                   <Pagination
                     count={totalPages}
                     page={page}
                     onChange={handlePageChange}
                     color="primary"
-                    size="large"
+                    size={isMobile ? 'large' : 'medium'}
                     sx={{
                       '& .MuiPaginationItem-root': {
                         color: '#a3824c',
@@ -1043,19 +1126,23 @@ export default function Admin() {
                   />
                 </Box>
               )}
-            </TableContainer>
+            </>
           )}
+
           {/* Product Dialog */}
           <Dialog
             open={prodDialogOpen}
             onClose={handleProdDialogClose}
-            maxWidth="sm"
+            maxWidth={isMobile ? false : 'md'}
             fullWidth
+            fullScreen={isMobile}
             PaperProps={{
               sx: {
-                borderRadius: 3,
+                borderRadius: isMobile ? 0 : 3,
                 boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-                border: '1px solid #e6d897',
+                border: isMobile ? 'none' : '1px solid #e6d897',
+                maxWidth: isMobile ? '100%' : '800px',
+                width: isMobile ? '100%' : '90%',
               },
             }}
           >
@@ -1064,198 +1151,126 @@ export default function Admin() {
                 background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
                 color: '#fff',
                 fontWeight: 700,
-                borderRadius: '12px 12px 0 0',
+                borderRadius: isMobile ? 0 : '12px 12px 0 0',
+                position: 'relative',
               }}
             >
               {prodDialogMode === 'add' ? 'Add Product' : 'Edit Product'}
+              {isMobile && (
+                <IconButton
+                  onClick={handleProdDialogClose}
+                  sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              )}
             </DialogTitle>
             <DialogContent
               dividers
               sx={{
                 background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                p: 3,
+                p: isMobile ? 2 : 3,
+                minHeight: isMobile ? 'auto' : '400px',
               }}
             >
-              <TextField
-                label="Name"
-                value={prodForm.name}
-                onChange={(e) =>
-                  setProdForm((f) => ({ ...f, name: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <TextField
-                label="Description"
-                value={prodForm.description}
-                onChange={(e) =>
-                  setProdForm((f) => ({ ...f, description: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <TextField
-                label="Price"
-                type="number"
-                value={prodForm.price}
-                onChange={(e) =>
-                  setProdForm((f) => ({ ...f, price: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <FormControl
-                variant="outlined"
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                <Select
-                  value={prodForm.category}
+              <Stack spacing={isMobile ? 2 : 3}>
+                <TextField
+                  label="Name"
+                  value={prodForm.name}
                   onChange={(e) =>
-                    setProdForm((f) => ({ ...f, category: e.target.value }))
+                    setProdForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  displayEmpty
-                  sx={{
-                    fontSize: '0.875rem',
-                    color: '#a3824c',
-                    fontWeight: 500,
-                    background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(163,130,76,0.3)',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#a3824c',
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#a3824c',
-                    },
-                    '& .MuiSelect-icon': { color: '#a3824c', fontSize: 16 },
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <TextField
+                  label="Description"
+                  value={prodForm.description}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 500) {
+                      setProdForm((f) => ({
+                        ...f,
+                        description: e.target.value,
+                      }));
+                    }
                   }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        backgroundColor: '#fffbe8',
-                        color: '#a3824c',
-                        fontWeight: 500,
-                        maxHeight: 200,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select Category
-                  </MenuItem>
-                  {categories.map((cat) => (
-                    <MenuItem key={cat._id} value={cat._id}>
-                      {cat.name}
+                  fullWidth
+                  multiline
+                  rows={isMobile ? 2 : 3}
+                  helperText={`${prodForm.description.length}/500 characters`}
+                  sx={inputStyles}
+                />
+                <TextField
+                  label="Price"
+                  type="number"
+                  value={prodForm.price}
+                  onChange={(e) =>
+                    setProdForm((f) => ({ ...f, price: e.target.value }))
+                  }
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <FormControl variant="outlined" fullWidth>
+                  <Select
+                    value={prodForm.category}
+                    onChange={(e) =>
+                      setProdForm((f) => ({ ...f, category: e.target.value }))
+                    }
+                    displayEmpty
+                    sx={{
+                      ...inputStyles['& .MuiOutlinedInput-root'],
+                      color: '#a3824c',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <MenuItem value="" disabled>
+                      Select Category
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField
-                label="Stock"
-                type="number"
-                value={prodForm.stock}
-                onChange={(e) =>
-                  setProdForm((f) => ({ ...f, stock: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <TextField
-                multiline
-                rows={3}
-                label="Image URLs (comma separated)"
-                value={
-                  Array.isArray(prodForm.images)
-                    ? prodForm.images.join(', ')
-                    : ''
-                }
-                onChange={handleImageUrlsChange}
-                placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                helperText={`${
-                  prodForm.images ? prodForm.images.length : 0
-                } image${
-                  prodForm.images && prodForm.images.length !== 1 ? 's' : ''
-                } added`}
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              {/* prodError && ( // This line is no longer needed */}
-              {/*   <Alert // This line is no longer needed */}
-              {/*     severity="error" // This line is no longer needed */}
-              {/*     sx={{ // This line is no longer needed */}
-              {/*       background: // This line is no longer needed */}
-              {/*         'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)', // This line is no longer needed */}
-              {/*       color: '#a3824c', // This line is no longer needed */}
-              {/*       border: '1px solid #e6d897', // This line is no longer needed */}
-              {/*       borderRadius: 2, // This line is no longer needed */}
-              {/*       '& .MuiAlert-icon': { // This line is no longer needed */}
-              {/*         color: '#a3824c', // This line is no longer needed */}
-              {/*       }, // This line is no longer needed */}
-              {/*     }} // This line is no longer needed */}
-              {/*   > // This line is no longer needed */}
-              {/*     {prodError} // This line is no longer needed */}
-              {/*   </Alert> // This line is no longer needed */}
-              {/* ) // This line is no longer needed */}
+                    {categories.map((cat) => (
+                      <MenuItem key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Stock"
+                  type="number"
+                  value={prodForm.stock}
+                  onChange={(e) =>
+                    setProdForm((f) => ({ ...f, stock: e.target.value }))
+                  }
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <TextField
+                  multiline
+                  rows={isMobile ? 2 : 3}
+                  label="Image URLs (comma separated)"
+                  value={
+                    Array.isArray(prodForm.images)
+                      ? prodForm.images.join(', ')
+                      : ''
+                  }
+                  onChange={handleImageUrlsChange}
+                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                  helperText={`${
+                    prodForm.images ? prodForm.images.length : 0
+                  } image${
+                    prodForm.images && prodForm.images.length !== 1 ? 's' : ''
+                  } added`}
+                  fullWidth
+                  sx={inputStyles}
+                />
+              </Stack>
             </DialogContent>
             <DialogActions
               sx={{
                 background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
                 p: 2,
-                borderRadius: '0 0 12px 12px',
+                borderRadius: isMobile ? 0 : '0 0 12px 12px',
+                justifyContent: isMobile ? 'stretch' : 'flex-end',
+                gap: 1,
               }}
             >
               <Button
@@ -1265,6 +1280,7 @@ export default function Admin() {
                   border: '1px solid #a3824c',
                   borderRadius: 1,
                   px: 3,
+                  flex: isMobile ? 1 : 'none',
                   '&:hover': {
                     background:
                       'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
@@ -1278,19 +1294,9 @@ export default function Admin() {
                 onClick={handleProdSave}
                 variant="contained"
                 sx={{
-                  background:
-                    'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-                  color: '#fff',
-                  fontWeight: 600,
-                  borderRadius: 1,
+                  ...buttonStyles,
                   px: 3,
-                  '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-                  },
-                  transition: 'all 0.3s ease',
+                  flex: isMobile ? 1 : 'none',
                 }}
               >
                 Save
@@ -1302,37 +1308,16 @@ export default function Admin() {
 
       {/* Category Management */}
       {tab === 1 && (
-        <Box
-          sx={{
-            background:
-              'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
-            borderRadius: 3,
-            p: 4,
-            border: '2px solid #e6d897',
-            boxShadow: '0 6px 24px 0 rgba(163,130,76,0.15)',
-            position: 'relative',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              borderRadius: '12px 12px 0 0',
-            },
-          }}
-        >
-          <Box
-            display="flex"
-            alignItems="center"
+        <Box sx={sectionStyles}>
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
             justifyContent="space-between"
+            alignItems={isMobile ? 'stretch' : 'center'}
             mb={3}
+            spacing={2}
           >
             <Typography
-              variant="h4"
-              gutterBottom
+              variant={isMobile ? 'h5' : 'h4'}
               sx={{
                 background:
                   'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
@@ -1347,144 +1332,346 @@ export default function Admin() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => handleCatDialogOpen('add')}
+              size={isMobile ? 'medium' : 'small'}
               sx={{
-                fontWeight: 700,
-                background:
-                  'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                color: '#fff',
-                textTransform: 'none',
-                boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-                height: 40,
-                px: 3,
-                borderRadius: 2,
-                fontSize: '1rem',
-                '&:hover': {
-                  background:
-                    'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
-                  color: '#000',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
-                },
-                transition: 'all 0.3s ease',
+                ...buttonStyles,
+                height: isMobile ? 48 : 32,
+                px: isMobile ? 3 : 2,
+                fontSize: isMobile ? '1rem' : '0.75rem',
               }}
             >
               Add Category
             </Button>
-          </Box>
+          </Stack>
 
           {catLoading ? (
             <Box display="flex" justifyContent="center" my={4}>
-              <CircularProgress sx={{ color: '#a3824c' }} />
+              <Loading />
             </Box>
           ) : catError ? (
-            <Alert
-              severity="error"
-              sx={{
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                color: '#a3824c',
-                border: '1px solid #e6d897',
-                borderRadius: 2,
-                '& .MuiAlert-icon': {
-                  color: '#a3824c',
-                },
-              }}
-            >
+            <Alert severity="error" sx={{ mb: 2 }}>
               {catError}
             </Alert>
           ) : categories.length > 0 ? (
-            <List sx={{ mt: 2 }}>
-              {categories.map((cat, index) => (
-                <ListItem
-                  key={cat._id}
+            <>
+              {/* Desktop Table View */}
+              {!isMobile && !isTablet && (
+                <TableContainer
+                  component={Paper}
                   sx={{
-                    background:
-                      index % 2 === 0
-                        ? 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)'
-                        : 'linear-gradient(135deg, #f7e7c4 0%, #fffbe6 100%)',
                     borderRadius: 3,
-                    mb: 2,
+                    boxShadow: '0 4px 20px 0 rgba(163,130,76,0.2)',
                     border: '2px solid #e6d897',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 8px rgba(163,130,76,0.1)',
-                    '&:hover': {
-                      background:
-                        'linear-gradient(135deg, #e6d897 0%, #f7e7c4 100%)',
-                      transform: 'translateX(8px) scale(1.02)',
-                      boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
-                      border: '2px solid #a3824c',
-                    },
+                    overflow: 'hidden',
+                    background:
+                      'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
                   }}
-                  secondaryAction={
-                    <>
-                      <IconButton
-                        onClick={() => handleCatDialogOpen('edit', cat)}
+                >
+                  <Table>
+                    <TableHead>
+                      <TableRow
                         sx={{
-                          color: '#a3824c',
-                          '&:hover': {
-                            background:
-                              'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                            transform: 'scale(1.1)',
-                          },
-                          transition: 'all 0.2s ease',
+                          background:
+                            'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                         }}
                       >
-                        <EditIcon />
-                      </IconButton>
-                    </>
-                  }
-                >
-                  <ListItemText
-                    primary={
-                      <Typography
-                        variant="h6"
-                        sx={{ color: '#a3824c', fontWeight: 700 }}
+                        {['Name', 'Description', 'Actions'].map((header) => (
+                          <TableCell
+                            key={header}
+                            sx={{
+                              color: '#fff',
+                              fontWeight: 700,
+                              fontSize: '1.1rem',
+                              textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                            }}
+                          >
+                            {header}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {categories.map((cat) => (
+                        <TableRow
+                          key={cat._id}
+                          sx={{
+                            '&:nth-of-type(even)': {
+                              background:
+                                'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                            },
+                            '&:nth-of-type(odd)': {
+                              background:
+                                'linear-gradient(135deg, #f7e7c4 0%, #fffbe6 100%)',
+                            },
+                            '&:hover': {
+                              background:
+                                'linear-gradient(135deg, #e6d897 0%, #f7e7c4 100%)',
+                              transform: 'scale(1.01)',
+                              boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
+                              border: '1px solid #a3824c',
+                            },
+                            transition: 'all 0.3s ease',
+                          }}
+                        >
+                          <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
+                            {cat.name || 'Unnamed Category'}
+                          </TableCell>
+                          <TableCell sx={{ color: '#b59961', maxWidth: 300 }}>
+                            {cat.description && cat.description.length > 0
+                              ? cat.description.length > 100
+                                ? `${cat.description.substring(0, 100)}...`
+                                : cat.description
+                              : 'No description available'}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              onClick={() => handleCatDialogOpen('edit', cat)}
+                              sx={{
+                                color: '#a3824c',
+                                '&:hover': {
+                                  background: 'rgba(163,130,76,0.1)',
+                                },
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              {/* Tablet Card View */}
+              {isTablet && !isMobile && (
+                <Grid container spacing={2}>
+                  {categories.map((cat) => (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      key={cat._id}
+                      sx={{ width: '100%' }}
+                    >
+                      <Card
+                        sx={{
+                          background:
+                            'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                          border: '2px solid #e6d897',
+                          borderRadius: 2,
+                          height: 280,
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          '&:hover': {
+                            boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
+                            transform: 'translateY(-2px)',
+                          },
+                          transition: 'all 0.3s ease',
+                        }}
                       >
-                        {cat.name}
-                      </Typography>
-                    }
-                    secondary={
-                      <Typography
-                        variant="body2"
-                        sx={{ color: '#b59961', mt: 0.5 }}
+                        <CardContent
+                          sx={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          <Stack spacing={2} sx={{ height: '100%' }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                color: '#a3824c',
+                                fontWeight: 700,
+                                minHeight: '1.5rem',
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {cat.name || 'Unnamed Category'}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: '#b59961',
+                                flexGrow: 1,
+                                minHeight: '3rem',
+                                lineHeight: 1.4,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {cat.description && cat.description.length > 0
+                                ? cat.description.length > 80
+                                  ? `${cat.description.substring(0, 80)}...`
+                                  : cat.description
+                                : 'No description available'}
+                            </Typography>
+                            <Chip
+                              label="Category"
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                borderColor: '#a3824c',
+                                color: '#a3824c',
+                                alignSelf: 'flex-start',
+                                mt: 'auto',
+                              }}
+                            />
+                          </Stack>
+                        </CardContent>
+                        <CardActions sx={{ mt: 'auto' }}>
+                          <Button
+                            startIcon={<EditIcon />}
+                            onClick={() => handleCatDialogOpen('edit', cat)}
+                            sx={{ color: '#a3824c' }}
+                            fullWidth
+                          >
+                            Edit
+                          </Button>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+
+              {/* Mobile Card View */}
+              {isMobile && (
+                <Grid container spacing={2}>
+                  {categories.map((cat) => (
+                    <Grid item xs={12} key={cat._id} sx={{ width: '100%' }}>
+                      <Card
+                        sx={{
+                          background:
+                            'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                          border: '2px solid #e6d897',
+                          borderRadius: 2,
+                          minHeight: 200,
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          '&:hover': {
+                            boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
+                            transform: 'translateY(-2px)',
+                          },
+                          transition: 'all 0.3s ease',
+                        }}
                       >
-                        {cat.description}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
+                        <CardContent
+                          sx={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          <Stack spacing={2} sx={{ height: '100%' }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                color: '#a3824c',
+                                fontWeight: 700,
+                                minHeight: '1.5rem',
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {cat.name || 'Unnamed Category'}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: '#b59961',
+                                flexGrow: 1,
+                                minHeight: '2.5rem',
+                                lineHeight: 1.4,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 4,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {cat.description && cat.description.length > 0
+                                ? cat.description.length > 120
+                                  ? `${cat.description.substring(0, 120)}...`
+                                  : cat.description
+                                : 'No description available'}
+                            </Typography>
+                            <Chip
+                              label="Category"
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                borderColor: '#a3824c',
+                                color: '#a3824c',
+                                alignSelf: 'flex-start',
+                                mt: 'auto',
+                              }}
+                            />
+                          </Stack>
+                        </CardContent>
+                        <CardActions sx={{ mt: 'auto' }}>
+                          <Button
+                            startIcon={<EditIcon />}
+                            onClick={() => handleCatDialogOpen('edit', cat)}
+                            sx={{ color: '#a3824c' }}
+                            fullWidth
+                          >
+                            Edit
+                          </Button>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </>
           ) : (
-            <Box
+            <Card
               sx={{
-                textAlign: 'center',
-                py: 6,
                 background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderRadius: 3,
                 border: '2px solid #e6d897',
-                boxShadow: '0 4px 16px rgba(163,130,76,0.1)',
-                p: 4,
+                textAlign: 'center',
+                py: isMobile ? 3 : 4,
+                px: isMobile ? 2 : 3,
               }}
             >
-              <Typography variant="h6" color="#a3824c" fontWeight={700} mb={2}>
-                No Categories Found
-              </Typography>
-              <Typography color="#b59961" sx={{ fontSize: '1.1rem' }}>
-                Start by adding your first category
-              </Typography>
-            </Box>
+              <CardContent>
+                <Typography
+                  variant={isMobile ? 'h6' : 'h5'}
+                  color="#a3824c"
+                  fontWeight={700}
+                  mb={2}
+                >
+                  No Categories Found
+                </Typography>
+                <Typography
+                  variant={isMobile ? 'body2' : 'body1'}
+                  color="#b59961"
+                >
+                  Start by adding your first category
+                </Typography>
+              </CardContent>
+            </Card>
           )}
+
           {/* Category Dialog */}
           <Dialog
             open={catDialogOpen}
             onClose={handleCatDialogClose}
-            maxWidth="sm"
+            maxWidth={isMobile ? false : 'md'}
             fullWidth
+            fullScreen={isMobile}
             PaperProps={{
               sx: {
-                borderRadius: 3,
+                borderRadius: isMobile ? 0 : 3,
                 boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-                border: '1px solid #e6d897',
+                border: isMobile ? 'none' : '1px solid #e6d897',
+                maxWidth: isMobile ? '100%' : '600px',
+                width: isMobile ? '100%' : '90%',
               },
             }}
           >
@@ -1493,81 +1680,65 @@ export default function Admin() {
                 background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
                 color: '#fff',
                 fontWeight: 700,
-                borderRadius: '12px 12px 0 0',
+                borderRadius: isMobile ? 0 : '12px 12px 0 0',
+                position: 'relative',
               }}
             >
               {catDialogMode === 'add' ? 'Add Category' : 'Edit Category'}
+              {isMobile && (
+                <IconButton
+                  onClick={handleCatDialogClose}
+                  sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              )}
             </DialogTitle>
             <DialogContent
               dividers
               sx={{
-                paddingTop: 2,
-                paddingBottom: 2,
                 background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                p: 3,
+                p: isMobile ? 2 : 3,
+                minHeight: isMobile ? 'auto' : '400px',
               }}
             >
-              <TextField
-                label="Name"
-                value={catForm.name}
-                onChange={(e) =>
-                  setCatForm((f) => ({ ...f, name: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <TextField
-                label="Description"
-                value={catForm.description}
-                onChange={(e) =>
-                  setCatForm((f) => ({ ...f, description: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              {catError && (
-                <Alert
-                  severity="error"
-                  sx={{
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                    color: '#a3824c',
-                    border: '1px solid #e6d897',
-                    borderRadius: 2,
-                    '& .MuiAlert-icon': {
-                      color: '#a3824c',
-                    },
+              <Stack spacing={isMobile ? 2 : 3}>
+                <TextField
+                  label="Name"
+                  value={catForm.name}
+                  onChange={(e) =>
+                    setCatForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <TextField
+                  label="Description"
+                  value={catForm.description}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 500) {
+                      setCatForm((f) => ({
+                        ...f,
+                        description: e.target.value,
+                      }));
+                    }
                   }}
-                >
-                  {catError}
-                </Alert>
-              )}
+                  fullWidth
+                  multiline
+                  rows={isMobile ? 2 : 3}
+                  helperText={`${catForm.description.length}/500 characters`}
+                  sx={inputStyles}
+                />
+                {catError && <Alert severity="error">{catError}</Alert>}
+              </Stack>
             </DialogContent>
             <DialogActions
               sx={{
                 background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
                 p: 2,
-                borderRadius: '0 0 12px 12px',
+                borderRadius: isMobile ? 0 : '0 0 12px 12px',
+                justifyContent: isMobile ? 'stretch' : 'flex-end',
+                gap: 1,
               }}
             >
               <Button
@@ -1577,6 +1748,7 @@ export default function Admin() {
                   border: '1px solid #a3824c',
                   borderRadius: 1,
                   px: 3,
+                  flex: isMobile ? 1 : 'none',
                   '&:hover': {
                     background:
                       'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
@@ -1590,19 +1762,9 @@ export default function Admin() {
                 onClick={handleCatSave}
                 variant="contained"
                 sx={{
-                  background:
-                    'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-                  color: '#fff',
-                  fontWeight: 600,
-                  borderRadius: 1,
+                  ...buttonStyles,
                   px: 3,
-                  '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-                  },
-                  transition: 'all 0.3s ease',
+                  flex: isMobile ? 1 : 'none',
                 }}
               >
                 Save
@@ -1614,210 +1776,594 @@ export default function Admin() {
 
       {/* User Management */}
       {tab === 2 && (
-        <Box
-          sx={{
-            background:
-              'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
-            borderRadius: 3,
-            p: 4,
-            border: '2px solid #e6d897',
-            boxShadow: '0 6px 24px 0 rgba(163,130,76,0.15)',
-            position: 'relative',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              borderRadius: '12px 12px 0 0',
-            },
-          }}
-        >
-          <Typography
-            variant="h4"
-            gutterBottom
-            sx={{
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontWeight: 700,
-              mb: 3,
-            }}
+        <Box sx={sectionStyles}>
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
+            justifyContent="space-between"
+            alignItems={isMobile ? 'stretch' : 'center'}
+            mb={3}
+            spacing={2}
           >
-            Manage Users
-          </Typography>
-          {userError && (
-            <Alert
-              severity="error"
+            <Typography
+              variant={isMobile ? 'h5' : 'h4'}
               sx={{
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                color: '#a3824c',
-                border: '1px solid #e6d897',
-                borderRadius: 2,
-                mb: 2,
-                '& .MuiAlert-icon': {
-                  color: '#a3824c',
-                },
+                background:
+                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 700,
               }}
             >
+              Manage Users
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleUserDialogOpen('add')}
+              size={isMobile ? 'medium' : 'small'}
+              sx={{
+                ...buttonStyles,
+                height: isMobile ? 48 : 32,
+                px: isMobile ? 3 : 2,
+                fontSize: isMobile ? '1rem' : '0.75rem',
+              }}
+            >
+              Add User
+            </Button>
+          </Stack>
+
+          {userError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
               {userError}
             </Alert>
           )}
+
           {userLoading ? (
             <Box display="flex" justifyContent="center" my={4}>
-              <CircularProgress sx={{ color: '#a3824c' }} />
+              <Loading />
             </Box>
           ) : users.length > 0 ? (
-            <List sx={{ mt: 2 }}>
-              {users.map((user, index) => (
-                <ListItem
-                  key={user._id}
+            <>
+              {/* Desktop Table View */}
+              {!isMobile && !isTablet && (
+                <TableContainer
+                  component={Paper}
                   sx={{
-                    background:
-                      index % 2 === 0
-                        ? 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)'
-                        : 'linear-gradient(135deg, #f7e7c4 0%, #fffbe6 100%)',
                     borderRadius: 3,
-                    mb: 2,
+                    boxShadow: '0 4px 20px 0 rgba(163,130,76,0.2)',
                     border: '2px solid #e6d897',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 8px rgba(163,130,76,0.1)',
-                    '&:hover': {
-                      background:
-                        'linear-gradient(135deg, #e6d897 0%, #f7e7c4 100%)',
-                      transform: 'translateX(8px) scale(1.02)',
-                      boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
-                      border: '2px solid #a3824c',
-                    },
+                    overflow: 'hidden',
+                    background:
+                      'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
                   }}
-                  secondaryAction={
-                    <>
-                      <Select
-                        value={user.role}
-                        onChange={(e) =>
-                          handleChangeUserRole(user, e.target.value)
-                        }
-                        size="small"
-                        sx={{
-                          mr: 2,
-                          minWidth: 90,
-                          background:
-                            'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                          borderRadius: 1,
-                          border: '1px solid #e6d897',
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            border: 'none',
-                          },
-                          '&:hover': {
-                            background:
-                              'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
-                          },
-                        }}
-                      >
-                        <MenuItem value="user">User</MenuItem>
-                        <MenuItem value="admin">Admin</MenuItem>
-                      </Select>
-                      <Button
-                        onClick={() => handleEditUser(user)}
-                        size="small"
-                        sx={{
-                          mr: 1,
-                          fontWeight: 600,
-                          color: '#a3824c',
-                          border: '1px solid #a3824c',
-                          textTransform: 'none',
-                          background:
-                            'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                          borderRadius: 1,
-                          '&:hover': {
-                            background:
-                              'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                            color: '#fff',
-                            transform: 'scale(1.05)',
-                          },
-                          transition: 'all 0.2s ease',
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <IconButton
-                        onClick={() => handleDeleteUser(user._id)}
-                        sx={{
-                          color: '#f44336',
-                          '&:hover': {
-                            background:
-                              'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                            transform: 'scale(1.1)',
-                          },
-                          transition: 'all 0.2s ease',
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </>
-                  }
                 >
-                  <ListItemText
-                    primary={
-                      <Typography
-                        variant="h6"
-                        sx={{ color: '#a3824c', fontWeight: 700 }}
+                  <Table>
+                    <TableHead>
+                      <TableRow
+                        sx={{
+                          background:
+                            'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                        }}
                       >
-                        {user.firstName} {user.lastName}
-                      </Typography>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: '#b59961', mb: 0.5 }}
+                        {['Name', 'Email', 'Role', 'Status', 'Actions'].map(
+                          (header) => (
+                            <TableCell
+                              key={header}
+                              sx={{
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: '1.1rem',
+                                textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                              }}
+                            >
+                              {header}
+                            </TableCell>
+                          )
+                        )}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {users.map((user) => (
+                        <TableRow
+                          key={user._id}
+                          sx={{
+                            '&:nth-of-type(even)': {
+                              background:
+                                'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                            },
+                            '&:nth-of-type(odd)': {
+                              background:
+                                'linear-gradient(135deg, #f7e7c4 0%, #fffbe6 100%)',
+                            },
+                            '&:hover': {
+                              background:
+                                'linear-gradient(135deg, #e6d897 0%, #f7e7c4 100%)',
+                              transform: 'scale(1.01)',
+                              boxShadow: '0 4px 16px rgba(163,130,76,0.2)',
+                              border: '1px solid #a3824c',
+                            },
+                            transition: 'all 0.3s ease',
+                          }}
                         >
-                          {user.email}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: '#a3824c', fontWeight: 600 }}
+                          <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
+                            {user.firstName} {user.lastName}
+                          </TableCell>
+                          <TableCell sx={{ color: '#b59961' }}>
+                            {user.email}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={user.role}
+                              size="small"
+                              sx={{
+                                backgroundColor:
+                                  user.role === 'admin' ? '#a3824c' : '#e6d897',
+                                color:
+                                  user.role === 'admin' ? '#fff' : '#a3824c',
+                                fontWeight: 600,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Stack
+                              direction="row"
+                              spacing={0.5}
+                              flexWrap="wrap"
+                            >
+                              <Chip
+                                label={
+                                  user.isVerified ? 'Verified' : 'Unverified'
+                                }
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  borderColor: user.isVerified
+                                    ? '#4caf50'
+                                    : '#ff9800',
+                                  color: user.isVerified
+                                    ? '#4caf50'
+                                    : '#ff9800',
+                                  fontSize: '0.6rem',
+                                  height: 18,
+                                  '& .MuiChip-label': {
+                                    px: 0.5,
+                                  },
+                                }}
+                              />
+                              {user.isDefaultPassword && (
+                                <Chip
+                                  label="Default Password"
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    borderColor: '#f44336',
+                                    color: '#f44336',
+                                    fontSize: '0.6rem',
+                                    height: 18,
+                                    '& .MuiChip-label': {
+                                      px: 0.5,
+                                    },
+                                  }}
+                                />
+                              )}
+                            </Stack>
+                          </TableCell>
+                          <TableCell>
+                            <Stack direction="row" spacing={1}>
+                              <Select
+                                value={user.role}
+                                onChange={(e) =>
+                                  handleChangeUserRole(user, e.target.value)
+                                }
+                                size="small"
+                                sx={{
+                                  minWidth: 90,
+                                  background:
+                                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                                  '& .MuiOutlinedInput-notchedOutline': {
+                                    border: 'none',
+                                  },
+                                  '& .MuiSelect-icon': { color: '#a3824c' },
+                                  color: '#a3824c',
+                                  fontWeight: 500,
+                                }}
+                              >
+                                <MenuItem value="user">User</MenuItem>
+                                <MenuItem value="admin">Admin</MenuItem>
+                              </Select>
+                              {!user.isVerified && (
+                                <IconButton
+                                  onClick={() => handleInviteUser(user._id)}
+                                  sx={{
+                                    color: '#4caf50',
+                                    '&:hover': {
+                                      background: 'rgba(76,175,80,0.1)',
+                                    },
+                                  }}
+                                  title="Send Invitation Email"
+                                >
+                                  <CheckCircleIcon />
+                                </IconButton>
+                              )}
+                              <IconButton
+                                onClick={() => handleEditUser(user)}
+                                sx={{
+                                  color: '#a3824c',
+                                  '&:hover': {
+                                    background: 'rgba(163,130,76,0.1)',
+                                  },
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => handleDeleteUser(user._id)}
+                                sx={{
+                                  color: '#f44336',
+                                  '&:hover': {
+                                    background: 'rgba(244,67,54,0.1)',
+                                  },
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              {/* Tablet Card View */}
+              {isTablet && !isMobile && (
+                <Grid container spacing={2}>
+                  {users.map((user) => (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      key={user._id}
+                      sx={{ width: '100%' }}
+                    >
+                      <Card
+                        sx={{
+                          background:
+                            'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                          border: '2px solid #e6d897',
+                          borderRadius: 2,
+                          height: '100%',
+                          '&:hover': {
+                            boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
+                            transform: 'translateY(-2px)',
+                          },
+                          transition: 'all 0.3s ease',
+                        }}
+                      >
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Stack spacing={2}>
+                            <Typography
+                              variant="h6"
+                              sx={{ color: '#a3824c', fontWeight: 700 }}
+                            >
+                              {user.firstName} {user.lastName}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: '#b59961' }}
+                            >
+                              {user.email}
+                            </Typography>
+                            <Stack
+                              direction="row"
+                              spacing={0.5}
+                              flexWrap="wrap"
+                            >
+                              <Chip
+                                label={user.role}
+                                size="small"
+                                sx={{
+                                  backgroundColor:
+                                    user.role === 'admin'
+                                      ? '#a3824c'
+                                      : '#e6d897',
+                                  color:
+                                    user.role === 'admin' ? '#fff' : '#a3824c',
+                                  fontWeight: 600,
+                                }}
+                              />
+                              <Chip
+                                label={
+                                  user.isVerified ? 'Verified' : 'Unverified'
+                                }
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  borderColor: user.isVerified
+                                    ? '#4caf50'
+                                    : '#ff9800',
+                                  color: user.isVerified
+                                    ? '#4caf50'
+                                    : '#ff9800',
+                                  fontSize: '0.6rem',
+                                  height: 18,
+                                  '& .MuiChip-label': {
+                                    px: 0.5,
+                                  },
+                                }}
+                              />
+                              {user.isDefaultPassword && (
+                                <Chip
+                                  label="Default Password"
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    borderColor: '#f44336',
+                                    color: '#f44336',
+                                    fontSize: '0.6rem',
+                                    height: 18,
+                                    '& .MuiChip-label': {
+                                      px: 0.5,
+                                    },
+                                  }}
+                                />
+                              )}
+                            </Stack>
+                          </Stack>
+                        </CardContent>
+                        <Divider />
+                        <CardActions
+                          sx={{
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: 1,
+                          }}
                         >
-                          Role: {user.role}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
+                          <Select
+                            value={user.role}
+                            onChange={(e) =>
+                              handleChangeUserRole(user, e.target.value)
+                            }
+                            size="small"
+                            sx={{
+                              minWidth: 90,
+                              background:
+                                'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                border: 'none',
+                              },
+                              '& .MuiSelect-icon': { color: '#a3824c' },
+                              color: '#a3824c',
+                              fontWeight: 500,
+                            }}
+                          >
+                            <MenuItem value="user">User</MenuItem>
+                            <MenuItem value="admin">Admin</MenuItem>
+                          </Select>
+                          <Stack direction="row" spacing={1}>
+                            {!user.isVerified && (
+                              <Button
+                                onClick={() => handleInviteUser(user._id)}
+                                size="small"
+                                sx={{ color: '#4caf50', minWidth: 'unset' }}
+                                title="Send Invitation Email"
+                              >
+                                <CheckCircleIcon fontSize="small" />
+                              </Button>
+                            )}
+                            <Button
+                              onClick={() => handleEditUser(user)}
+                              size="small"
+                              sx={{ color: '#a3824c', minWidth: 'unset' }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteUser(user._id)}
+                              size="small"
+                              sx={{ color: '#f44336', minWidth: 'unset' }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </Button>
+                          </Stack>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+
+              {/* Mobile Card View */}
+              {isMobile && (
+                <Grid container spacing={2}>
+                  {users.map((user) => (
+                    <Grid item xs={12} key={user._id} sx={{ width: '100%' }}>
+                      <Card
+                        sx={{
+                          background:
+                            'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+                          border: '2px solid #e6d897',
+                          borderRadius: 2,
+                          '&:hover': {
+                            boxShadow: '0 6px 20px rgba(163,130,76,0.25)',
+                            transform: 'translateY(-2px)',
+                          },
+                          transition: 'all 0.3s ease',
+                        }}
+                      >
+                        <CardContent>
+                          <Stack spacing={2}>
+                            <Typography
+                              variant="h6"
+                              sx={{ color: '#a3824c', fontWeight: 700 }}
+                            >
+                              {user.firstName} {user.lastName}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: '#b59961' }}
+                            >
+                              {user.email}
+                            </Typography>
+                            <Stack
+                              direction="row"
+                              spacing={0.5}
+                              flexWrap="wrap"
+                            >
+                              <Chip
+                                label={user.role}
+                                size="small"
+                                sx={{
+                                  backgroundColor:
+                                    user.role === 'admin'
+                                      ? '#a3824c'
+                                      : '#e6d897',
+                                  color:
+                                    user.role === 'admin' ? '#fff' : '#a3824c',
+                                  fontWeight: 600,
+                                }}
+                              />
+                              <Chip
+                                label={
+                                  user.isVerified ? 'Verified' : 'Unverified'
+                                }
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  borderColor: user.isVerified
+                                    ? '#4caf50'
+                                    : '#ff9800',
+                                  color: user.isVerified
+                                    ? '#4caf50'
+                                    : '#ff9800',
+                                  fontSize: '0.6rem',
+                                  height: 18,
+                                  '& .MuiChip-label': {
+                                    px: 0.5,
+                                  },
+                                }}
+                              />
+                              {user.isDefaultPassword && (
+                                <Chip
+                                  label="Default Password"
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    borderColor: '#f44336',
+                                    color: '#f44336',
+                                    fontSize: '0.6rem',
+                                    height: 18,
+                                    '& .MuiChip-label': {
+                                      px: 0.5,
+                                    },
+                                  }}
+                                />
+                              )}
+                            </Stack>
+                          </Stack>
+                        </CardContent>
+                        <Divider />
+                        <CardActions
+                          sx={{
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: 1,
+                          }}
+                        >
+                          <Select
+                            value={user.role}
+                            onChange={(e) =>
+                              handleChangeUserRole(user, e.target.value)
+                            }
+                            size="small"
+                            sx={{
+                              minWidth: 90,
+                              background:
+                                'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                border: 'none',
+                              },
+                              '& .MuiSelect-icon': { color: '#a3824c' },
+                              color: '#a3824c',
+                              fontWeight: 500,
+                            }}
+                          >
+                            <MenuItem value="user">User</MenuItem>
+                            <MenuItem value="admin">Admin</MenuItem>
+                          </Select>
+                          <Stack direction="row" spacing={1}>
+                            {!user.isVerified && (
+                              <Button
+                                onClick={() => handleInviteUser(user._id)}
+                                size="small"
+                                sx={{ color: '#4caf50', minWidth: 'unset' }}
+                                title="Send Invitation Email"
+                              >
+                                <CheckCircleIcon fontSize="small" />
+                              </Button>
+                            )}
+                            <Button
+                              onClick={() => handleEditUser(user)}
+                              size="small"
+                              sx={{ color: '#a3824c', minWidth: 'unset' }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteUser(user._id)}
+                              size="small"
+                              sx={{ color: '#f44336', minWidth: 'unset' }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </Button>
+                          </Stack>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </>
           ) : (
-            <Box
+            <Card
               sx={{
-                textAlign: 'center',
-                py: 6,
                 background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderRadius: 3,
                 border: '2px solid #e6d897',
-                boxShadow: '0 4px 16px rgba(163,130,76,0.1)',
-                p: 4,
+                textAlign: 'center',
+                py: 4,
               }}
             >
-              <Typography variant="h6" color="#a3824c" fontWeight={700} mb={2}>
-                No Users Found
-              </Typography>
-              <Typography color="#b59961" sx={{ fontSize: '1.1rem' }}>
-                No users are currently registered
-              </Typography>
-            </Box>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  color="#a3824c"
+                  fontWeight={700}
+                  mb={2}
+                >
+                  No Users Found
+                </Typography>
+                <Typography color="#b59961">
+                  No users are currently registered
+                </Typography>
+              </CardContent>
+            </Card>
           )}
+
+          {/* User Dialog */}
           <Dialog
             open={userDialogOpen}
             onClose={handleUserDialogClose}
+            maxWidth={isMobile ? false : 'md'}
+            fullWidth
+            fullScreen={isMobile}
             PaperProps={{
               sx: {
-                borderRadius: 3,
+                borderRadius: isMobile ? 0 : 3,
                 boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-                border: '1px solid #e6d897',
+                border: isMobile ? 'none' : '1px solid #e6d897',
+                maxWidth: isMobile ? '100%' : '600px',
+                width: isMobile ? '100%' : '90%',
               },
             }}
           >
@@ -1826,107 +2372,88 @@ export default function Admin() {
                 background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
                 color: '#fff',
                 fontWeight: 700,
-                borderRadius: '12px 12px 0 0',
+                borderRadius: isMobile ? 0 : '12px 12px 0 0',
+                position: 'relative',
               }}
             >
-              Edit User
+              {userDialogMode === 'add' ? 'Add User' : 'Edit User'}
+              {isMobile && (
+                <IconButton
+                  onClick={handleUserDialogClose}
+                  sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              )}
             </DialogTitle>
             <DialogContent
               dividers
               sx={{
                 background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                p: 3,
+                p: isMobile ? 2 : 3,
+                minHeight: isMobile ? 'auto' : '400px',
               }}
             >
-              <TextField
-                label="First Name"
-                value={userDialogForm.firstName}
-                onChange={(e) =>
-                  setUserDialogForm((f) => ({
-                    ...f,
-                    firstName: e.target.value,
-                  }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <TextField
-                label="Last Name"
-                value={userDialogForm.lastName}
-                onChange={(e) =>
-                  setUserDialogForm((f) => ({ ...f, lastName: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <TextField
-                label="Email"
-                value={userDialogForm.email}
-                onChange={(e) =>
-                  setUserDialogForm((f) => ({ ...f, email: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: 1,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&:focus fieldset': { borderColor: '#a3824c' },
-                  },
-                }}
-              />
-              <Select
-                label="Role"
-                value={userDialogForm.role}
-                onChange={(e) =>
-                  setUserDialogForm((f) => ({ ...f, role: e.target.value }))
-                }
-                fullWidth
-                sx={{
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                  borderRadius: 1,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e6d897',
-                  },
-                  '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
-                  },
-                }}
-              >
-                <MenuItem value="user">User</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-              </Select>
+              <Stack spacing={isMobile ? 2 : 3}>
+                <TextField
+                  label="First Name"
+                  value={userDialogForm.firstName}
+                  onChange={(e) =>
+                    setUserDialogForm((f) => ({
+                      ...f,
+                      firstName: e.target.value,
+                    }))
+                  }
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <TextField
+                  label="Last Name"
+                  value={userDialogForm.lastName}
+                  onChange={(e) =>
+                    setUserDialogForm((f) => ({
+                      ...f,
+                      lastName: e.target.value,
+                    }))
+                  }
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <TextField
+                  label="Email"
+                  value={userDialogForm.email}
+                  onChange={(e) =>
+                    setUserDialogForm((f) => ({ ...f, email: e.target.value }))
+                  }
+                  fullWidth
+                  sx={inputStyles}
+                />
+                <FormControl variant="outlined" fullWidth>
+                  <Select
+                    value={userDialogForm.role}
+                    onChange={(e) =>
+                      setUserDialogForm((f) => ({ ...f, role: e.target.value }))
+                    }
+                    displayEmpty
+                    sx={{
+                      ...inputStyles['& .MuiOutlinedInput-root'],
+                      color: '#a3824c',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <MenuItem value="user">User</MenuItem>
+                    <MenuItem value="admin">Admin</MenuItem>
+                  </Select>
+                </FormControl>
+              </Stack>
             </DialogContent>
             <DialogActions
               sx={{
                 background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
                 p: 2,
-                borderRadius: '0 0 12px 12px',
+                borderRadius: isMobile ? 0 : '0 0 12px 12px',
+                justifyContent: isMobile ? 'stretch' : 'flex-end',
+                gap: 1,
               }}
             >
               <Button
@@ -1936,6 +2463,7 @@ export default function Admin() {
                   border: '1px solid #a3824c',
                   borderRadius: 1,
                   px: 3,
+                  flex: isMobile ? 1 : 'none',
                   '&:hover': {
                     background:
                       'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
@@ -1949,19 +2477,9 @@ export default function Admin() {
                 onClick={handleUserDialogSave}
                 variant="contained"
                 sx={{
-                  background:
-                    'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-                  color: '#fff',
-                  fontWeight: 600,
-                  borderRadius: 1,
+                  ...buttonStyles,
                   px: 3,
-                  '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-                  },
-                  transition: 'all 0.3s ease',
+                  flex: isMobile ? 1 : 'none',
                 }}
               >
                 Save

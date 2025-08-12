@@ -8,17 +8,20 @@ exports.getAllProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
-    
+
     // Field selection to avoid fetching unnecessary data
-    const selectFields = 'name price images stock ratings category createdAt';
-    
+    const selectFields =
+      'name description price category stock images ratings createdAt';
+
     // Build query with optional filters
     const query = {};
     if (req.query.category) query.category = req.query.category;
-    if (req.query.minPrice) query.price = { $gte: parseFloat(req.query.minPrice) };
-    if (req.query.maxPrice) query.price = { ...query.price, $lte: parseFloat(req.query.maxPrice) };
+    if (req.query.minPrice)
+      query.price = { $gte: parseFloat(req.query.minPrice) };
+    if (req.query.maxPrice)
+      query.price = { ...query.price, $lte: parseFloat(req.query.maxPrice) };
     if (req.query.inStock === 'true') query.stock = { $gt: 0 };
-    
+
     // Execute queries in parallel for better performance
     const [products, totalCount] = await Promise.all([
       Product.find(query)
@@ -28,13 +31,15 @@ exports.getAllProducts = async (req, res) => {
         .skip(skip)
         .limit(limit)
         .lean(), // Use lean() for better performance when not needing Mongoose documents
-      Product.countDocuments(query)
+      Product.countDocuments(query),
     ]);
-    
+
     const totalPages = Math.ceil(totalCount / limit);
-    
-    logger.info(`Products retrieved: ${products.length} products (page ${page}/${totalPages})`);
-    
+
+    logger.info(
+      `Products retrieved: ${products.length} products (page ${page}/${totalPages})`
+    );
+
     res.json({
       products,
       pagination: {
@@ -42,8 +47,8 @@ exports.getAllProducts = async (req, res) => {
         totalPages,
         totalCount,
         hasNext: page < totalPages,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     });
   } catch (err) {
     logger.error('Error getting products:', err);
@@ -182,7 +187,7 @@ exports.searchProducts = async (req, res) => {
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
       .populate('category');
-      
+
     logger.info(
       `Products searched: ${
         products.length

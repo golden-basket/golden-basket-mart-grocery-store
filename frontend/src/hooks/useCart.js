@@ -9,10 +9,17 @@ export const cartKeys = {
 
 // Get user's cart
 export const useCart = () => {
+  // Check if user is authenticated
+  const token = localStorage.getItem('token');
+  
   return useQuery({
     queryKey: cartKeys.user(),
     queryFn: ApiService.getCart,
     staleTime: 1 * 60 * 1000, // 1 minute
+    enabled: !!token, // Only fetch if user is authenticated
+    retry: false, // Don't retry on failure
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Don't refetch on mount if disabled
   });
 };
 

@@ -50,6 +50,33 @@ const loginValidation = [
     .withMessage('Password is required'),
 ];
 
+// Validation rules for creating users (admin only)
+const createUserValidation = [
+  body('firstName')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('First name must be between 2 and 50 characters')
+    .matches(/^[a-zA-Z\s]+$/)
+    .withMessage('First name can only contain letters and spaces'),
+  
+  body('lastName')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Last name must be between 2 and 50 characters')
+    .matches(/^[a-zA-Z\s]+$/)
+    .withMessage('Last name can only contain letters and spaces'),
+  
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email address'),
+  
+  body('role')
+    .optional()
+    .isIn(['user', 'admin'])
+    .withMessage('Role must be either "user" or "admin"'),
+];
+
 // Validation rules for product creation/update
 const productValidation = [
   body('name')
@@ -169,6 +196,7 @@ module.exports = {
   validateObjectId,
   registerValidation,
   loginValidation,
+  createUserValidation,
   productValidation,
   cartValidation,
   addressValidation,

@@ -37,11 +37,16 @@ const Cart = () => {
     setError('');
     ApiService.getCart()
       .then((res) => {
-        setCart(res.items || []);
+        if (res && Array.isArray(res.items)) {
+          setCart(res.items);
+        } else {
+          setCart([]);
+        }
         setLoading(false);
       })
       .catch((err) => {
         setError(`Failed to fetch cart: ${err.message}`);
+        setCart([]);
         setLoading(false);
       });
   };
@@ -54,7 +59,9 @@ const Cart = () => {
     const item = cart.find((item) => item.product._id === productId);
     if (!item) return;
     ApiService.updateCartItem(productId, item.quantity + 1)
-      .then((res) => setCart(res.items || []))
+      .then(() => {
+        fetchCart();
+      })
       .catch((err) => setError(err.message || 'Failed to update cart.'));
   };
 
@@ -63,20 +70,23 @@ const Cart = () => {
     if (!item) return;
     if (item.quantity === 1) return removeFromCart(productId);
     ApiService.updateCartItem(productId, item.quantity - 1)
-      .then((res) => setCart(res.items || []))
+      .then(() => {
+        fetchCart();
+      })
       .catch((err) => setError(err.message || 'Failed to update cart.'));
   };
 
   const removeFromCart = (productId) => {
     ApiService.removeFromCart(productId)
-      .then((res) => setCart(res.items || []))
+      .then(() => {
+        fetchCart();
+      })
       .catch((err) => setError(err.message || 'Failed to remove from cart.'));
   };
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const total = cart
+    .filter((item) => item && item.product && item.product.price)
+    .reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (
     <Box sx={{ mt: 1, px: { xs: 2, md: 5 }, pb: 4 }}>
@@ -211,9 +221,11 @@ const Cart = () => {
               </Box>
             ) : (
               <List>
-                {cart.map((item) => (
-                  <Box key={item.product._id}>
+                {cart
+                  .filter((item) => item && item.product && item.product._id)
+                  .map((item) => (
                     <ListItem
+                      key={item.product._id}
                       alignItems="flex-start"
                       sx={{
                         bgcolor:
@@ -341,8 +353,7 @@ const Cart = () => {
                         Subtotal: ₹{item.product.price * item.quantity}
                       </Typography>
                     </ListItem>
-                  </Box>
-                ))}
+                  ))}
               </List>
             )}
           </Grid>
@@ -380,23 +391,31 @@ const Cart = () => {
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Box sx={{ mb: 2 }}>
-                    {cart.map((item) => (
-                      <Box
-                        key={item.product._id}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          mb: 1,
-                        }}
-                      >
-                        <Typography sx={{ color: '#a3824c', fontWeight: 600 }}>
-                          {item.product.name} × {item.quantity}
-                        </Typography>
-                        <Typography sx={{ color: '#7d6033', fontWeight: 600 }}>
-                          ₹{item.product.price * item.quantity}
-                        </Typography>
-                      </Box>
-                    ))}
+                    {cart
+                      .filter(
+                        (item) => item && item.product && item.product._id
+                      )
+                      .map((item) => (
+                        <Box
+                          key={item.product._id}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 1,
+                          }}
+                        >
+                          <Typography
+                            sx={{ color: '#a3824c', fontWeight: 600 }}
+                          >
+                            {item.product.name} × {item.quantity}
+                          </Typography>
+                          <Typography
+                            sx={{ color: '#7d6033', fontWeight: 600 }}
+                          >
+                            ₹{item.product.price * item.quantity}
+                          </Typography>
+                        </Box>
+                      ))}
                   </Box>
                   <Divider />
                   <Box
