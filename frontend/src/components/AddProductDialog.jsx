@@ -8,6 +8,7 @@ import {
   Button,
   Alert,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import ApiService from '../services/api';
 import PropTypes from 'prop-types';
@@ -250,7 +251,7 @@ const AddProductDialog = ({ open, onClose, onSuccess }) => {
               },
             }}
           >
-            {loading ? 'Adding...' : 'Add Product'}
+            {loading ? <CircularProgress size={15} /> : 'Add Product'}
           </Button>
         </DialogActions>
       </form>

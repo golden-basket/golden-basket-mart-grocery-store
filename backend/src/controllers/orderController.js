@@ -27,7 +27,6 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     }
 
     // Validate that items have required product information
-    console.log('Validating order items:', order.items);
     for (const item of order.items) {
       if (
         !item.product ||
@@ -38,7 +37,6 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
         throw new Error(`Invalid item structure: ${JSON.stringify(item)}`);
       }
     }
-    console.log('Order items validation passed');
 
     // Ensure invoices directory exists
     const invoicesDir = path.resolve(__dirname, '../../public/invoices');
@@ -440,12 +438,11 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
       9
     );
 
-    console.log('PDF document content completed, ending document');
     doc.end();
 
     // Add timeout for PDF generation
     timeout = setTimeout(() => {
-      console.error('PDF generation timeout');
+      logger.error('PDF generation timeout');
       if (stream) {
         stream.destroy();
       }
@@ -456,38 +453,30 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     }, 30000); // 30 second timeout
 
     // Handle stream events
-    console.log('Setting up stream event handlers');
+
     stream.on('finish', () => {
-      console.log('Stream finish event triggered');
       clearTimeout(timeout);
       // Verify file was created
       if (fs.existsSync(filePath)) {
         const stats = fs.statSync(filePath);
-        console.log('File exists, size:', stats.size);
+
         if (stats.size > 0) {
           // Clean up the stream
           stream.destroy();
-          console.log(
-            'PDF generation successful, calling callback with filePath:',
-            filePath
-          );
+
           cb(filePath);
         } else {
           stream.destroy();
-          console.log('Generated PDF file is empty');
           cb(null, new Error('Generated PDF file is empty'));
         }
       } else {
         stream.destroy();
-        console.log('PDF file was not created');
         cb(null, new Error('PDF file was not created'));
       }
     });
 
     stream.on('error', (error) => {
-      console.log('Stream error event triggered:', error.message);
       clearTimeout(timeout);
-      console.error('Stream error during PDF generation:', error);
       // Clean up the stream
       stream.destroy();
       cb(null, error);
@@ -497,7 +486,6 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     if (doc) {
       doc.on('error', (error) => {
         clearTimeout(timeout);
-        console.error('PDF document error during generation:', error);
         if (stream) {
           stream.destroy();
         }
@@ -505,7 +493,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
       });
     }
   } catch (error) {
-    console.error('Error during PDF generation:', error);
+    logger.error('Error during PDF generation:', error);
     // Clean up resources
     if (timeout) {
       clearTimeout(timeout);
@@ -595,10 +583,6 @@ exports.placeOrder = async (req, res) => {
       'items.product'
     );
 
-    // Generate and store PDF
-    console.log('Starting PDF generation for invoice:', invoice._id);
-    console.log('Order items for PDF:', populatedOrder.items);
-
     generateInvoicePDF(
       invoice,
       populatedOrder,
@@ -606,7 +590,7 @@ exports.placeOrder = async (req, res) => {
       shippingAddress,
       async (filePath, error) => {
         if (error) {
-          console.error('PDF generation failed:', error);
+          logger.error('PDF generation failed:', error);
           // Still create the order but without PDF
           res.status(201).json({
             order,
@@ -617,7 +601,6 @@ exports.placeOrder = async (req, res) => {
         }
 
         try {
-          console.log('PDF generated successfully, saving to:', filePath);
           invoice.pdfPath = filePath;
           await invoice.save();
           // Clear cart
@@ -625,7 +608,6 @@ exports.placeOrder = async (req, res) => {
           await cart.save();
           res.status(201).json({ order, invoice });
         } catch (saveError) {
-          console.error('Error saving invoice or clearing cart:', saveError);
           res.status(201).json({
             order,
             invoice,
@@ -730,6 +712,278 @@ exports.getUserInvoices = async (req, res) => {
       'order'
     );
     res.json(invoices);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get user order statistics
+exports.getUserOrderStats = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Get user's orders with populated product details
+    const orders = await Order.find({ user: userId })
+      .populate({
+        path: 'items.product',
+        select: 'name category price',
+        populate: {
+          path: 'category',
+          select: 'name',
+        },
+      })
+      .lean();
+
+    // Calculate statistics
+    const totalOrders = orders.length;
+    const totalSpent = orders.reduce(
+      (sum, order) => sum + (order.totalAmount || 0),
+      0
+    );
+
+    // Get top category from orders
+    const categoryCounts = {};
+    orders.forEach((order) => {
+      order.items?.forEach((item) => {
+        if (item.product?.category?.name) {
+          const categoryName = item.product.category.name;
+          categoryCounts[categoryName] =
+            (categoryCounts[categoryName] || 0) + 1;
+        }
+      });
+    });
+
+    const topCategory =
+      Object.keys(categoryCounts).length > 0
+        ? Object.keys(categoryCounts).reduce((a, b) =>
+            categoryCounts[a] > categoryCounts[b] ? a : b
+          )
+        : 'None';
+
+    res.json({
+      totalOrders,
+      totalSpent,
+      topCategory,
+      averageOrderValue: totalOrders > 0 ? totalSpent / totalOrders : 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update order status (admin only)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { orderStatus, trackingNumber, trackingUrl, notes } = req.body;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Update order status
+    if (orderStatus) {
+      order.orderStatus = orderStatus;
+    }
+
+    // Add tracking information
+    if (trackingNumber || trackingUrl) {
+      if (!order.tracking) {
+        order.tracking = {};
+      }
+      if (trackingNumber) order.tracking.number = trackingNumber;
+      if (trackingUrl) order.tracking.url = trackingUrl;
+    }
+
+    // Add admin notes
+    if (notes) {
+      if (!order.adminNotes) {
+        order.adminNotes = [];
+      }
+      order.adminNotes.push({
+        note: notes,
+        timestamp: new Date(),
+        adminId: req.user.userId,
+      });
+    }
+
+    await order.save();
+
+    // Populate order details for response
+    const updatedOrder = await Order.findById(orderId).populate(
+      'user items.product invoice shippingAddress'
+    );
+
+    res.json({
+      message: 'Order updated successfully',
+      order: updatedOrder,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update payment status (admin only)
+exports.updatePaymentStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { paymentStatus, paymentMethod, transactionId } = req.body;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Update payment status
+    if (paymentStatus) {
+      order.paymentStatus = paymentStatus;
+    }
+
+    // Update payment method if provided
+    if (paymentMethod) {
+      order.paymentMode = paymentMethod;
+    }
+
+    // Add transaction ID if provided
+    if (transactionId) {
+      order.transactionId = transactionId;
+    }
+
+    await order.save();
+
+    // Populate order details for response
+    const updatedOrder = await Order.findById(orderId).populate(
+      'user items.product invoice shippingAddress'
+    );
+
+    res.json({
+      message: 'Payment status updated successfully',
+      order: updatedOrder,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get order statistics for admin dashboard
+exports.getOrderStats = async (req, res) => {
+  try {
+    const totalOrders = await Order.countDocuments();
+    const pendingOrders = await Order.countDocuments({
+      orderStatus: 'processing',
+    });
+    const shippedOrders = await Order.countDocuments({
+      orderStatus: 'shipped',
+    });
+    const deliveredOrders = await Order.countDocuments({
+      orderStatus: 'delivered',
+    });
+    const cancelledOrders = await Order.countDocuments({
+      orderStatus: 'cancelled',
+    });
+
+    const pendingPayments = await Order.countDocuments({
+      paymentStatus: 'pending',
+    });
+    const paidOrders = await Order.countDocuments({ paymentStatus: 'paid' });
+    const failedPayments = await Order.countDocuments({
+      paymentStatus: 'failed',
+    });
+
+    // Calculate total revenue
+    const revenueData = await Order.aggregate([
+      { $match: { paymentStatus: 'paid' } },
+      { $group: { _id: null, totalRevenue: { $sum: '$totalAmount' } } },
+    ]);
+    const totalRevenue =
+      revenueData.length > 0 ? revenueData[0].totalRevenue : 0;
+
+    // Get recent orders (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentOrders = await Order.countDocuments({
+      createdAt: { $gte: sevenDaysAgo },
+    });
+
+    // Get orders by payment method
+    const paymentMethodStats = await Order.aggregate([
+      { $group: { _id: '$paymentMode', count: { $sum: 1 } } },
+    ]);
+
+    res.json({
+      totalOrders,
+      pendingOrders,
+      shippedOrders,
+      deliveredOrders,
+      cancelledOrders,
+      pendingPayments,
+      paidOrders,
+      failedPayments,
+      totalRevenue,
+      recentOrders,
+      paymentMethodStats,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get orders with filters and pagination (admin)
+exports.getOrdersWithFilters = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      paymentStatus,
+      paymentMethod,
+      startDate,
+      endDate,
+      search,
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    const filter = {};
+
+    // Apply filters
+    if (status) filter.orderStatus = status;
+    if (paymentStatus) filter.paymentStatus = paymentStatus;
+    if (paymentMethod) filter.paymentMode = paymentMethod;
+
+    // Date range filter
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
+    }
+
+    // Search filter (search in user email or order ID)
+    if (search) {
+      filter.$or = [{ _id: { $regex: search, $options: 'i' } }];
+    }
+
+    const orders = await Order.find(filter)
+      .populate('user', 'firstName lastName email')
+      .populate('items.product', 'name price images')
+      .populate('invoice')
+      .populate('shippingAddress')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Order.countDocuments(filter);
+
+    res.json({
+      orders,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalOrders: total,
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

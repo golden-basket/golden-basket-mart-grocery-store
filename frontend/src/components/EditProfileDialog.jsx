@@ -6,7 +6,7 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
+  CircularProgress,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -14,10 +14,9 @@ import {
   Person as PersonIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
-  LocationOn as LocationIcon,
 } from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
 import { useAuth } from '../hooks/useAuth';
-import Loading from './Loading';
 
 const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
   const { updateProfile } = useAuth();
@@ -41,7 +40,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
       });
       setErrors({});
     }
-  }, [user?.id, open]); // Only reset when user ID changes or dialog opens
+  }, [user, open]); // Reset when user changes or dialog opens
 
   // Don't render if user is not available
   if (!user) {
@@ -192,7 +191,13 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
       <form onSubmit={handleSubmit}>
         <DialogContent sx={{ pt: 4, pb: 2 }}>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={6}>
+            <Grid
+              item
+              span={{
+                xs: 12,
+                sm: 6,
+              }}
+            >
               <TextField
                 fullWidth
                 label="First Name"
@@ -218,7 +223,13 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              item
+              span={{
+                xs: 12,
+                sm: 6,
+              }}
+            >
               <TextField
                 fullWidth
                 label="Last Name"
@@ -244,7 +255,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item span={12}>
               <TextField
                 fullWidth
                 label="Email"
@@ -271,7 +282,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item span={12}>
               <TextField
                 fullWidth
                 label="Phone"
@@ -332,7 +343,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
             variant="contained"
             startIcon={
               isSubmitting ? (
-                <Loading />
+                <CircularProgress size={15} />
               ) : (
                 <SaveIcon sx={{ fontSize: '1.25rem' }} />
               )

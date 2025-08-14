@@ -37,14 +37,37 @@ app.use(compression({
 }));
 
 // CORS configuration
+const corsOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.CORS_ORIGIN].filter(Boolean)
+  : [
+      process.env.CORS_ORIGIN,
+      'http://localhost:5173', // Vite dev server
+      'http://localhost:3000', // Backend server
+      'http://127.0.0.1:5173', // Alternative localhost
+      'http://127.0.0.1:3000'  // Alternative localhost
+    ].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: corsOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type', 
+      'Authorization', 
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Cache-Control',
+      'X-File-Name'
+    ],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    maxAge: 86400 // 24 hours
   })
 );
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Body parsing middleware with optimized limits
 app.use(express.json({ 
@@ -71,8 +94,10 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000/api',
-        description: 'Development server',
+        url: process.env.NODE_ENV === 'production' 
+          ? `${process.env.CORS_ORIGIN}/api`
+          : 'http://localhost:3000/api',
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
       },
     ],
     components: {

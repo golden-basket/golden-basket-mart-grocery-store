@@ -23,7 +23,7 @@ exports.getAllProducts = async (req, res) => {
     if (req.query.inStock === 'true') query.stock = { $gt: 0 };
 
     // Execute queries in parallel for better performance
-    const [products, totalCount] = await Promise.all([
+    const [products, filteredCount, totalCount] = await Promise.all([
       Product.find(query)
         .select(selectFields)
         .populate('category', 'name')
@@ -31,10 +31,11 @@ exports.getAllProducts = async (req, res) => {
         .skip(skip)
         .limit(limit)
         .lean(), // Use lean() for better performance when not needing Mongoose documents
-      Product.countDocuments(query),
+      Product.countDocuments(query), // Count of products matching current filters
+      Product.countDocuments({}), // Total count of all products in database
     ]);
 
-    const totalPages = Math.ceil(totalCount / limit);
+    const totalPages = Math.ceil(filteredCount / limit);
 
     logger.info(
       `Products retrieved: ${products.length} products (page ${page}/${totalPages})`
@@ -45,7 +46,8 @@ exports.getAllProducts = async (req, res) => {
       pagination: {
         currentPage: page,
         totalPages,
-        totalCount,
+        totalCount, // Total products in database
+        filteredCount, // Products matching current filters
         hasNext: page < totalPages,
         hasPrev: page > 1,
       },

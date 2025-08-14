@@ -1,14 +1,16 @@
 import axios from 'axios';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -28,8 +30,16 @@ apiClient.interceptors.request.use(
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response;
+  },
   (error) => {
+    console.error(
+      'API error:',
+      error.config?.url,
+      error.response?.status,
+      error.response?.data
+    );
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('token');
@@ -174,8 +184,35 @@ class ApiService {
     return this.request('/orders');
   }
 
+  static async getUserOrderStats() {
+    return this.request('/orders/stats');
+  }
+
   static async getAllOrders() {
     return this.request('/orders/all');
+  }
+
+  static async getFilteredOrders(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/orders/filtered?${queryString}`);
+  }
+
+  static async getOrderStats() {
+    return this.request('/orders/stats/admin');
+  }
+
+  static async updateOrderStatus(orderId, statusData) {
+    return this.request(`/orders/${orderId}/status`, {
+      method: 'PUT',
+      data: statusData,
+    });
+  }
+
+  static async updatePaymentStatus(orderId, paymentData) {
+    return this.request(`/orders/${orderId}/payment`, {
+      method: 'PUT',
+      data: paymentData,
+    });
   }
 
   static async getUserInvoices() {
@@ -191,7 +228,8 @@ class ApiService {
       });
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.error || 'Failed to download invoice';
+      const message =
+        error.response?.data?.error || 'Failed to download invoice';
       throw new Error(message);
     }
   }

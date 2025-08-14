@@ -15,6 +15,7 @@ const {
   createUserValidation,
   productValidation,
   cartValidation,
+  cartRemoveValidation,
   addressValidation,
   orderValidation,
   handleValidationErrors,
@@ -122,6 +123,103 @@ router.post(
  *         description: Invalid or expired token
  */
 router.get('/auth/verify/:token', authController.verifyEmail);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       400:
+ *         description: Validation error
+ */
+router.post('/auth/forgot-password', authLimiter, authController.forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid token or validation error
+ */
+router.post('/auth/reset-password', authLimiter, authController.resetPassword);
+
+/**
+ * @swagger
+ * /auth/resend-verification:
+ *   post:
+ *     summary: Resend email verification
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ *       400:
+ *         description: Validation error
+ */
+router.post('/auth/resend-verification', authLimiter, authController.resendVerification);
+
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/auth/logout', auth, authController.logout);
 
 // Cart routes
 /**
@@ -242,7 +340,13 @@ router.put(
  *       400:
  *         description: Validation error
  */
-router.delete('/cart/remove', auth, cartController.removeFromCart);
+router.delete(
+  '/cart/remove',
+  auth,
+  cartRemoveValidation,
+  handleValidationErrors,
+  cartController.removeFromCart
+);
 
 /**
  * @swagger
@@ -309,6 +413,37 @@ router.get('/orders', auth, orderController.getUserOrders);
 
 /**
  * @swagger
+ * /orders/stats:
+ *   get:
+ *     summary: Get user's order statistics
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalOrders:
+ *                   type: number
+ *                   description: Total number of orders
+ *                 totalSpent:
+ *                   type: number
+ *                   description: Total amount spent on orders
+ *                 topCategory:
+ *                   type: string
+ *                   description: Most frequently ordered category
+ *                 averageOrderValue:
+ *                   type: number
+ *                   description: Average order value
+ */
+router.get('/orders/stats', auth, orderController.getUserOrderStats);
+
+/**
+ * @swagger
  * /orders/all:
  *   get:
  *     summary: Get all orders (admin only)
@@ -322,6 +457,182 @@ router.get('/orders', auth, orderController.getUserOrders);
  *         description: Admin access required
  */
 router.get('/orders/all', auth, admin, orderController.getAllOrders);
+
+/**
+ * @swagger
+ * /orders/filtered:
+ *   get:
+ *     summary: Get orders with filters and pagination (admin only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of orders per page
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [processing, shipped, delivered, cancelled]
+ *         description: Filter by order status
+ *       - in: query
+ *         name: paymentStatus
+ *         schema:
+ *           type: string
+ *           enum: [pending, paid, failed]
+ *         description: Filter by payment status
+ *       - in: query
+ *         name: paymentMethod
+ *         schema:
+ *           type: string
+ *           enum: [card, paypal, upi, cod, net_banking]
+ *         description: Filter by payment method
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for filtering
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date for filtering
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by order ID
+ *     responses:
+ *       200:
+ *         description: Filtered orders retrieved successfully
+ *       403:
+ *         description: Admin access required
+ */
+router.get(
+  '/orders/filtered',
+  auth,
+  admin,
+  orderController.getOrdersWithFilters
+);
+
+/**
+ * @swagger
+ * /orders/stats/admin:
+ *   get:
+ *     summary: Get order statistics for admin dashboard
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order statistics retrieved successfully
+ *       403:
+ *         description: Admin access required
+ */
+router.get('/orders/stats/admin', auth, admin, orderController.getOrderStats);
+
+/**
+ * @swagger
+ * /orders/{orderId}/status:
+ *   put:
+ *     summary: Update order status and tracking (admin only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orderStatus:
+ *                 type: string
+ *                 enum: [processing, shipped, delivered, cancelled]
+ *               trackingNumber:
+ *                 type: string
+ *               trackingUrl:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Order status updated successfully
+ *       404:
+ *         description: Order not found
+ *       403:
+ *         description: Admin access required
+ */
+router.put(
+  '/orders/:orderId/status',
+  auth,
+  admin,
+  orderController.updateOrderStatus
+);
+
+/**
+ * @swagger
+ * /orders/{orderId}/payment:
+ *   put:
+ *     summary: Update payment status (admin only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: mongoId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               paymentStatus:
+ *                 type: string
+ *                 enum: [pending, paid, failed]
+ *               paymentMethod:
+ *                 type: string
+ *                 enum: [card, paypal, upi, cod, net_banking]
+ *               transactionId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Payment status updated successfully
+ *       404:
+ *         description: Order not found
+ *       403:
+ *         description: Admin access required
+ */
+router.put(
+  '/orders/:orderId/payment',
+  auth,
+  admin,
+  orderController.updatePaymentStatus
+);
 
 // Invoices routes
 /**
@@ -966,7 +1277,12 @@ router.patch('/users/:id/role', auth, admin, authController.changeUserRole);
  *       403:
  *         description: Admin access required
  */
-router.patch('/users/:id/invite', auth, admin, authController.sendInvitationEmail);
+router.patch(
+  '/users/:id/invite',
+  auth,
+  admin,
+  authController.sendInvitationEmail
+);
 
 /**
  * @swagger
@@ -1283,7 +1599,12 @@ router.get('/categories', categoryController.getCategories);
  *       400:
  *         description: Validation error
  */
-router.post('/categories', auth, admin, categoryController.createOrUpdateCategory);
+router.post(
+  '/categories',
+  auth,
+  admin,
+  categoryController.createOrUpdateCategory
+);
 
 /**
  * @swagger

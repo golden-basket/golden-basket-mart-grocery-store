@@ -30,7 +30,10 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "compression": "^1.7.4",
-    "express-validator": "^7.0.1"
+    "express-validator": "^7.0.1",
+    "redis": "^4.6.7",
+    "rate-limit-redis": "^4.2.0",
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

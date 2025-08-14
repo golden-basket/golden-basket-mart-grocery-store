@@ -4,11 +4,8 @@ import PropTypes from 'prop-types';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 
 const ErrorFallback = ({ error, resetErrorBoundary }) => {
-  const { 
-    isFoldable, 
-    getFoldableClasses, 
-    getResponsiveValue 
-  } = useFoldableDisplay();
+  const { isFoldable, getFoldableClasses, getResponsiveValue } =
+    useFoldableDisplay();
 
   return (
     <Box
@@ -24,22 +21,37 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
         transition: 'all 0.3s ease',
       }}
     >
-      <Alert 
-        severity="error" 
-        sx={{ 
-          mb: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined), 
-          maxWidth: getResponsiveValue(500, 550, 600, isFoldable ? 525 : undefined),
-          borderRadius: getResponsiveValue(8, 12, 16, isFoldable ? 10 : undefined),
+      <Alert
+        severity="error"
+        sx={{
+          mb: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined),
+          maxWidth: getResponsiveValue(
+            500,
+            550,
+            600,
+            isFoldable ? 525 : undefined
+          ),
+          borderRadius: getResponsiveValue(
+            8,
+            12,
+            16,
+            isFoldable ? 10 : undefined
+          ),
           '& .MuiAlert-message': {
             width: '100%',
-          }
+          },
         }}
       >
-        <Typography 
-          variant={getResponsiveValue("h6", "h5", "h4", isFoldable ? "h5" : undefined)} 
+        <Typography
+          variant={getResponsiveValue(
+            'h6',
+            'h5',
+            'h4',
+            isFoldable ? 'h5' : undefined
+          )}
           gutterBottom
           sx={{
-            fontSize: isFoldable 
+            fontSize: isFoldable
               ? 'clamp(1.125rem, 3.5vw, 1.375rem)'
               : getResponsiveValue('1.25rem', '1.5rem', '1.75rem', undefined),
             fontWeight: 600,
@@ -49,12 +61,12 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
         >
           Something went wrong
         </Typography>
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
-          sx={{ 
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
             mb: getResponsiveValue(1.5, 2, 2.5, isFoldable ? 1.75 : undefined),
-            fontSize: isFoldable 
+            fontSize: isFoldable
               ? 'clamp(0.875rem, 2.5vw, 1rem)'
               : getResponsiveValue('0.875rem', '1rem', '1.125rem', undefined),
             lineHeight: 1.5,
@@ -72,17 +84,34 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
               'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
             textTransform: 'none',
             color: '#fff',
-            fontSize: getResponsiveValue('0.875rem', '1rem', '1.125rem', isFoldable ? '0.95rem' : undefined),
+            fontSize: getResponsiveValue(
+              '0.875rem',
+              '1rem',
+              '1.125rem',
+              isFoldable ? '0.95rem' : undefined
+            ),
             minHeight: isFoldable ? '48px' : 'auto',
             px: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined),
-            py: getResponsiveValue(1, 1.25, 1.5, isFoldable ? 1.125 : undefined),
-            borderRadius: getResponsiveValue(6, 8, 10, isFoldable ? 7 : undefined),
+            py: getResponsiveValue(
+              1,
+              1.25,
+              1.5,
+              isFoldable ? 1.125 : undefined
+            ),
+            borderRadius: getResponsiveValue(
+              6,
+              8,
+              10,
+              isFoldable ? 7 : undefined
+            ),
             transition: 'all 0.2s ease',
             '&:hover': {
               background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
               color: '#000',
               transform: isFoldable ? 'scale(1.02)' : 'none',
-              boxShadow: isFoldable ? '0 4px 12px rgba(163, 130, 76, 0.3)' : '0 4px 12px rgba(163, 130, 76, 0.3)',
+              boxShadow: isFoldable
+                ? '0 4px 12px rgba(163, 130, 76, 0.3)'
+                : '0 4px 12px rgba(163, 130, 76, 0.3)',
             },
           }}
         >
@@ -100,7 +129,8 @@ const ErrorBoundary = ({ children }) => {
       onError={(error, errorInfo) => {
         // Log error to console in development
         if (import.meta.env.DEV) {
-          console.error('Error caught by boundary:', error, errorInfo);
+          console.error('Error caught by ErrorBoundary:', error);
+          console.error('Error info:', errorInfo);
         }
         // In production, you could send this to an error reporting service
         // like Sentry, LogRocket, etc.

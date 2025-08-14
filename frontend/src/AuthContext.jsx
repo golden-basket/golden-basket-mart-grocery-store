@@ -1,9 +1,8 @@
 // AuthProvider.js
-import React, { createContext, useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import ApiService from './services/api';
-
-export const AuthContext = createContext();
+import { AuthContext } from './contexts/AuthContext';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

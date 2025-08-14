@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   Container,
-  Grid,
   Link,
   TextField,
   Button,
@@ -11,6 +10,7 @@ import {
   Stack,
   Tooltip,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -18,6 +18,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import InstagramIcon from '@mui/icons-material/Instagram';
+// TODO: Add LinkedIn, YouTube, WhatsApp, Telegram icons. Currently not used.
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -28,7 +29,24 @@ import SecurityIcon from '@mui/icons-material/Security';
 import EnergySavingsLeafIcon from '@mui/icons-material/EnergySavingsLeaf';
 import SupportIcon from '@mui/icons-material/Support';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import ImageWithFallback from './ImageWithFallback';
 import logo from '../assets/golden-basket-rounded.png';
+import HomeIcon from '@mui/icons-material/Home';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import SpaIcon from '@mui/icons-material/Spa';
+import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
+import EmojiFoodBeverageIcon from '@mui/icons-material/EmojiFoodBeverage';
+import ShareLocationIcon from '@mui/icons-material/ShareLocation';
+import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
+import LiveHelpIcon from '@mui/icons-material/LiveHelp';
+import LocationPinIcon from '@mui/icons-material/LocationPin';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import InfoIcon from '@mui/icons-material/Info';
+import WorkIcon from '@mui/icons-material/Work';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import RecyclingIcon from '@mui/icons-material/Recycling';
+import GavelIcon from '@mui/icons-material/Gavel';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const Footer = () => {
   const {
@@ -67,30 +85,34 @@ const Footer = () => {
   ];
 
   const quickLinks = [
-    { text: 'Home', href: '/', icon: '🏠' },
-    { text: 'Catalogue', href: '/catalogue', icon: '🛍️' },
-    { text: 'Special Offers', href: '/offers', icon: '🎉' },
-    { text: 'Fresh Produce', href: '/category/fresh-produce', icon: '🥬' },
-    { text: 'Dairy & Eggs', href: '/category/dairy', icon: '🥛' },
-    { text: 'Beverages', href: '/category/beverages', icon: '🥤' },
+    { text: 'Home', href: '/', icon: HomeIcon },
+    { text: 'Catalogue', href: '/catalogue', icon: LocalOfferIcon },
+    { text: 'Special Offers', href: '/offers', icon: CelebrationIcon },
+    { text: 'Fresh Produce', href: '/category/fresh-produce', icon: SpaIcon },
+    { text: 'Dairy', href: '/category/dairy', icon: LocalDrinkIcon },
+    {
+      text: 'Beverages',
+      href: '/category/beverages',
+      icon: EmojiFoodBeverageIcon,
+    },
   ];
 
   const customerService = [
-    { text: 'Track Order', href: '/track-order', icon: '📦' },
-    { text: 'Return Policy', href: '/returns', icon: '↩️' },
-    { text: 'FAQ', href: '/faq', icon: '❓' },
-    { text: 'Contact Support', href: '/support', icon: '📞' },
-    { text: 'Store Locator', href: '/stores', icon: '📍' },
-    { text: 'Gift Cards', href: '/gift-cards', icon: '🎁' },
+    { text: 'Track Order', href: '/track-order', icon: ShareLocationIcon },
+    { text: 'Return Policy', href: '/returns', icon: KeyboardReturnIcon },
+    { text: 'FAQ', href: '/faq', icon: LiveHelpIcon },
+    { text: 'Contact Support', href: '/support', icon: PhoneIcon },
+    { text: 'Store Locator', href: '/stores', icon: LocationPinIcon },
+    { text: 'Gift Cards', href: '/gift-cards', icon: CardGiftcardIcon },
   ];
 
   const companyInfo = [
-    { text: 'About Us', href: '/about', icon: '🏢' },
-    { text: 'Careers', href: '/careers', icon: '💼' },
-    { text: 'Press & Media', href: '/press', icon: '📰' },
-    { text: 'Sustainability', href: '/sustainability', icon: '🌱' },
-    { text: 'Privacy Policy', href: '/privacy', icon: '🔒' },
-    { text: 'Terms of Service', href: '/terms', icon: '📋' },
+    { text: 'About Us', href: '/about', icon: InfoIcon },
+    { text: 'Careers', href: '/careers', icon: WorkIcon },
+    { text: 'Press & Media', href: '/press', icon: NewspaperIcon },
+    { text: 'Sustainability', href: '/sustainability', icon: RecyclingIcon },
+    { text: 'Privacy Policy', href: '/privacy', icon: SecurityIcon },
+    { text: 'Terms of Service', href: '/terms', icon: GavelIcon },
   ];
 
   const features = [
@@ -115,17 +137,17 @@ const Footer = () => {
       className={`${getFoldableClasses()} ${getResponsiveSpacingClasses()}`}
       sx={{
         background:
-          'linear-gradient(135deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
-        color: '#e6d897',
-        py: getResponsiveValue(4, 5, 6, isFoldable ? 4.5 : undefined),
-        mt: getResponsiveValue(4, 6, 8, isFoldable ? 5 : undefined),
-        borderTop: '3px solid #a3824c',
+          'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 50%, var(--color-cream-light) 100%)',
+        color: 'var(--color-text-primary)',
+        py: getResponsiveValue(3, 4, 5, isFoldable ? 3.5 : undefined),
+        mt: getResponsiveValue(3, 4, 6, isFoldable ? 4 : undefined),
+        borderTop: '3px solid var(--color-primary)',
         transition: 'all 0.3s ease',
         position: 'relative',
         '&:hover': {
           background: isFoldable
-            ? 'linear-gradient(135deg, #1a1a1a 0%, #4a3518 50%, #1a1a1a 100%)'
-            : 'linear-gradient(135deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
+            ? 'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-primary-light) 50%, var(--color-cream-light) 100%)'
+            : 'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 50%, var(--color-cream-light) 100%)',
         },
         '&::before': {
           content: '""',
@@ -135,7 +157,7 @@ const Footer = () => {
           right: 0,
           height: '1px',
           background:
-            'linear-gradient(90deg, transparent 0%, #e6d897 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, var(--color-primary) 50%, transparent 100%)',
           opacity: 0.3,
         },
       }}
@@ -144,28 +166,37 @@ const Footer = () => {
       <Container maxWidth="xl">
         <Grid
           container
-          spacing={getResponsiveValue(3, 4, 5, isFoldable ? 3.5 : undefined)}
+          spacing={getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined)}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            px: { xs: 2, sm: 3, md: 4 },
+            py: { xs: 2, sm: 3, md: 4 },
+          }}
         >
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={12} md={12}>
             <Box
               sx={{
-                textAlign: { xs: 'center', sm: 'left' },
+                textAlign: 'center',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
+                alignItems: 'center',
+                p: { xs: 2, sm: 1.5, md: 2 },
+                mb: { xs: 3, sm: 0 },
               }}
             >
               <Box
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: { xs: 'center', sm: 'flex-start' },
+                  justifyContent: 'center',
                   mb: getResponsiveValue(
+                    1.5,
                     2,
                     2.5,
-                    3,
-                    isFoldable ? 2.5 : undefined
+                    isFoldable ? 2 : undefined
                   ),
                   transition: 'transform 0.2s ease',
                   '&:hover': {
@@ -177,78 +208,83 @@ const Footer = () => {
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: { xs: 'center', sm: 'flex-start' },
+                    justifyContent: 'center',
                   }}
                 >
-                  <Box
-                    component="img"
-                    src={logo}
-                    alt="Golden Basket Mart"
-                    style={{
-                      height: isFoldable
-                        ? 50
-                        : isMobile
-                        ? 40
-                        : isTablet
-                        ? 44
-                        : 48,
-                      width: 'auto',
-                      marginRight: getResponsiveValue(
-                        1,
-                        1.5,
-                        2,
-                        isFoldable ? 1.5 : undefined
-                      ),
-                      transition: 'all 0.2s ease',
-                    }}
-                  />
-                  <Typography
-                    variant={getResponsiveValue(
-                      'h6',
-                      'h5',
-                      'h5',
-                      isFoldable ? 'h5' : undefined
-                    )}
-                    sx={{
-                      ml: 1,
-                      fontWeight: 700,
-                      background:
-                        'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      fontSize: isFoldable
-                        ? 'clamp(1.125rem, 3.5vw, 1.375rem)'
-                        : {
-                            xs: 'clamp(1.25rem, 4vw, 1.5rem)',
-                            sm: 'clamp(1.5rem, 3.5vw, 1.75rem)',
-                          },
-                      transition: 'all 0.2s ease',
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Golden Basket Mart
-                  </Typography>
+                  <Stack direction="column" spacing={1} alignItems="center">
+                    <ImageWithFallback
+                      src={logo}
+                      alt="Golden Basket Mart"
+                      fallbackText="Golden Basket"
+                      sx={{
+                        height: isFoldable
+                          ? 50
+                          : isMobile
+                          ? 40
+                          : isTablet
+                          ? 44
+                          : 48,
+                        width: isFoldable
+                          ? 50
+                          : isMobile
+                          ? 40
+                          : isTablet
+                          ? 44
+                          : 48,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        transition: 'all 0.2s ease',
+                      }}
+                    />
+                    <Typography
+                      variant={getResponsiveValue(
+                        'h6',
+                        'h5',
+                        'h5',
+                        isFoldable ? 'h5' : undefined
+                      )}
+                      sx={{
+                        fontWeight: 700,
+                        background:
+                          'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontSize: isFoldable
+                          ? 'clamp(1rem, 3vw, 1.25rem)'
+                          : {
+                              xs: 'clamp(1.125rem, 3.5vw, 1.375rem)',
+                              sm: 'clamp(1.25rem, 3vw, 1.5rem)',
+                            },
+                        transition: 'all 0.2s ease',
+                        lineHeight: 1.2,
+                        textAlign: 'center',
+                      }}
+                    >
+                      Golden Basket Mart
+                    </Typography>
+                  </Stack>
                 </Box>
               </Box>
               <Typography
                 variant="body2"
                 sx={{
-                  color: '#c1b17a',
+                  color: 'var(--color-text-secondary)',
                   lineHeight: 1.6,
                   fontSize: isFoldable
-                    ? 'clamp(0.7rem, 2vw, 0.8rem)'
+                    ? 'clamp(0.75rem, 2.2vw, 0.875rem)'
                     : {
-                        xs: 'clamp(0.75rem, 2.2vw, 0.875rem)',
-                        sm: 'clamp(0.875rem, 1.8vw, 1rem)',
+                        xs: 'clamp(0.875rem, 2.5vw, 1rem)',
+                        sm: 'clamp(1rem, 2vw, 1.125rem)',
                       },
                   transition: 'color 0.2s ease',
                   mb: getResponsiveValue(
+                    1.5,
                     2,
                     2.5,
-                    3,
-                    isFoldable ? 2.5 : undefined
+                    isFoldable ? 2 : undefined
                   ),
-                  textAlign: { xs: 'center', sm: 'left' },
+                  textAlign: 'center',
+                  maxWidth: { xs: '100%', sm: '80%', md: '60%' },
                 }}
               >
                 Your trusted source for fresh groceries, dairy products, and
@@ -263,26 +299,27 @@ const Footer = () => {
         {/* Features Section - Top */}
         <Box
           sx={{
-            mb: getResponsiveValue(4, 5, 6, isFoldable ? 4.5 : undefined),
-            p: getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined),
+            mb: { xs: 4, sm: 3, md: 5 },
+            p: { xs: 3, sm: 2, md: 3 },
+            mx: { xs: 2, sm: 3, md: 4 },
             background:
-              'linear-gradient(135deg, rgba(163, 130, 76, 0.1) 0%, rgba(230, 216, 151, 0.05) 100%)',
-            borderRadius: isMobile ? 2 : isTablet ? 3 : isFoldable ? 2.5 : 4,
-            border: '1px solid rgba(163, 130, 76, 0.2)',
+              'linear-gradient(135deg, rgba(163, 130, 76, 0.08) 0%, rgba(230, 216, 151, 0.03) 100%)',
+            borderRadius: { xs: 2, sm: 2, md: 3 },
+            border: '1px solid rgba(163, 130, 76, 0.15)',
           }}
         >
           <Grid
             container
-            spacing={getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined)}
+            spacing={getResponsiveValue(1.5, 2, 3, isFoldable ? 2 : undefined)}
             sx={{
               display: 'flex',
               flexDirection: 'row',
-              rowWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'space-between',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
+              alignItems: 'center',
               alignContent: 'center',
-              gap: 2,
-              p: 2,
+              gap: getResponsiveValue(1, 1.5, 2, isFoldable ? 1.5 : undefined),
+              p: getResponsiveValue(1, 1.5, 2, isFoldable ? 1.5 : undefined),
             }}
           >
             {features.map((feature, index) => (
@@ -290,12 +327,8 @@ const Footer = () => {
                 <Box
                   sx={{
                     textAlign: 'center',
-                    p: getResponsiveValue(
-                      1.5,
-                      2,
-                      2.5,
-                      isFoldable ? 2 : undefined
-                    ),
+                    p: { xs: 2, sm: 1.5, md: 2 },
+                    mb: { xs: 2, sm: 0 },
                     transition: 'all 0.3s ease',
                     height: '100%',
                     display: 'flex',
@@ -309,34 +342,34 @@ const Footer = () => {
                     },
                   }}
                 >
-                  <feature.icon
-                    sx={{
+                  {React.createElement(feature.icon, {
+                    sx: {
                       fontSize: getResponsiveValue(
+                        24,
                         28,
                         32,
-                        36,
-                        isFoldable ? 30 : undefined
+                        isFoldable ? 26 : undefined
                       ),
-                      color: '#e6d897',
+                      color: 'var(--color-primary)',
                       mb: getResponsiveValue(
+                        0.75,
                         1,
                         1.5,
-                        2,
-                        isFoldable ? 1.5 : undefined
+                        isFoldable ? 1 : undefined
                       ),
                       transition: 'color 0.2s ease',
-                    }}
-                  />
+                    },
+                  })}
                   <Typography
                     variant="body2"
                     sx={{
                       fontWeight: 600,
-                      color: '#e6d897',
+                      color: 'var(--color-text-primary)',
                       fontSize: isFoldable
-                        ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                        ? 'clamp(0.75rem, 2vw, 0.875rem)'
                         : {
-                            xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                            sm: 'clamp(1rem, 2vw, 1.125rem)',
+                            xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                            sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                           },
                       mb: getResponsiveValue(
                         0.5,
@@ -353,7 +386,7 @@ const Footer = () => {
                   <Typography
                     variant="caption"
                     sx={{
-                      color: '#c1b17a',
+                      color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
                         ? 'clamp(0.7rem, 1.8vw, 0.8rem)'
                         : {
@@ -375,20 +408,21 @@ const Footer = () => {
         {/* Main Footer Content */}
         <Grid
           container
-          spacing={getResponsiveValue(3, 4, 6, isFoldable ? 3.5 : undefined)}
+          spacing={{ xs: 3, sm: 3, md: 4 }}
           sx={{
             display: 'flex',
             flexDirection: 'row',
-            rowWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'space-between',
-            alignContent: 'center',
-            gap: 2,
-            p: 2,
+            flexWrap: 'wrap',
+            justifyContent: 'space-around',
+            alignItems: 'flex-start',
+            alignContent: 'flex-start',
+            gap: { xs: 3, sm: 2, md: 3 },
+            p: { xs: 3, sm: 2, md: 2 },
+            px: { xs: 2, sm: 3, md: 4 },
           }}
         >
           {/* Quick Links */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -396,6 +430,8 @@ const Footer = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
+                p: { xs: 3, sm: 1.5, md: 2 },
+                mb: { xs: 4, sm: 0 },
               }}
             >
               <Typography
@@ -407,13 +443,18 @@ const Footer = () => {
                 )}
                 sx={{
                   fontWeight: 600,
-                  mb: getResponsiveValue(2, 3, 3, isFoldable ? 2.5 : undefined),
-                  color: '#e6d897',
+                  mb: getResponsiveValue(
+                    1.5,
+                    2,
+                    2.5,
+                    isFoldable ? 2 : undefined
+                  ),
+                  color: 'var(--color-text-primary)',
                   fontSize: getResponsiveValue(
-                    'clamp(1.125rem, 3.5vw, 1.25rem)', // mobile
-                    'clamp(1.25rem, 3vw, 1.5rem)', // tablet
-                    'clamp(1.5rem, 2.5vw, 1.75rem)', // desktop
-                    isFoldable ? 'clamp(1rem, 3vw, 1.125rem)' : undefined
+                    'clamp(1rem, 3vw, 1.125rem)', // mobile
+                    'clamp(1.125rem, 2.8vw, 1.25rem)', // tablet
+                    'clamp(1.25rem, 2.5vw, 1.5rem)', // desktop
+                    isFoldable ? 'clamp(0.875rem, 2.8vw, 1rem)' : undefined
                   ),
                   transition: 'color 0.2s ease',
                   lineHeight: 1.2,
@@ -435,14 +476,13 @@ const Footer = () => {
               >
                 {quickLinks.map((link) => (
                   <Box
-                    component="li"
                     key={link.text}
                     sx={{
                       mb: getResponsiveValue(
+                        0.75,
                         1,
                         1.5,
-                        2,
-                        isFoldable ? 1.25 : undefined
+                        isFoldable ? 1 : undefined
                       ),
                       transition: 'transform 0.2s ease',
                       '&:hover': {
@@ -453,13 +493,13 @@ const Footer = () => {
                     <Link
                       href={link.href}
                       sx={{
-                        color: '#c1b17a',
+                        color: 'var(--color-text-secondary)',
                         textDecoration: 'none',
                         fontSize: isFoldable
-                          ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                          ? 'clamp(0.75rem, 2vw, 0.875rem)'
                           : {
-                              xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                              sm: 'clamp(1rem, 2vw, 1.125rem)',
+                              xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                              sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                             },
                         transition: 'all 0.2s ease',
                         display: 'flex',
@@ -471,26 +511,32 @@ const Footer = () => {
                           isFoldable ? 0.75 : undefined
                         ),
                         '&:hover': {
-                          color: '#e6d897',
+                          color: 'var(--color-primary)',
                           textShadow: isFoldable
-                            ? '0 0 8px rgba(230, 216, 151, 0.3)'
+                            ? '0 0 8px rgba(163, 130, 76, 0.2)'
                             : 'none',
                         },
                       }}
                     >
-                      <span
-                        style={{
-                          fontSize: getResponsiveValue(
-                            16,
-                            18,
-                            20,
-                            isFoldable ? 18 : undefined
-                          ),
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: '7px !important',
                         }}
                       >
-                        {/* {link.icon} */}
-                        {link.icon}
-                      </span>{' '}
+                        <link.icon
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              18,
+                              20,
+                              22,
+                              isFoldable ? 20 : undefined
+                            ),
+                          }}
+                        />
+                      </Box>{' '}
                       {link.text}
                     </Link>
                   </Box>
@@ -500,7 +546,7 @@ const Footer = () => {
           </Grid>
 
           {/* Customer Service */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -508,6 +554,8 @@ const Footer = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
+                p: { xs: 3, sm: 1.5, md: 2 },
+                mb: { xs: 4, sm: 0 },
               }}
             >
               <Typography
@@ -519,13 +567,18 @@ const Footer = () => {
                 )}
                 sx={{
                   fontWeight: 600,
-                  mb: getResponsiveValue(2, 3, 3, isFoldable ? 2.5 : undefined),
-                  color: '#e6d897',
+                  mb: getResponsiveValue(
+                    1.5,
+                    2,
+                    2.5,
+                    isFoldable ? 2 : undefined
+                  ),
+                  color: 'var(--color-text-primary)',
                   fontSize: getResponsiveValue(
-                    'clamp(1.125rem, 3.5vw, 1.25rem)', // mobile
-                    'clamp(1.25rem, 3vw, 1.5rem)', // tablet
-                    'clamp(1.5rem, 2.5vw, 1.75rem)', // desktop
-                    isFoldable ? 'clamp(1rem, 3vw, 1.125rem)' : undefined
+                    'clamp(1rem, 3vw, 1.125rem)', // mobile
+                    'clamp(1.125rem, 2.8vw, 1.25rem)', // tablet
+                    'clamp(1.25rem, 2.5vw, 1.5rem)', // desktop
+                    isFoldable ? 'clamp(0.875rem, 2.8vw, 1rem)' : undefined
                   ),
                   transition: 'color 0.2s ease',
                   lineHeight: 1.2,
@@ -547,14 +600,13 @@ const Footer = () => {
               >
                 {customerService.map((link) => (
                   <Box
-                    component="li"
                     key={link.text}
                     sx={{
                       mb: getResponsiveValue(
+                        0.75,
                         1,
                         1.5,
-                        2,
-                        isFoldable ? 1.25 : undefined
+                        isFoldable ? 1 : undefined
                       ),
                       transition: 'transform 0.2s ease',
                       '&:hover': {
@@ -565,13 +617,13 @@ const Footer = () => {
                     <Link
                       href={link.href}
                       sx={{
-                        color: '#c1b17a',
+                        color: 'var(--color-text-secondary)',
                         textDecoration: 'none',
                         fontSize: isFoldable
-                          ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                          ? 'clamp(0.75rem, 2vw, 0.875rem)'
                           : {
-                              xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                              sm: 'clamp(1rem, 2vw, 1.125rem)',
+                              xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                              sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                             },
                         transition: 'all 0.2s ease',
                         display: 'flex',
@@ -583,25 +635,32 @@ const Footer = () => {
                           isFoldable ? 0.75 : undefined
                         ),
                         '&:hover': {
-                          color: '#e6d897',
+                          color: 'var(--color-primary)',
                           textShadow: isFoldable
-                            ? '0 0 8px rgba(230, 216, 151, 0.3)'
+                            ? '0 0 8px rgba(163, 130, 76, 0.2)'
                             : 'none',
                         },
                       }}
                     >
-                      <span
-                        style={{
-                          fontSize: getResponsiveValue(
-                            16,
-                            18,
-                            20,
-                            isFoldable ? 18 : undefined
-                          ),
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: '7px !important',
                         }}
                       >
-                        {link.icon}
-                      </span>
+                        <link.icon
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              18,
+                              20,
+                              22,
+                              isFoldable ? 20 : undefined
+                            ),
+                          }}
+                        />
+                      </Box>{' '}
                       {link.text}
                     </Link>
                   </Box>
@@ -611,14 +670,16 @@ const Footer = () => {
           </Grid>
 
           {/* Company Info */}
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
-                height: '100%',
+                height: 'flex-start',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
+                p: { xs: 3, sm: 1.5, md: 2 },
+                mb: { xs: 4, sm: 0 },
               }}
             >
               <Typography
@@ -630,13 +691,18 @@ const Footer = () => {
                 )}
                 sx={{
                   fontWeight: 600,
-                  mb: getResponsiveValue(2, 3, 3, isFoldable ? 2.5 : undefined),
-                  color: '#e6d897',
+                  mb: getResponsiveValue(
+                    1.5,
+                    2,
+                    2.5,
+                    isFoldable ? 2 : undefined
+                  ),
+                  color: 'var(--color-text-primary)',
                   fontSize: getResponsiveValue(
-                    'clamp(1.125rem, 3.5vw, 1.25rem)', // mobile
-                    'clamp(1.25rem, 3vw, 1.5rem)',     // tablet
-                    'clamp(1.5rem, 2.5vw, 1.75rem)',  // desktop
-                    isFoldable ? 'clamp(1rem, 3vw, 1.125rem)' : undefined
+                    'clamp(1rem, 3vw, 1.125rem)', // mobile
+                    'clamp(1.125rem, 2.8vw, 1.25rem)', // tablet
+                    'clamp(1.25rem, 2.5vw, 1.5rem)', // desktop
+                    isFoldable ? 'clamp(0.875rem, 2.8vw, 1rem)' : undefined
                   ),
                   transition: 'color 0.2s ease',
                   lineHeight: 1.2,
@@ -658,14 +724,13 @@ const Footer = () => {
               >
                 {companyInfo.map((link) => (
                   <Box
-                    component="li"
                     key={link.text}
                     sx={{
                       mb: getResponsiveValue(
+                        0.75,
                         1,
                         1.5,
-                        2,
-                        isFoldable ? 1.25 : undefined
+                        isFoldable ? 1 : undefined
                       ),
                       transition: 'transform 0.2s ease',
                       '&:hover': {
@@ -676,13 +741,13 @@ const Footer = () => {
                     <Link
                       href={link.href}
                       sx={{
-                        color: '#c1b17a',
+                        color: 'var(--color-text-secondary)',
                         textDecoration: 'none',
                         fontSize: isFoldable
-                          ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                          ? 'clamp(0.75rem, 2vw, 0.875rem)'
                           : {
-                              xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                              sm: 'clamp(1rem, 2vw, 1.125rem)',
+                              xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                              sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                             },
                         transition: 'all 0.2s ease',
                         display: 'flex',
@@ -694,25 +759,32 @@ const Footer = () => {
                           isFoldable ? 0.75 : undefined
                         ),
                         '&:hover': {
-                          color: '#e6d897',
+                          color: 'var(--color-primary)',
                           textShadow: isFoldable
-                            ? '0 0 8px rgba(230, 216, 151, 0.3)'
+                            ? '0 0 8px rgba(163, 130, 76, 0.2)'
                             : 'none',
                         },
                       }}
                     >
-                      <span
-                        style={{
-                          fontSize: getResponsiveValue(
-                            16,
-                            18,
-                            20,
-                            isFoldable ? 18 : undefined
-                          ),
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: '7px !important',
                         }}
                       >
-                        {link.icon}
-                      </span>
+                        <link.icon
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              18,
+                              20,
+                              22,
+                              isFoldable ? 20 : undefined
+                            ),
+                          }}
+                        />
+                      </Box>{' '}
                       {link.text}
                     </Link>
                   </Box>
@@ -722,7 +794,7 @@ const Footer = () => {
           </Grid>
 
           {/* Contact */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={3} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -730,6 +802,8 @@ const Footer = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
+                p: { xs: 3, sm: 1.5, md: 2 },
+                mb: { xs: 4, sm: 0 },
               }}
             >
               {/* Contact Info */}
@@ -748,12 +822,12 @@ const Footer = () => {
                     2.5,
                     isFoldable ? 2 : undefined
                   ),
-                  color: '#e6d897',
+                  color: 'var(--color-text-primary)',
                   fontSize: getResponsiveValue(
-                    'clamp(1.125rem, 3.5vw, 1.25rem)', // mobile
-                    'clamp(1.25rem, 3vw, 1.5rem)', // tablet
-                    'clamp(1.5rem, 2.5vw, 1.75rem)', // desktop
-                    isFoldable ? 'clamp(1rem, 3vw, 1.125rem)' : undefined
+                    'clamp(1rem, 3vw, 1.125rem)', // mobile
+                    'clamp(1.125rem, 2.8vw, 1.25rem)', // tablet
+                    'clamp(1.25rem, 2.5vw, 1.5rem)', // desktop
+                    isFoldable ? 'clamp(0.875rem, 2.8vw, 1rem)' : undefined
                   ),
                   transition: 'color 0.2s ease',
                 }}
@@ -773,58 +847,86 @@ const Footer = () => {
                 }}
               >
                 {[
-                  { icon: PhoneIcon, text: '+91 98765 43210' },
-                  { icon: EmailIcon, text: 'info@goldenbasket.com' },
-                  { icon: LocationOnIcon, text: 'Jaipur, Rajasthan' },
-                ].map((item, index) => (
+                  {
+                    icon: PhoneIcon,
+                    text: '+91 98765 43210',
+                    href: 'tel:+919876543210',
+                  },
+                  {
+                    icon: EmailIcon,
+                    text: 'info@goldenbasket.com',
+                    href: 'mailto:info@goldenbasket.com',
+                  },
+                  {
+                    icon: LocationOnIcon,
+                    text: 'Jaipur, Rajasthan',
+                    href: 'https://maps.app.goo.gl/1234567890',
+                  },
+                ].map((item) => (
                   <Box
-                    key={index}
+                    key={item.text}
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: { xs: 'center', sm: 'flex-start' },
-                      gap: getResponsiveValue(
+                      mb: getResponsiveValue(
+                        0.75,
                         1,
                         1.5,
-                        2,
-                        isFoldable ? 1.25 : undefined
+                        isFoldable ? 1 : undefined
                       ),
-                      transition: 'all 0.2s ease',
+                      transition: 'transform 0.2s ease',
                       '&:hover': {
-                        transform: isFoldable ? 'scale(1.02)' : 'none',
+                        transform: isFoldable ? 'translateX(4px)' : 'none',
                       },
                     }}
                   >
-                    <item.icon
+                    <Link
+                      href={item.href}
                       sx={{
-                        fontSize: getResponsiveValue(
-                          18,
-                          20,
-                          22,
-                          isFoldable ? 20 : undefined
+                        color: 'var(--color-text-secondary)',
+                        textDecoration: 'none',
+                        fontSize: isFoldable
+                          ? 'clamp(0.75rem, 2vw, 0.875rem)'
+                          : {
+                              xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                              sm: 'clamp(1rem, 1.8vw, 1.125rem)',
+                            },
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: getResponsiveValue(
+                          0.5,
+                          0.75,
+                          1,
+                          isFoldable ? 0.75 : undefined
                         ),
-                        color: '#a3824c',
-                        transition: 'color 0.2s ease',
                         '&:hover': {
-                          color: '#c1b17a',
+                          color: 'var(--color-primary)',
+                          textShadow: isFoldable
+                            ? '0 0 8px rgba(163, 130, 76, 0.2)'
+                            : 'none',
                         },
                       }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#c1b17a',
-                        fontSize: isFoldable
-                          ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
-                          : {
-                              xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                              sm: 'clamp(1rem, 2vw, 1.125rem)',
-                            },
-                        transition: 'color 0.2s ease',
-                      }}
                     >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          p: '7px !important',
+                        }}
+                      >
+                        <item.icon
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              18,
+                              20,
+                              22,
+                              isFoldable ? 20 : undefined
+                            ),
+                          }}
+                        />
+                      </Box>{' '}
                       {item.text}
-                    </Typography>
+                    </Link>
                   </Box>
                 ))}
               </Box>
@@ -876,109 +978,131 @@ const Footer = () => {
                         ),
                       }}
                     >
-                      <social.icon
-                        sx={{
+                      {React.createElement(social.icon, {
+                        sx: {
                           fontSize: getResponsiveValue(
                             18,
                             20,
                             22,
                             isFoldable ? 20 : undefined
                           ),
-                        }}
-                      />
+                        },
+                      })}
                     </IconButton>
                   </Tooltip>
                 ))}
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            {/* Newsletter */}
-            <Typography
-              variant={getResponsiveValue(
-                'h6',
-                'h5',
-                'h5',
-                isFoldable ? 'h5' : undefined
-              )}
-              sx={{
-                fontWeight: 600,
-                mb: getResponsiveValue(2, 3, 3, isFoldable ? 2.5 : undefined),
-                color: '#e6d897',
-                fontSize: getResponsiveValue(
-                  'clamp(1.125rem, 3.5vw, 1.25rem)', // mobile
-                  'clamp(1.25rem, 3vw, 1.5rem)',     // tablet
-                  'clamp(1.5rem, 2.5vw, 1.75rem)',  // desktop
-                  isFoldable ? 'clamp(1rem, 3vw, 1.125rem)' : undefined
-                ),
-                transition: 'color 0.2s ease',
-                lineHeight: 1.2,
-              }}
-            >
-              Newsletter
-            </Typography>
+
+          {/* Newsletter */}
+          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
-              component="form"
-              onSubmit={handleNewsletterSubmit}
               sx={{
-                mb: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.5 : undefined),
+                p: { xs: 3, sm: 1.5, md: 2 },
+                mb: { xs: 4, sm: 0 },
               }}
             >
-              <Stack
-                spacing={getResponsiveValue(
-                  1,
-                  1.5,
-                  2,
-                  isFoldable ? 1.5 : undefined
+              <Typography
+                variant={getResponsiveValue(
+                  'h6',
+                  'h5',
+                  'h5',
+                  isFoldable ? 'h5' : undefined
                 )}
+                sx={{
+                  fontWeight: 600,
+                  mb: getResponsiveValue(
+                    1.5,
+                    2,
+                    2.5,
+                    isFoldable ? 2 : undefined
+                  ),
+                  color: 'var(--color-text-primary)',
+                  fontSize: getResponsiveValue(
+                    'clamp(1rem, 3vw, 1.125rem)', // mobile
+                    'clamp(1.125rem, 2.8vw, 1.25rem)', // tablet
+                    'clamp(1.25rem, 2.5vw, 1.5rem)', // desktop
+                    isFoldable ? 'clamp(0.875rem, 2.8vw, 1rem)' : undefined
+                  ),
+                  transition: 'color 0.2s ease',
+                  lineHeight: 1.2,
+                }}
               >
-                <TextField
-                  type="email"
-                  placeholder="Enter your email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  size="small"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: '#e6d897',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      borderColor: 'rgba(163, 130, 76, 0.3)',
-                      '&:hover': {
-                        borderColor: 'rgba(163, 130, 76, 0.5)',
-                      },
-                      '&.Mui-focused': {
-                        borderColor: '#e6d897',
-                      },
-                    },
-                    '& .MuiOutlinedInput-input::placeholder': {
-                      color: '#c1b17a',
-                      opacity: 0.7,
-                    },
-                  }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={newsletterLoading || !newsletterEmail.trim()}
-                  sx={{
-                    background:
-                      'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-                    color: '#1a1a1a',
-                    fontWeight: 600,
-                    '&:hover': {
-                      background:
-                        'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                      transform: 'translateY(-1px)',
-                    },
-                    '&:disabled': {
-                      background: 'rgba(163, 130, 76, 0.3)',
-                      color: 'rgba(230, 216, 151, 0.5)',
-                    },
-                  }}
+                Newsletter
+              </Typography>
+              <Box
+                component="form"
+                onSubmit={handleNewsletterSubmit}
+                sx={{
+                  mb: getResponsiveValue(
+                    2,
+                    2.5,
+                    3,
+                    isFoldable ? 2.5 : undefined
+                  ),
+                }}
+              >
+                <Stack
+                  spacing={getResponsiveValue(
+                    1,
+                    1.5,
+                    2,
+                    isFoldable ? 1.5 : undefined
+                  )}
                 >
-                  {newsletterLoading ? 'Subscribing...' : 'Subscribe'}
-                </Button>
-              </Stack>
+                  <TextField
+                    type="email"
+                    placeholder="Enter your email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    size="small"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        color: 'var(--color-primary-light)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'rgba(163, 130, 76, 0.3)',
+                        '&:hover': {
+                          borderColor: 'rgba(163, 130, 76, 0.5)',
+                        },
+                        '&.Mui-focused': {
+                          borderColor: 'var(--color-primary-light)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input::placeholder': {
+                        color: 'var(--color-primary-muted)',
+                        opacity: 0.7,
+                      },
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={newsletterLoading || !newsletterEmail.trim()}
+                    sx={{
+                      background:
+                        'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%)',
+                      color: 'var(--color-text-primary)',
+                      fontWeight: 600,
+                      '&:hover': {
+                        background:
+                          'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%)',
+                        transform: 'translateY(-1px)',
+                      },
+                      '&:disabled': {
+                        background:
+                          'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
+                        color: '#999',
+                        borderColor: '#ccc',
+                        transform: 'none',
+                        boxShadow: 'none',
+                      },
+                    }}
+                  >
+                    {newsletterLoading ? 'Subscribing...' : 'Subscribe'}
+                  </Button>
+                </Stack>
+              </Box>
             </Box>
           </Grid>
         </Grid>
@@ -986,90 +1110,52 @@ const Footer = () => {
         {/* Business Hours Section */}
         <Box
           sx={{
-            mt: getResponsiveValue(4, 5, 6, isFoldable ? 4.5 : undefined),
-            p: getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined),
+            mt: { xs: 4, sm: 3, md: 5 },
+            p: { xs: 3, sm: 2, md: 3 },
+            mx: { xs: 2, sm: 3, md: 4 },
             background:
-              'linear-gradient(135deg, rgba(163, 130, 76, 0.1) 0%, rgba(230, 216, 151, 0.05) 100%)',
-            borderRadius: getResponsiveValue(
-              2,
-              3,
-              4,
-              isFoldable ? 2.5 : undefined
-            ),
-            border: '1px solid rgba(163, 130, 76, 0.2)',
-            textAlign: 'center',
+              'linear-gradient(135deg, rgba(163, 130, 76, 0.08) 0%, rgba(230, 216, 151, 0.03) 100%)',
+            borderRadius: { xs: 2, sm: 2, md: 3 },
+            border: '1px solid rgba(163, 130, 76, 0.15)',
           }}
         >
-          <Typography
-            variant={getResponsiveValue(
-              'h6',
-              'h5',
-              'h5',
-              isFoldable ? 'h5' : undefined
-            )}
-            sx={{
-              fontWeight: 600,
-              p: isMobile ? 0.5 : isTablet ? 0.5 : isFoldable ? 0.75 : 2,
-              m: getResponsiveValue(2, 3, 3, isFoldable ? 2.5 : undefined),
-              color: '#e6d897',
-              fontSize: isFoldable
-                ? 'clamp(1rem, 3vw, 1.125rem)'
-                : {
-                    xs: 'clamp(1.125rem, 3.5vw, 1.25rem)',
-                    sm: 'clamp(1.25rem, 3vw, 1.5rem)',
-                  },
-              transition: 'color 0.2s ease',
-              lineHeight: 1.2,
-            }}
-          >
-            Business Hours
-          </Typography>
           <Grid
             container
-            spacing={getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined)}
+            spacing={getResponsiveValue(1.5, 2, 3, isFoldable ? 2 : undefined)}
             sx={{
               display: 'flex',
               flexDirection: 'row',
-              rowWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'space-between',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
+              alignItems: 'center',
               alignContent: 'center',
-              gap: 1,
-              p: 2,
+              gap: getResponsiveValue(1, 1.5, 2, isFoldable ? 1.5 : undefined),
+              p: getResponsiveValue(1, 1.5, 2, isFoldable ? 1.5 : undefined),
             }}
           >
-            <Grid item xs={12} sm={4}>
+            <Grid
+              size={{ xs: 12, sm: 4 }}
+              style={{
+                width: isMobile ? '100%' : 'auto',
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: getResponsiveValue(
-                    1,
-                    1.5,
-                    2,
-                    isFoldable ? 1.25 : undefined
-                  ),
+                  gap: { xs: 1.5, sm: 1, md: 1.5 },
                   transition: 'all 0.2s ease',
-                  p: getResponsiveValue(
-                    1.5,
-                    2,
-                    2.5,
-                    isFoldable ? 2 : undefined
-                  ),
-                  borderRadius: getResponsiveValue(
-                    1.5,
-                    2,
-                    2.5,
-                    isFoldable ? 2 : undefined
-                  ),
-                  background: 'rgba(163, 130, 76, 0.05)',
-                  border: '1px solid rgba(163, 130, 76, 0.1)',
+                  p: { xs: 3, sm: 1.5, md: 2 },
+                  mb: { xs: 3, sm: 0 },
+                  borderRadius: { xs: 2, sm: 1.5, md: 2 },
+                  background: 'rgba(163, 130, 76, 0.03)',
+                  border: '1px solid rgba(163, 130, 76, 0.08)',
                   height: '100%',
                   '&:hover': {
                     transform: isFoldable ? 'scale(1.02)' : 'translateY(-2px)',
-                    background: 'rgba(163, 130, 76, 0.08)',
+                    background: 'rgba(163, 130, 76, 0.05)',
                   },
                 }}
               >
@@ -1081,10 +1167,10 @@ const Footer = () => {
                       28,
                       isFoldable ? 22 : undefined
                     ),
-                    color: '#a3824c',
+                    color: 'var(--color-primary)',
                     transition: 'color 0.2s ease',
                     '&:hover': {
-                      color: '#c1b17a',
+                      color: 'var(--color-primary-muted)',
                     },
                   }}
                 />
@@ -1092,13 +1178,13 @@ const Footer = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#e6d897',
+                      color: 'var(--color-text-primary)',
                       fontWeight: 600,
                       fontSize: isFoldable
-                        ? 'clamp(0.9rem, 2.5vw, 1rem)'
+                        ? 'clamp(0.875rem, 2.2vw, 1rem)'
                         : {
-                            xs: 'clamp(1rem, 2.8vw, 1.125rem)',
-                            sm: 'clamp(1.125rem, 2.5vw, 1.25rem)',
+                            xs: 'clamp(1rem, 2.5vw, 1.125rem)',
+                            sm: 'clamp(1.125rem, 2.2vw, 1.25rem)',
                           },
                       lineHeight: 1.3,
                       mb: 0.5,
@@ -1109,12 +1195,12 @@ const Footer = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#c1b17a',
+                      color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
-                        ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                        ? 'clamp(0.75rem, 2vw, 0.875rem)'
                         : {
-                            xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                            sm: 'clamp(1rem, 2vw, 1.125rem)',
+                            xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                            sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                           },
                       lineHeight: 1.3,
                     }}
@@ -1124,38 +1210,29 @@ const Footer = () => {
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid
+              size={{ xs: 12, sm: 4 }}
+              style={{
+                width: isMobile ? '100%' : 'auto',
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: getResponsiveValue(
-                    1,
-                    1.5,
-                    2,
-                    isFoldable ? 1.25 : undefined
-                  ),
+                  gap: { xs: 1.5, sm: 1, md: 1.5 },
                   transition: 'all 0.2s ease',
-                  p: getResponsiveValue(
-                    1.5,
-                    2,
-                    2.5,
-                    isFoldable ? 2 : undefined
-                  ),
-                  borderRadius: getResponsiveValue(
-                    1.5,
-                    2,
-                    2.5,
-                    isFoldable ? 2 : undefined
-                  ),
-                  background: 'rgba(163, 130, 76, 0.05)',
-                  border: '1px solid rgba(163, 130, 76, 0.1)',
+                  p: { xs: 3, sm: 1.5, md: 2 },
+                  mb: { xs: 3, sm: 0 },
+                  borderRadius: { xs: 2, sm: 1.5, md: 2 },
+                  background: 'rgba(163, 130, 76, 0.03)',
+                  border: '1px solid rgba(163, 130, 76, 0.08)',
                   height: '100%',
                   '&:hover': {
                     transform: isFoldable ? 'scale(1.02)' : 'translateY(-2px)',
-                    background: 'rgba(163, 130, 76, 0.08)',
+                    background: 'rgba(163, 130, 76, 0.05)',
                   },
                 }}
               >
@@ -1167,10 +1244,10 @@ const Footer = () => {
                       28,
                       isFoldable ? 22 : undefined
                     ),
-                    color: '#a3824c',
+                    color: 'var(--color-primary)',
                     transition: 'color 0.2s ease',
                     '&:hover': {
-                      color: '#c1b17a',
+                      color: 'var(--color-primary-muted)',
                     },
                   }}
                 />
@@ -1178,13 +1255,13 @@ const Footer = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#e6d897',
+                      color: 'var(--color-text-primary)',
                       fontWeight: 600,
                       fontSize: isFoldable
-                        ? 'clamp(0.9rem, 2.5vw, 1rem)'
+                        ? 'clamp(0.875rem, 2.2vw, 1rem)'
                         : {
-                            xs: 'clamp(1rem, 2.8vw, 1.125rem)',
-                            sm: 'clamp(1.125rem, 2.5vw, 1.25rem)',
+                            xs: 'clamp(1rem, 2.5vw, 1.125rem)',
+                            sm: 'clamp(1.125rem, 2.2vw, 1.25rem)',
                           },
                       lineHeight: 1.3,
                       mb: 0.5,
@@ -1195,12 +1272,12 @@ const Footer = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#c1b17a',
+                      color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
-                        ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                        ? 'clamp(0.75rem, 2vw, 0.875rem)'
                         : {
-                            xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                            sm: 'clamp(1rem, 2vw, 1.125rem)',
+                            xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                            sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                           },
                       lineHeight: 1.3,
                     }}
@@ -1210,38 +1287,29 @@ const Footer = () => {
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid
+              size={{ xs: 12, sm: 4 }}
+              style={{
+                width: isMobile ? '100%' : 'auto',
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: getResponsiveValue(
-                    1,
-                    1.5,
-                    2,
-                    isFoldable ? 1.25 : undefined
-                  ),
+                  gap: { xs: 1.5, sm: 1, md: 1.5 },
                   transition: 'all 0.2s ease',
-                  p: getResponsiveValue(
-                    1.5,
-                    2,
-                    2.5,
-                    isFoldable ? 2 : undefined
-                  ),
-                  borderRadius: getResponsiveValue(
-                    1.5,
-                    2,
-                    2.5,
-                    isFoldable ? 2 : undefined
-                  ),
-                  background: 'rgba(163, 130, 76, 0.05)',
-                  border: '1px solid rgba(163, 130, 76, 0.1)',
+                  p: { xs: 3, sm: 1.5, md: 2 },
+                  mb: { xs: 3, sm: 0 },
+                  borderRadius: { xs: 2, sm: 1.5, md: 2 },
+                  background: 'rgba(163, 130, 76, 0.03)',
+                  border: '1px solid rgba(163, 130, 76, 0.08)',
                   height: '100%',
                   '&:hover': {
                     transform: isFoldable ? 'scale(1.02)' : 'translateY(-2px)',
-                    background: 'rgba(163, 130, 76, 0.08)',
+                    background: 'rgba(163, 130, 76, 0.05)',
                   },
                 }}
               >
@@ -1253,10 +1321,10 @@ const Footer = () => {
                       28,
                       isFoldable ? 22 : undefined
                     ),
-                    color: '#a3824c',
+                    color: 'var(--color-primary)',
                     transition: 'color 0.2s ease',
                     '&:hover': {
-                      color: '#c1b17a',
+                      color: 'var(--color-primary-muted)',
                     },
                   }}
                 />
@@ -1264,13 +1332,13 @@ const Footer = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#e6d897',
+                      color: 'var(--color-text-primary)',
                       fontWeight: 600,
                       fontSize: isFoldable
-                        ? 'clamp(0.9rem, 2.5vw, 1rem)'
+                        ? 'clamp(0.875rem, 2.2vw, 1rem)'
                         : {
-                            xs: 'clamp(1rem, 2.8vw, 1.125rem)',
-                            sm: 'clamp(1.125rem, 2.5vw, 1.25rem)',
+                            xs: 'clamp(1rem, 2.5vw, 1.125rem)',
+                            sm: 'clamp(1.125rem, 2.2vw, 1.25rem)',
                           },
                       lineHeight: 1.3,
                       mb: 0.5,
@@ -1281,12 +1349,12 @@ const Footer = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#c1b17a',
+                      color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
-                        ? 'clamp(0.8rem, 2.2vw, 0.9rem)'
+                        ? 'clamp(0.75rem, 2vw, 0.875rem)'
                         : {
-                            xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                            sm: 'clamp(1rem, 2vw, 1.125rem)',
+                            xs: 'clamp(0.875rem, 2.2vw, 1rem)',
+                            sm: 'clamp(1rem, 1.8vw, 1.125rem)',
                           },
                       lineHeight: 1.3,
                     }}
@@ -1302,9 +1370,10 @@ const Footer = () => {
         {/* Bottom Section */}
         <Box
           sx={{
-            borderTop: '1px solid #a3824c',
-            mt: getResponsiveValue(4, 5, 6, isFoldable ? 4.5 : undefined),
-            pt: getResponsiveValue(3, 4, 5, isFoldable ? 3.5 : undefined),
+            borderTop: '1px solid var(--color-primary)',
+            mt: { xs: 4, sm: 3, md: 5 },
+            pt: { xs: 3, sm: 2, md: 4 },
+            px: { xs: 2, sm: 3, md: 4 },
             textAlign: 'center',
             transition: 'all 0.3s ease',
           }}
@@ -1312,7 +1381,8 @@ const Footer = () => {
           <Typography
             variant="body2"
             sx={{
-              color: '#c1b17a',
+              p: { xs: 3, sm: 1.5, md: 2 },
+              color: 'var(--color-text-secondary)',
               fontSize: isFoldable
                 ? 'clamp(0.75rem, 2.2vw, 0.875rem)'
                 : {

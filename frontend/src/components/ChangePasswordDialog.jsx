@@ -96,7 +96,10 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
       handleClose();
     } catch (error) {
       console.error('Error changing password:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to change password. Please try again.';
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to change password. Please try again.';
       onError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -434,7 +437,9 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
               boxShadow: '0 8px 24px rgba(163, 130, 76, 0.3)',
             },
             '&:disabled': {
-              background: 'var(--color-text-secondary)',
+              background: 'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
+              color: '#999',
+              borderColor: '#ccc',
               transform: 'none',
               boxShadow: 'none',
             },

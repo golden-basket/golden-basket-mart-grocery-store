@@ -20,7 +20,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import ApiService from '../services/api';
 
-export default function ChangePassword() {
+const ChangePassword = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function ChangePassword() {
   useEffect(() => {
     const tempUser = localStorage.getItem('tempUser');
     const tempToken = localStorage.getItem('tempToken');
-    
+
     if (!tempUser || !tempToken) {
       // No temporary auth, redirect to login
       navigate('/login');
@@ -59,24 +59,24 @@ export default function ChangePassword() {
   const [submitSuccess, setSubmitSuccess] = useState('');
 
   const handleInputChange = (field) => (event) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: event.target.value
+      [field]: event.target.value,
     }));
-    
+
     // Clear field-specific error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ''
+        [field]: '',
       }));
     }
   };
 
   const togglePasswordVisibility = (field) => {
-    setShowPasswords(prev => ({
+    setShowPasswords((prev) => ({
       ...prev,
-      [field]: !prev[field]
+      [field]: !prev[field],
     }));
   };
 
@@ -91,8 +91,13 @@ export default function ChangePassword() {
       newErrors.newPassword = 'New password is required';
     } else if (formData.newPassword.length < 8) {
       newErrors.newPassword = 'New password must be at least 8 characters long';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/.test(formData.newPassword)) {
-      newErrors.newPassword = 'Password must include uppercase, lowercase, number, and special character';
+    } else if (
+      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/.test(
+        formData.newPassword
+      )
+    ) {
+      newErrors.newPassword =
+        'Password must include uppercase, lowercase, number, and special character';
     }
 
     if (!formData.confirmPassword.trim()) {
@@ -107,7 +112,7 @@ export default function ChangePassword() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -122,8 +127,10 @@ export default function ChangePassword() {
         newPassword: formData.newPassword,
       });
 
-      setSubmitSuccess('Password changed successfully! Completing authentication...');
-      
+      setSubmitSuccess(
+        'Password changed successfully! Completing authentication...'
+      );
+
       // Clear form
       setFormData({
         currentPassword: '',
@@ -134,24 +141,25 @@ export default function ChangePassword() {
       // Get temporary user data and complete authentication
       const tempUser = JSON.parse(localStorage.getItem('tempUser'));
       const tempToken = localStorage.getItem('tempToken');
-      
+
       // Update user object to reflect password change
       const updatedUser = { ...tempUser, isDefaultPassword: false };
-      
+
       // Complete the login process
       login(updatedUser, tempToken);
-      
+
       // Clean up temporary data
       localStorage.removeItem('tempUser');
       localStorage.removeItem('tempToken');
-      
+
       // Redirect to dashboard after 2 seconds
       setTimeout(() => {
         navigate('/');
       }, 2000);
-
     } catch (error) {
-      setSubmitError(error.message || 'Failed to change password. Please try again.');
+      setSubmitError(
+        error.message || 'Failed to change password. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -162,7 +170,8 @@ export default function ChangePassword() {
     mb: isMobile ? 2 : 4,
     px: isMobile ? 2 : 4,
     py: isMobile ? 3 : 5,
-    background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 50%, #fffbe6 100%)',
+    background:
+      'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 50%, #fffbe6 100%)',
     borderRadius: isMobile ? 2 : 3,
     boxShadow: '0 4px 20px 0 rgba(163,130,76,0.15)',
     border: '1px solid #e6d897',
@@ -182,14 +191,16 @@ export default function ChangePassword() {
       left: 0,
       right: 0,
       height: '4px',
-      background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+      background:
+        'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
       borderRadius: isMobile ? '8px 8px 0 0' : '12px 12px 0 0',
     },
   };
 
   const buttonStyles = {
     fontWeight: 700,
-    background: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+    background:
+      'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
     color: '#fff',
     textTransform: 'none',
     boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
@@ -204,7 +215,9 @@ export default function ChangePassword() {
     },
     transition: 'all 0.3s ease',
     '&:disabled': {
-      background: '#ccc',
+      background: 'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
+      color: '#999',
+      borderColor: '#ccc',
       transform: 'none',
       boxShadow: 'none',
     },
@@ -232,17 +245,18 @@ export default function ChangePassword() {
     <Container maxWidth="sm" sx={containerStyles}>
       <Paper sx={paperStyles}>
         <Box textAlign="center" mb={4}>
-          <LockIcon 
-            sx={{ 
-              fontSize: isMobile ? 48 : 64, 
+          <LockIcon
+            sx={{
+              fontSize: isMobile ? 48 : 64,
               color: '#a3824c',
-              mb: 2 
-            }} 
+              mb: 2,
+            }}
           />
           <Typography
             variant={isMobile ? 'h5' : 'h4'}
             sx={{
-              background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background:
+                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               fontWeight: 700,
@@ -291,7 +305,11 @@ export default function ChangePassword() {
                       onClick={() => togglePasswordVisibility('current')}
                       edge="end"
                     >
-                      {showPasswords.current ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPasswords.current ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -304,7 +322,10 @@ export default function ChangePassword() {
               value={formData.newPassword}
               onChange={handleInputChange('newPassword')}
               error={!!errors.newPassword}
-              helperText={errors.newPassword || 'Must be at least 8 characters with uppercase, lowercase, number, and special character'}
+              helperText={
+                errors.newPassword ||
+                'Must be at least 8 characters with uppercase, lowercase, number, and special character'
+              }
               fullWidth
               required
               sx={inputStyles}
@@ -315,7 +336,11 @@ export default function ChangePassword() {
                       onClick={() => togglePasswordVisibility('new')}
                       edge="end"
                     >
-                      {showPasswords.new ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPasswords.new ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -339,7 +364,11 @@ export default function ChangePassword() {
                       onClick={() => togglePasswordVisibility('confirm')}
                       edge="end"
                     >
-                      {showPasswords.confirm ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPasswords.confirm ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -366,4 +395,6 @@ export default function ChangePassword() {
       </Paper>
     </Container>
   );
-}
+};
+
+export default ChangePassword;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import {
@@ -13,40 +13,126 @@ import {
   Divider,
   Fade,
   Slide,
+  FormControlLabel,
+  Checkbox,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
+  Tooltip,
+  Zoom,
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LoginIcon from '@mui/icons-material/Login';
+import RememberMeIcon from '@mui/icons-material/RememberMe';
 import JumpingCartAvatar from './JumpingCartAvatar';
+import ThemeSnackbar from '../components/ThemeSnackbar';
 import ApiService from '../services/api';
+import { validateEmail } from '../utils/common';
+import { createSnackbarConfig } from '../utils/errorHandler';
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rememberMe: false,
+  });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info',
+  });
+
+  // Real-time validation
+  useEffect(() => {
+    const newErrors = {};
+
+    if (touched.email && !formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (touched.email && !validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (touched.password && !formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+  }, [formData, touched]);
+
+  const handleInputChange = (e) => {
+    const { name, value, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'rememberMe' ? checked : value,
+    }));
+
+    // Mark field as touched
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
+
+  const handleBlur = (fieldName) => {
+    setTouched((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setAttemptCount((prev) => prev + 1);
+
     try {
       const res = await ApiService.login({
-        email,
-        password,
+        email: formData.email.trim(),
+        password: formData.password,
       });
+
       const user = res.user;
       const authToken = res.token;
+
       if (!user || !authToken) {
-        setError('Invalid response from server');
-        return;
+        throw new Error('Invalid response from server');
       }
-      
+
       // Check if user has a default password and redirect accordingly
       if (user.isDefaultPassword) {
         // Store user and token temporarily for password change
@@ -56,13 +142,38 @@ const Login = () => {
       } else {
         // Normal login flow
         login(user, authToken);
+
+        // Handle remember me functionality
+        if (formData.rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('rememberMe');
+        }
+
         navigate('/');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed.');
+      console.error('Login error:', err);
+      
+      // Use the error handling utility
+      const snackbarConfig = createSnackbarConfig(err, 'login');
+      setSnackbar(snackbarConfig);
+
+      // Clear any previous inline errors
+      setErrors({});
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -72,16 +183,19 @@ const Login = () => {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        p: 2,
+        p: { xs: 1, sm: 2, md: 3 },
+        background:
+          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
       }}
     >
       <Slide direction="right" in={true} timeout={400}>
         <Paper
           elevation={24}
           sx={{
-            p: { xs: 3, md: 4 },
-            width: '50%',
-            borderRadius: 4,
+            p: { xs: 2, sm: 3, md: 4 },
+            width: { xs: '100%', sm: '90%', md: '70%', lg: '50%', xl: '40%' },
+            maxWidth: 500,
+            borderRadius: { xs: 2, sm: 3, md: 4 },
             background:
               'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
             border: '2px solid #e6d897',
@@ -101,12 +215,12 @@ const Login = () => {
           }}
         >
           {/* Header Section */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 3, md: 4 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
               <JumpingCartAvatar />
             </Box>
             <Typography
-              variant="h4"
+              variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
                 background:
@@ -120,7 +234,7 @@ const Login = () => {
               Welcome Back
             </Typography>
             <Typography
-              variant="body1"
+              variant={isMobile ? 'body2' : 'body1'}
               color="text.secondary"
               sx={{ fontWeight: 500 }}
             >
@@ -128,36 +242,24 @@ const Login = () => {
             </Typography>
           </Box>
 
-          {/* Error Alert */}
-          {error && (
-            <Fade in={true}>
-              <Alert
-                severity="error"
-                sx={{
-                  mb: 3,
-                  borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
-                  color: '#c53030',
-                  border: '1px solid #feb2b2',
-                  '& .MuiAlert-icon': { color: '#c53030' },
-                }}
-              >
-                {error}
-              </Alert>
-            </Fade>
-          )}
+
 
           {/* Login Form */}
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
             <TextField
               label="Email Address"
+              name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('email')}
+              onKeyPress={handleKeyPress}
               fullWidth
               required
               margin="normal"
+              error={!!errors.email}
+              helperText={errors.email}
+              disabled={loading}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -170,21 +272,32 @@ const Login = () => {
                   borderRadius: 2,
                   '&:hover fieldset': { borderColor: '#a3824c' },
                   '&.Mui-focused fieldset': { borderColor: '#a3824c' },
+                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
                 },
                 '& .MuiInputLabel-root': {
                   '&.Mui-focused': { color: '#a3824c' },
+                  '&.Mui-error': { color: '#d32f2f' },
+                },
+                '& .MuiFormHelperText-root': {
+                  '&.Mui-error': { color: '#d32f2f' },
                 },
               }}
             />
 
             <TextField
               label="Password"
+              name="password"
               type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('password')}
+              onKeyPress={handleKeyPress}
               fullWidth
               required
               margin="normal"
+              error={!!errors.password}
+              helperText={errors.password}
+              disabled={loading}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -193,17 +306,26 @@ const Login = () => {
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      sx={{ color: '#a3824c' }}
+                    <Tooltip
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                      TransitionComponent={Zoom}
                     >
-                      {showPassword ? (
-                        <VisibilityOffIcon />
-                      ) : (
-                        <VisibilityIcon />
-                      )}
-                    </IconButton>
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        disabled={loading}
+                        sx={{ color: '#a3824c' }}
+                        aria-label={
+                          showPassword ? 'Hide password' : 'Show password'
+                        }
+                      >
+                        {showPassword ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    </Tooltip>
                   </InputAdornment>
                 ),
               }}
@@ -212,24 +334,90 @@ const Login = () => {
                   borderRadius: 2,
                   '&:hover fieldset': { borderColor: '#a3824c' },
                   '&.Mui-focused fieldset': { borderColor: '#a3824c' },
+                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
                 },
                 '& .MuiInputLabel-root': {
                   '&.Mui-focused': { color: '#a3824c' },
+                  '&.Mui-error': { color: '#d32f2f' },
+                },
+                '& .MuiFormHelperText-root': {
+                  '&.Mui-error': { color: '#d32f2f' },
                 },
               }}
             />
 
+            {/* Remember Me Checkbox */}
+            <Box
+              sx={{
+                mt: 2,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                    sx={{
+                      color: '#a3824c',
+                      '&.Mui-checked': { color: '#a3824c' },
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <RememberMeIcon sx={{ fontSize: 16, color: '#a3824c' }} />
+                    <Typography variant="body2" sx={{ color: '#7d6033' }}>
+                      Remember me
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <Tooltip
+                title="Contact support if you forgot your password"
+                TransitionComponent={Zoom}
+              >
+                <Button
+                  component={Link}
+                  to="/forgot-password"
+                  disabled={loading}
+                  sx={{
+                    textTransform: 'none',
+                    color: '#a3824c',
+                    fontSize: '0.875rem',
+                    '&:hover': {
+                      color: '#866422',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Forgot Password?
+                </Button>
+              </Tooltip>
+            </Box>
+
             <Button
               type="submit"
               fullWidth
-              disabled={loading}
-              startIcon={loading ? null : <LoginIcon />}
+              disabled={loading || attemptCount >= 5}
+              startIcon={
+                loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <LoginIcon />
+                )
+              }
               sx={{
                 mt: 3,
                 mb: 2,
-                py: 1.5,
+                py: { xs: 1.5, sm: 2 },
                 fontWeight: 700,
-                fontSize: '1.1rem',
+                fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
                 background:
                   'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
@@ -246,6 +434,8 @@ const Login = () => {
                 '&:disabled': {
                   background: 'linear-gradient(90deg, #ccc 0%, #ddd 100%)',
                   color: '#666',
+                  transform: 'none',
+                  boxShadow: 'none',
                 },
                 transition: 'all 0.3s ease',
               }}
@@ -266,20 +456,27 @@ const Login = () => {
               to="/register"
               fullWidth
               variant="outlined"
+              disabled={loading}
               sx={{
-                py: 1.5,
+                py: { xs: 1.5, sm: 2 },
                 fontWeight: 600,
                 borderRadius: 2,
                 borderColor: '#a3824c',
                 color: '#a3824c',
                 textTransform: 'none',
-                fontSize: '1rem',
+                fontSize: { xs: '0.9rem', sm: '1rem' },
                 '&:hover': {
                   color: '#a3824c',
                   borderColor: '#e6d897',
                   backgroundColor: 'rgba(163,130,76,0.05)',
                   transform: 'translateY(-1px)',
                   boxShadow: '0 4px 12px rgba(163,130,76,0.2)',
+                },
+                '&:disabled': {
+                  borderColor: '#ccc',
+                  color: '#999',
+                  transform: 'none',
+                  boxShadow: 'none',
                 },
                 transition: 'all 0.3s ease',
               }}
@@ -289,6 +486,14 @@ const Login = () => {
           </Box>
         </Paper>
       </Slide>
+
+      {/* Theme Snackbar for notifications */}
+      <ThemeSnackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={handleCloseSnackbar}
+      />
     </Box>
   );
 };

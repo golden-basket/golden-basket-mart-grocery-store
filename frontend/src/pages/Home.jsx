@@ -7,22 +7,30 @@ import {
   useTheme,
   useMediaQuery,
   Pagination,
-  Divider,
+  CircularProgress,
 } from '@mui/material';
 import HeroBanner from '../components/HeroBanner';
 import ProductCarousel from '../components/ProductCarousel';
 import Loading from '../components/Loading';
+import FilterStatusBar from '../components/FilterStatusBar';
 import { useProducts } from '../hooks/useProducts';
+import { useAddToCart } from '../hooks/useCart';
 import { useNavigate } from 'react-router-dom';
-import ApiService from '../services/api';
 import { useState, useEffect } from 'react';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import ThemeSnackbar from '../components/ThemeSnackbar';
 
 const HomeComponent = () => {
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = useState({});
+  const [buyNowLoading, setBuyNowLoading] = useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   // Pagination state for home page
   const [page, setPage] = useState(1);
@@ -31,6 +39,9 @@ const HomeComponent = () => {
 
   // Use paginated products hook with a reasonable limit for home page
   const { data: productsData, isLoading, error } = useProducts(page, 20); // Show 20 products per page
+
+  // Cart mutation hook
+  const addToCartMutation = useAddToCart();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -92,23 +103,52 @@ const HomeComponent = () => {
   // Add to cart handler
   const handleAddToCart = async (productId) => {
     setActionLoading((prev) => ({ ...prev, [productId]: true }));
+
     try {
-      await ApiService.addToCart(productId, 1);
-      // Optionally show a snackbar or refresh cart state
+      await addToCartMutation.mutateAsync({ productId, quantity: 1 });
+      setSnackbar({
+        open: true,
+        message: 'Item added to cart successfully!',
+        severity: 'success',
+      });
     } catch (err) {
       console.error('Failed to add to cart:', err);
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.error || 'Failed to add item to cart',
+        severity: 'error',
+      });
     } finally {
       setActionLoading((prev) => ({ ...prev, [productId]: false }));
     }
   };
 
-  // Buy now handler
-  const handleBuyNow = async (productId) => {
-    await handleAddToCart(productId);
-    navigate('/checkout');
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
-  if (isLoading) return <Loading />;
+  // Buy now handler
+  const handleBuyNow = async (productId) => {
+    setBuyNowLoading((prev) => ({ ...prev, [productId]: true }));
+
+    try {
+      await addToCartMutation.mutateAsync({ productId, quantity: 1 });
+      navigate('/checkout');
+    } catch (err) {
+      console.error('Failed to process buy now:', err);
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.error || 'Failed to process buy now',
+        severity: 'error',
+      });
+    } finally {
+      setBuyNowLoading((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <Container
@@ -269,17 +309,21 @@ const HomeComponent = () => {
                   variant="contained"
                   className={getResponsiveButtonSize()}
                   startIcon={
-                    <LocalMallIcon
-                      sx={{
-                        color: '#fffbe6',
-                        fontSize: {
-                          xs: isExtraSmall ? 16 : 18,
-                          sm: isSmall ? 17 : 16,
-                        },
-                      }}
-                    />
+                    buyNowLoading[product._id] ? (
+                      <CircularProgress size={15} />
+                    ) : (
+                      <LocalMallIcon
+                        sx={{
+                          color: '#fffbe6',
+                          fontSize: {
+                            xs: isExtraSmall ? 16 : 18,
+                            sm: isSmall ? 17 : 16,
+                          },
+                        }}
+                      />
+                    )
                   }
-                  disabled={product.stock === 0 || actionLoading[product._id]}
+                  disabled={product.stock === 0 || buyNowLoading[product._id]}
                   onClick={() => handleBuyNow(product._id)}
                   sx={{
                     fontWeight: 600,
@@ -324,7 +368,7 @@ const HomeComponent = () => {
                     },
                   }}
                 >
-                  {actionLoading[product._id] ? 'Processing...' : 'Buy Now'}
+                  Buy Now
                 </Button>
 
                 <Button
@@ -332,15 +376,19 @@ const HomeComponent = () => {
                   fullWidth
                   className={getResponsiveButtonSize()}
                   startIcon={
-                    <AddShoppingCartIcon
-                      sx={{
-                        color: '#a3824c',
-                        fontSize: {
-                          xs: isExtraSmall ? 16 : 18,
-                          sm: isSmall ? 17 : 16,
-                        },
-                      }}
-                    />
+                    actionLoading[product._id] ? (
+                      <CircularProgress size={15} />
+                    ) : (
+                      <AddShoppingCartIcon
+                        sx={{
+                          color: '#a3824c',
+                          fontSize: {
+                            xs: isExtraSmall ? 16 : 18,
+                            sm: isSmall ? 17 : 16,
+                          },
+                        }}
+                      />
+                    )
                   }
                   disabled={product.stock === 0 || actionLoading[product._id]}
                   onClick={() => handleAddToCart(product._id)}
@@ -389,7 +437,7 @@ const HomeComponent = () => {
                     },
                   }}
                 >
-                  {actionLoading[product._id] ? 'Adding...' : 'Add to Cart'}
+                  Add to Cart
                 </Button>
               </Stack>
             )}
@@ -417,6 +465,28 @@ const HomeComponent = () => {
             className: getResponsiveSpacingClasses(),
           }}
         >
+          <FilterStatusBar
+            showing={displayProducts.length}
+            total={displayProducts.length}
+            itemType="products"
+            sx={{
+              textAlign: 'center',
+              background: 'transparent',
+              border: 'none',
+              p: 0,
+              mb: 1,
+              '& .MuiTypography-root': {
+                fontSize: {
+                  xs: isExtraSmall
+                    ? 'clamp(0.75rem, 2.5vw, 0.875rem)'
+                    : 'clamp(0.875rem, 3vw, 1rem)',
+                  sm: isSmall
+                    ? 'clamp(0.875rem, 2.5vw, 1rem)'
+                    : 'clamp(0.875rem, 2.5vw, 1rem)',
+                },
+              },
+            }}
+          />
           <Typography
             variant="body2"
             className={getResponsiveTextClasses()}
@@ -434,8 +504,7 @@ const HomeComponent = () => {
               },
             }}
           >
-            Page {page} of {totalPages} • Showing {displayProducts.length}{' '}
-            products
+            Page {page} of {totalPages}
           </Typography>
 
           <Box
@@ -509,6 +578,13 @@ const HomeComponent = () => {
           </Box>
         </Box>
       )}
+
+      <ThemeSnackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        message={snackbar.message}
+        severity={snackbar.severity}
+      />
     </Container>
   );
 };

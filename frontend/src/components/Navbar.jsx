@@ -25,55 +25,40 @@ import LocalGroceryStoreIcon from '@mui/icons-material/LocalGroceryStore';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import EmojiNatureIcon from '@mui/icons-material/EmojiNature';
 import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../hooks/useAuth';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
-import PersonIcon from '@mui/icons-material/Person';
 import { useCart } from '../hooks/useCart';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import ImageWithFallback from './ImageWithFallback';
 import { useState } from 'react';
-
-const stringToColor = (str) => {
-  let hash = 0;
-  let i;
-
-  for (i = 0; i < str.length; i += 1) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  let color = '#';
-
-  for (i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `0F0${value.toString(16)}`.slice(-2);
-  }
-
-  return color;
-};
+import logo from '../assets/golden-basket-rounded.png';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: cart } = useCart();
-  const { 
-    isMobile, 
-    isTablet, 
-    isFoldable, 
-    isUltraWide, 
+  const {
+    isMobile,
+    isTablet,
+    isFoldable,
+    isUltraWide,
     isExtraSmall,
     isSmall,
     getFoldableClasses,
     getResponsiveButtonSize,
-    getResponsiveTextClasses
+    getResponsiveTextClasses,
   } = useFoldableDisplay();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
 
   // Calculate cart item count
   const cartItemCount =
-    cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+    cart?.items?.reduce((total, item) => total + (item.quantity || 0), 0) || 0;
 
   const navLinks = [
     { to: '/', label: 'Home', icon: <HomeIcon /> },
@@ -87,6 +72,7 @@ const Navbar = () => {
 
   // User-specific links for mobile drawer (desktop uses Profile dropdown)
   const userLinks = [
+    { to: '/profile', label: 'Profile', icon: <PersonIcon /> },
     { to: '/orders', label: 'Orders', icon: <LocalOfferIcon /> },
     { to: '/addresses', label: 'Addresses', icon: <EmojiNatureIcon /> },
   ];
@@ -105,11 +91,11 @@ const Navbar = () => {
     borderRadius: isFoldable ? 2 : 1,
     transition: 'all 0.3s ease',
     '&:hover': {
-      color: '#000',
+      color: '#ffffff',
       background:
-        'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%)',
+        'linear-gradient(90deg, #8B7355 0%, #A0522D 50%, #8B4513 100%)',
       transform: 'translateY(-2px)',
-      boxShadow: '0 4px 12px rgba(163, 130, 76, 0.2)',
+      boxShadow: '0 6px 20px rgba(139, 69, 19, 0.3)',
     },
   });
 
@@ -149,57 +135,95 @@ const Navbar = () => {
       sx={{
         width: isUltraWide ? 400 : { xs: 280, sm: 320 },
         pt: isUltraWide ? 4 : { xs: 2, sm: 3 },
-        background:
-          'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
         height: '100%',
-        borderRight: '2px solid var(--color-primary-light)',
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          px: { xs: 2, sm: 3 },
-          mb: { xs: 2, sm: 3 },
-          py: { xs: 1.5, sm: 2 },
-        }}
-      >
-        <img
-          src="/golden-basket-rounded.png"
-          alt="Golden Basket Mart"
-          style={{
-            width: 50,
-            height: 50,
-            objectFit: 'contain',
-            borderRadius: '10px',
-          }}
-        />
-        <Typography
+      {/* User Profile Section for Mobile */}
+      {user && (
+        <Box
           sx={{
-            fontWeight: 500,
-            ml: 1.5,
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+            mb: { xs: 2, sm: 3 },
+            mx: { xs: 1, sm: 1.5 },
+            borderRadius: 2,
             background:
-              'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontSize: {
-              xs: 'clamp(1.25rem, 4vw, 1.5rem)',
-              sm: 'clamp(1.5rem, 3.5vw, 1.75rem)',
-            },
-            letterSpacing: '0.5px',
-            textShadow: '0 2px 8px rgba(163,130,76,0.08)',
+              'linear-gradient(135deg, rgba(163, 130, 76, 0.1) 0%, rgba(210, 180, 140, 0.15) 100%)',
+            border: '1px solid rgba(163, 130, 76, 0.2)',
           }}
         >
-          Golden Basket
-        </Typography>
-      </Box>
-      <Divider
-        sx={{
-          mb: { xs: 2, sm: 3 },
-          borderColor: 'var(--color-primary-light)',
-          opacity: 0.6,
-        }}
-      />
+          <Box display="flex" alignItems="center" gap={2}>
+            <Avatar
+              sx={{
+                fontWeight: 700,
+                fontSize: 14,
+                width: 48,
+                height: 48,
+                background:
+                  'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                border: '2px solid #e6d897',
+                boxShadow: '0 4px 12px rgba(163, 130, 76, 0.25)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 6px 16px rgba(163, 130, 76, 0.35)',
+                  background:
+                    'linear-gradient(135deg, #866422 0%, #a3824c 50%, #b59961 100%)',
+                },
+              }}
+            >
+              {user.firstName.charAt(0) + user.lastName.charAt(0)}
+            </Avatar>
+            <Box>
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+                  color: 'var(--color-primary-dark)',
+                  lineHeight: 1.2,
+                }}
+              >
+                {user.firstName} {user.lastName}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                  color: 'var(--color-primary-darker)',
+                  opacity: 0.8,
+                  fontWeight: 400,
+                }}
+              >
+                {user.email}
+              </Typography>
+              {user.role === 'admin' && (
+                <Typography
+                  sx={{
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    color: 'var(--color-primary)',
+                    fontWeight: 500,
+                    mt: 0.5,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Administrator
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {/* Divider after user profile section */}
+      {user && (
+        <Divider
+          sx={{
+            mb: { xs: 2, sm: 3 },
+            borderColor: 'var(--color-primary-light)',
+            opacity: 0.6,
+          }}
+        />
+      )}
 
       <List sx={{ px: { xs: 1, sm: 1.5 } }}>
         {navLinks.map((link) => (
@@ -208,10 +232,10 @@ const Navbar = () => {
               onClick={() => handleNavigation(link.to)}
               selected={isActive(link.to)}
               sx={{
-                py: { xs: 1.5, sm: 2 },
-                px: { xs: 2, sm: 2.5 },
-                borderRadius: 2,
-                mx: { xs: 0.5, sm: 1 },
+                py: { xs: 1, sm: 1.25 },
+                px: { xs: 1.5, sm: 2 },
+                borderRadius: 1.5,
+                mx: { xs: 0.25, sm: 0.5 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: 'rgba(163, 130, 76, 0.08)',
@@ -226,10 +250,8 @@ const Navbar = () => {
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 44,
-                  color: isActive(link.to)
-                    ? 'var(--color-primary-dark)'
-                    : 'var(--color-primary)',
+                  minWidth: 36,
+                  color: isActive(link.to) ? '#2F1B14' : '#4A3728',
                   transition: 'color 0.3s ease',
                 }}
               >
@@ -240,8 +262,8 @@ const Navbar = () => {
                 primaryTypographyProps={{
                   fontWeight: isActive(link.to) ? 500 : 400,
                   fontSize: {
-                    xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    sm: 'clamp(1rem, 2vw, 1.125rem)',
+                    xs: 'clamp(0.75rem, 2vw, 0.875rem)',
+                    sm: 'clamp(0.875rem, 1.5vw, 1rem)',
                   },
                   color: isActive(link.to)
                     ? 'var(--color-primary-dark)'
@@ -253,55 +275,54 @@ const Navbar = () => {
         ))}
 
         {/* Auth Links for non-authenticated users */}
-        {!user && authLinks.map((link) => (
-          <ListItem key={link.to} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              onClick={() => handleNavigation(link.to)}
-              selected={isActive(link.to)}
-              sx={{
-                py: { xs: 1.5, sm: 2 },
-                px: { xs: 2, sm: 2.5 },
-                borderRadius: 2,
-                mx: { xs: 0.5, sm: 1 },
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  backgroundColor: 'rgba(163, 130, 76, 0.08)',
-                  transform: 'translateX(4px)',
-                },
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(163, 130, 76, 0.15)',
-                  borderLeft: '4px solid var(--color-primary)',
-                  boxShadow: '0 2px 8px rgba(163,130,76,0.12)',
-                },
-              }}
-            >
-              <ListItemIcon
+        {!user &&
+          authLinks.map((link) => (
+            <ListItem key={link.to} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => handleNavigation(link.to)}
+                selected={isActive(link.to)}
                 sx={{
-                  minWidth: 44,
-                  color: isActive(link.to)
-                    ? 'var(--color-primary-dark)'
-                    : 'var(--color-primary)',
-                  transition: 'color 0.3s ease',
+                  py: { xs: 1, sm: 1.25 },
+                  px: { xs: 1.5, sm: 2 },
+                  borderRadius: 1.5,
+                  mx: { xs: 0.25, sm: 0.5 },
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: 'rgba(163, 130, 76, 0.08)',
+                    transform: 'translateX(4px)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(163, 130, 76, 0.15)',
+                    borderLeft: '4px solid var(--color-primary)',
+                    boxShadow: '0 2px 8px rgba(163,130,76,0.12)',
+                  },
                 }}
               >
-                {link.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={link.label}
-                primaryTypographyProps={{
-                  fontWeight: isActive(link.to) ? 500 : 400,
-                  fontSize: {
-                    xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    sm: 'clamp(1rem, 2vw, 1.125rem)',
-                  },
-                  color: isActive(link.to)
-                    ? 'var(--color-primary-dark)'
-                    : 'var(--color-primary-darker)',
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+                <ListItemIcon
+                  sx={{
+                    minWidth: 36,
+                    color: isActive(link.to) ? '#2F1B14' : '#4A3728',
+                    transition: 'color 0.3s ease',
+                  }}
+                >
+                  {link.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={link.label}
+                  primaryTypographyProps={{
+                    fontWeight: isActive(link.to) ? 500 : 400,
+                    fontSize: {
+                      xs: 'clamp(0.75rem, 2vw, 0.875rem)',
+                      sm: 'clamp(0.875rem, 1.5vw, 1rem)',
+                    },
+                    color: isActive(link.to)
+                      ? 'var(--color-primary-dark)'
+                      : 'var(--color-primary-darker)',
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
 
         {user && (
           <ListItem disablePadding sx={{ mb: 0.5 }}>
@@ -309,10 +330,10 @@ const Navbar = () => {
               onClick={() => handleNavigation('/cart')}
               selected={isActive('/cart')}
               sx={{
-                py: { xs: 1.5, sm: 2 },
-                px: { xs: 2, sm: 2.5 },
-                borderRadius: 2,
-                mx: { xs: 0.5, sm: 1 },
+                py: { xs: 1, sm: 1.25 },
+                px: { xs: 1.5, sm: 2 },
+                borderRadius: 1.5,
+                mx: { xs: 0.25, sm: 0.5 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: 'rgba(163, 130, 76, 0.08)',
@@ -327,24 +348,26 @@ const Navbar = () => {
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 44,
-                  color: isActive('/cart')
-                    ? 'var(--color-primary-dark)'
-                    : 'var(--color-primary)',
+                  minWidth: 36,
+                  color: isActive('/cart') ? '#2F1B14' : '#4A3728',
                   transition: 'color 0.3s ease',
                 }}
               >
-                <Badge badgeContent={cartItemCount} color="error" max={99}>
+                {cartItemCount > 0 ? (
+                  <Badge badgeContent={cartItemCount} color="error" max={99}>
+                    <LocalGroceryStoreIcon />
+                  </Badge>
+                ) : (
                   <LocalGroceryStoreIcon />
-                </Badge>
+                )}
               </ListItemIcon>
               <ListItemText
                 primary="Cart"
                 primaryTypographyProps={{
                   fontWeight: isActive('/cart') ? 500 : 400,
                   fontSize: {
-                    xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    sm: 'clamp(1rem, 2vw, 1.125rem)',
+                    xs: 'clamp(0.75rem, 2vw, 0.875rem)',
+                    sm: 'clamp(0.875rem, 1.5vw, 1rem)',
                   },
                   color: isActive('/cart')
                     ? 'var(--color-primary-dark)'
@@ -363,10 +386,10 @@ const Navbar = () => {
                 onClick={() => handleNavigation(link.to)}
                 selected={isActive(link.to)}
                 sx={{
-                  py: { xs: 1.5, sm: 2 },
-                  px: { xs: 2, sm: 2.5 },
-                  borderRadius: 2,
-                  mx: { xs: 0.5, sm: 1 },
+                  py: { xs: 1, sm: 1.25 },
+                  px: { xs: 1.5, sm: 2 },
+                  borderRadius: 1.5,
+                  mx: { xs: 0.25, sm: 0.5 },
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     backgroundColor: 'rgba(163, 130, 76, 0.08)',
@@ -381,7 +404,7 @@ const Navbar = () => {
               >
                 <ListItemIcon
                   sx={{
-                    minWidth: 44,
+                    minWidth: 36,
                     color: isActive(link.to)
                       ? 'var(--color-primary-dark)'
                       : 'var(--color-primary)',
@@ -395,8 +418,8 @@ const Navbar = () => {
                   primaryTypographyProps={{
                     fontWeight: isActive(link.to) ? 500 : 400,
                     fontSize: {
-                      xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                      sm: 'clamp(1rem, 2vw, 1.125rem)',
+                      xs: 'clamp(0.75rem, 2vw, 0.875rem)',
+                      sm: 'clamp(0.875rem, 1.5vw, 1rem)',
                     },
                     color: isActive(link.to)
                       ? 'var(--color-primary-dark)'
@@ -413,10 +436,10 @@ const Navbar = () => {
               onClick={() => handleNavigation('/admin')}
               selected={isActive('/admin')}
               sx={{
-                py: { xs: 1.5, sm: 2 },
-                px: { xs: 2, sm: 2.5 },
-                borderRadius: 2,
-                mx: { xs: 0.5, sm: 1 },
+                py: { xs: 1, sm: 1.25 },
+                px: { xs: 1.5, sm: 2 },
+                borderRadius: 1.5,
+                mx: { xs: 0.25, sm: 0.5 },
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: 'rgba(163, 130, 76, 0.08)',
@@ -431,7 +454,7 @@ const Navbar = () => {
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 44,
+                  minWidth: 36,
                   color: isActive('/admin')
                     ? 'var(--color-primary-dark)'
                     : 'var(--color-primary)',
@@ -445,8 +468,8 @@ const Navbar = () => {
                 primaryTypographyProps={{
                   fontWeight: isActive('/admin') ? 500 : 400,
                   fontSize: {
-                    xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    sm: 'clamp(1rem, 2vw, 1.125rem)',
+                    xs: 'clamp(0.75rem, 2vw, 0.875rem)',
+                    sm: 'clamp(0.875rem, 1.5vw, 1rem)',
                   },
                   color: isActive('/admin')
                     ? 'var(--color-primary-dark)'
@@ -470,10 +493,10 @@ const Navbar = () => {
               <ListItemButton
                 onClick={handleLogout}
                 sx={{
-                  py: { xs: 1.5, sm: 2 },
-                  px: { xs: 2, sm: 2.5 },
-                  borderRadius: 2,
-                  mx: { xs: 0.5, sm: 1 },
+                  py: { xs: 1, sm: 1.25 },
+                  px: { xs: 1.5, sm: 2 },
+                  borderRadius: 1.5,
+                  mx: { xs: 0.25, sm: 0.5 },
                   color: 'var(--color-error)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -484,7 +507,7 @@ const Navbar = () => {
               >
                 <ListItemIcon
                   sx={{
-                    minWidth: 44,
+                    minWidth: 36,
                     color: 'var(--color-error)',
                     transition: 'color 0.3s ease',
                   }}
@@ -496,8 +519,8 @@ const Navbar = () => {
                   primaryTypographyProps={{
                     fontWeight: 400,
                     fontSize: {
-                      xs: 'clamp(0.875rem, 2.5vw, 1rem)',
-                      sm: 'clamp(1rem, 2vw, 1.125rem)',
+                      xs: 'clamp(0.75rem, 2vw, 0.875rem)',
+                      sm: 'clamp(0.875rem, 1.5vw, 1rem)',
                     },
                     color: 'var(--color-error)',
                   }}
@@ -515,10 +538,13 @@ const Navbar = () => {
       <AppBar
         position="static"
         className={`${getFoldableClasses()}}`}
+        elevation={1}
         sx={{
           background:
-            'linear-gradient(90deg, #1a1a1a 0%, #3e2d14 50%, #1a1a1a 100%)',
+            'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
           boxShadow: 4,
+          mx: 'auto',
+          borderRadius: '0 0 0.25rem 0.25rem',
         }}
       >
         <Toolbar
@@ -529,25 +555,44 @@ const Navbar = () => {
           }}
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <img
-              src="/golden-basket-rounded.png"
-              alt="Golden Basket Mart"
-              style={{
-                width: isExtraSmall ? 40 : isSmall ? 45 : 50,
-                height: isExtraSmall ? 40 : isSmall ? 45 : 50,
-                objectFit: 'contain',
-                borderRadius: '10px',
-              }}
-            />
+            {!isMobile &&
+              !isTablet &&
+              !isExtraSmall &&
+              !isSmall &&
+              !isFoldable && (
+                <ImageWithFallback
+                  src={logo}
+                  alt="Golden Basket Mart"
+                  fallbackText="Golden Basket"
+                  sx={{
+                    height: isFoldable
+                      ? 50
+                      : isMobile
+                      ? 40
+                      : isTablet
+                      ? 44
+                      : 48,
+                    width: 'auto',
+                    marginRight: isFoldable
+                      ? 1.5
+                      : isMobile
+                      ? 1
+                      : isTablet
+                      ? 1.5
+                      : 2,
+                    transition: 'all 0.2s ease',
+                  }}
+                />
+              )}
             <Typography
               variant={isMobile ? 'h6' : 'h5'}
               className={getResponsiveTextClasses()}
               sx={{
-                fontWeight: 500,
+                fontWeight: 700,
                 letterSpacing: 1,
                 textShadow: '1px 1px 4px #00000055',
                 background:
-                  'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%)',
+                  'linear-gradient(90deg, #5d4509 0%, #7a5f35 50%, #453306 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 display: { xs: 'none', sm: 'inline-block' },
@@ -565,11 +610,11 @@ const Navbar = () => {
                 variant="h6"
                 className={getResponsiveTextClasses()}
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: 700,
                   letterSpacing: 1,
                   textShadow: '1px 1px 4px #00000055',
                   background:
-                    'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary-medium) 100%)',
+                    'linear-gradient(90deg, #5d4509 0%, #7a5f35 50%, #453306 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   fontSize: {
@@ -606,9 +651,17 @@ const Navbar = () => {
                   component={Link}
                   to="/cart"
                   startIcon={
-                    <Badge badgeContent={cartItemCount} color="error" max={99}>
+                    cartItemCount > 0 ? (
+                      <Badge
+                        badgeContent={cartItemCount}
+                        color="error"
+                        max={99}
+                      >
+                        <LocalGroceryStoreIcon />
+                      </Badge>
+                    ) : (
                       <LocalGroceryStoreIcon />
-                    </Badge>
+                    )
                   }
                   className={getResponsiveButtonSize()}
                   sx={{ ...navButtonSx(isActive('/cart')) }}
@@ -635,14 +688,22 @@ const Navbar = () => {
                   >
                     <Avatar
                       sx={{
-                        fontWeight: 500,
+                        fontWeight: 700,
                         fontSize: 12,
-                        width: 32,
-                        height: 32,
-                        background: stringToColor(
-                          user.firstName + ' ' + user.lastName
-                        ),
+                        width: isFoldable ? 32 : { xs: 36, sm: 40 },
+                        height: isFoldable ? 32 : { xs: 36, sm: 40 },
+                        background:
+                          'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                        border: '2px solid #e6d897',
+                        boxShadow: '0 3px 8px rgba(163, 130, 76, 0.2)',
                         cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                          boxShadow: '0 4px 12px rgba(163, 130, 76, 0.3)',
+                          background:
+                            'linear-gradient(135deg, #866422 0%, #a3824c 50%, #b59961 100%)',
+                        },
                       }}
                     >
                       {user.firstName.charAt(0) + user.lastName.charAt(0)}
@@ -664,9 +725,10 @@ const Navbar = () => {
                       sx: {
                         mt: 1,
                         minWidth: 200,
-                        background: 'var(--color-cream-light)',
-                        border: '1px solid var(--color-primary-light)',
-                        boxShadow: '0 8px 32px rgba(163, 130, 76, 0.15)',
+                        background:
+                          'linear-gradient(135deg, #FFF8DC 0%, #F5F5DC 50%, #FAF0E6 100%)',
+                        border: '2px solid #D2B48C',
+                        boxShadow: '0 12px 40px rgba(210, 180, 140, 0.25)',
                       },
                     }}
                   >
@@ -676,29 +738,46 @@ const Navbar = () => {
                         py: 1.5,
                         px: 2,
                         '&:hover': {
-                          backgroundColor: 'rgba(163, 130, 76, 0.08)',
+                          backgroundColor: 'rgba(210, 180, 140, 0.15)',
                         },
                       }}
                     >
                       <ListItemAvatar>
-                        <Avatar
+                        <Box
                           sx={{
-                            width: 32,
-                            height: 32,
-                            background: stringToColor(
-                              user.firstName + ' ' + user.lastName
-                            ),
+                            p: 0.5,
+                            ml: 1,
                           }}
                         >
-                          {user.firstName.charAt(0) + user.lastName.charAt(0)}
-                        </Avatar>
+                          <Avatar
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: 12,
+                              width: isFoldable ? 32 : { xs: 36, sm: 40 },
+                              height: isFoldable ? 32 : { xs: 36, sm: 40 },
+                              background:
+                                'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                              border: '2px solid #e6d897',
+                              boxShadow: '0 3px 8px rgba(163, 130, 76, 0.2)',
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                transform: 'scale(1.05)',
+                                boxShadow: '0 4px 12px rgba(163, 130, 76, 0.3)',
+                                background:
+                                  'linear-gradient(135deg, #866422 0%, #a3824c 50%, #b59961 100%)',
+                              },
+                            }}
+                          >
+                            {user.firstName.charAt(0) + user.lastName.charAt(0)}
+                          </Avatar>
+                        </Box>
                       </ListItemAvatar>
                       <Box>
                         <Typography
-                          variant="body2"
+                          variant="body1"
                           sx={{
-                            fontWeight: 500,
-                            color: 'var(--color-primary-darker)',
+                            fontWeight: 600,
+                            color: '#2F1B14',
                           }}
                         >
                           {user.firstName} {user.lastName}
@@ -706,27 +785,30 @@ const Navbar = () => {
                         <Typography
                           variant="caption"
                           sx={{
-                            color: 'var(--color-primary-medium)',
+                            color: '#6B4423',
                             fontSize: '0.75rem',
+                            fontWeight: 500,
                           }}
                         >
                           {user.email}
                         </Typography>
                       </Box>
                     </MenuItem>
-                    <Divider sx={{ my: 1, borderColor: 'var(--color-primary-light)' }} />
+                    <Divider
+                      sx={{ my: 1, borderColor: 'var(--color-primary-light)' }}
+                    />
                     <MenuItem
                       onClick={() => handleNavigation('/orders')}
                       sx={{
                         py: 1.5,
                         px: 2,
                         '&:hover': {
-                          backgroundColor: 'rgba(163, 130, 76, 0.08)',
+                          backgroundColor: 'rgba(210, 180, 140, 0.15)',
                         },
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40 }}>
-                        <LocalOfferIcon sx={{ color: 'var(--color-primary)' }} />
+                        <LocalOfferIcon sx={{ color: '#4A3728' }} />
                       </ListItemIcon>
                       <Typography sx={{ fontWeight: 400 }}>Orders</Typography>
                     </MenuItem>
@@ -736,14 +818,16 @@ const Navbar = () => {
                         py: 1.5,
                         px: 2,
                         '&:hover': {
-                          backgroundColor: 'rgba(163, 130, 76, 0.08)',
+                          backgroundColor: 'rgba(210, 180, 140, 0.15)',
                         },
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 40 }}>
-                        <EmojiNatureIcon sx={{ color: 'var(--color-primary)' }} />
+                        <EmojiNatureIcon sx={{ color: '#4A3728' }} />
                       </ListItemIcon>
-                      <Typography sx={{ fontWeight: 400 }}>Addresses</Typography>
+                      <Typography sx={{ fontWeight: 400 }}>
+                        Addresses
+                      </Typography>
                     </MenuItem>
                     {user.role === 'admin' && (
                       <MenuItem
@@ -752,17 +836,21 @@ const Navbar = () => {
                           py: 1.5,
                           px: 2,
                           '&:hover': {
-                            backgroundColor: 'rgba(163, 130, 76, 0.08)',
+                            backgroundColor: 'rgba(210, 180, 140, 0.15)',
                           },
                         }}
                       >
                         <ListItemIcon sx={{ minWidth: 40 }}>
-                          <InventoryIcon sx={{ color: 'var(--color-primary)' }} />
+                          <InventoryIcon sx={{ color: '#4A3728' }} />
                         </ListItemIcon>
-                        <Typography sx={{ fontWeight: 400 }}>Admin Panel</Typography>
+                        <Typography sx={{ fontWeight: 400 }}>
+                          Admin Panel
+                        </Typography>
                       </MenuItem>
                     )}
-                    <Divider sx={{ my: 1, borderColor: 'var(--color-primary-light)' }} />
+                    <Divider
+                      sx={{ my: 1, borderColor: 'var(--color-primary-light)' }}
+                    />
                     <MenuItem
                       onClick={handleLogout}
                       sx={{
@@ -820,7 +908,7 @@ const Navbar = () => {
                 ml: 'auto',
                 minWidth: '48px',
                 minHeight: '48px',
-                color: 'var(--color-primary-light)',
+                color: '#2F1B14',
               }}
             >
               <MenuIcon />
@@ -844,10 +932,35 @@ const Navbar = () => {
             boxSizing: 'border-box',
             width: isUltraWide ? 400 : isFoldable ? 300 : 280,
             backgroundColor: 'var(--color-cream-light)',
+            border: 'none',
+            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
           },
         }}
       >
-        {drawer}
+        <>
+          {/* Close Button for Mobile Sidebar */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              zIndex: 1,
+            }}
+          >
+            <IconButton
+              onClick={handleDrawerToggle}
+              size="small"
+              sx={{
+                color: 'var(--color-primary-darker)',
+                width: { xs: 28, sm: 30 },
+                height: { xs: 28, sm: 30 },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />
+            </IconButton>
+          </Box>
+          {drawer}
+        </>
       </Drawer>
     </>
   );

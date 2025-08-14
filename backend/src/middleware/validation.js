@@ -126,6 +126,13 @@ const cartValidation = [
     .withMessage('Quantity must be a positive integer'),
 ];
 
+// Validation rules for cart remove operations (only productId)
+const cartRemoveValidation = [
+  body('productId')
+    .isMongoId()
+    .withMessage('Invalid product ID format'),
+];
+
 // Validation rules for address operations
 const addressValidation = [
   body('addressLine1')
@@ -199,6 +206,7 @@ module.exports = {
   createUserValidation,
   productValidation,
   cartValidation,
+  cartRemoveValidation,
   addressValidation,
   orderValidation,
   handleValidationErrors,

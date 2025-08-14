@@ -4,13 +4,13 @@ import Slider from 'react-slick';
 import {
   Box,
   Card,
-  CardMedia,
   CardContent,
   Typography,
   Stack,
   Chip,
 } from '@mui/material';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import ImageWithFallback from './ImageWithFallback';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -432,12 +432,9 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                     },
                   }}
                 />
-                <CardMedia
-                  component="img"
+                <Box
                   className={getResponsiveImageSize()}
                   sx={{
-                    objectFit: 'contain',
-                    objectPosition: 'center', // Ensure image is centered
                     p: getResponsiveSpacing(0.25, 0.5, 0.75, 1, 1.25, 1.5),
                     background:
                       'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
@@ -473,15 +470,22 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                     justifyContent: 'center',
                     flexShrink: 0, // Prevent image from shrinking
                   }}
-                  image={
-                    product.images?.[0] ||
-                    `https://via.placeholder.com/220x180?text=${encodeURIComponent(
-                      product.name
-                    )}`
-                  }
-                  alt={product.name}
-                  loading="lazy"
-                />
+                >
+                  <ImageWithFallback
+                    src={product.images?.[0]}
+                    alt={product.name}
+                    fallbackText={product.name}
+                    sx={{
+                      objectFit: 'contain',
+                      objectPosition: 'center',
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      width: 'auto',
+                      height: 'auto',
+                    }}
+                    loading="lazy"
+                  />
+                </Box>
                 <CardContent
                   className={getResponsiveSpacingClasses()}
                   sx={{

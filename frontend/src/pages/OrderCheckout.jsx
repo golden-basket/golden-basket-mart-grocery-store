@@ -11,21 +11,48 @@ import {
   RadioGroup,
   FormControlLabel,
   Divider,
+  Grid,
+  Chip,
+  Stack,
 } from '@mui/material';
 import Loading from '../components/Loading';
+import PaymentMethodSelector from '../components/PaymentMethodSelector';
 import { useNavigate } from 'react-router-dom';
+import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 
 const OrderCheckout = () => {
   const { token } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [cart, setCart] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
+  const [paymentDetails, setPaymentDetails] = useState({});
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+  const [deliveryDistance] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [invoice, setInvoice] = useState(null);
   const navigate = useNavigate();
+
+  // Enhanced responsive utilities from useFoldableDisplay
+  const {
+    isExtraSmall,
+    isSmall,
+    isMedium,
+    isLarge,
+    isExtraLarge,
+    isTablet,
+    isFoldable,
+    getResponsiveSpacingClasses,
+    getResponsiveTextClasses,
+    getResponsiveButtonSize,
+    getResponsiveAlertSize,
+    getResponsiveCardSize,
+    getResponsiveContainer,
+    getResponsiveValue,
+  } = useFoldableDisplay();
 
   useEffect(() => {
     let isMounted = true;
@@ -49,21 +76,102 @@ const OrderCheckout = () => {
     };
   }, [token]);
 
+  // Calculate delivery charges based on distance and order amount
+  const calculateDeliveryCharges = (distance, orderAmount) => {
+    let baseCharge = 0;
+
+    // Base delivery charge based on distance
+    if (distance <= 5) {
+      baseCharge = 30; // Within 5km
+    } else if (distance <= 10) {
+      baseCharge = 50; // 5-10km
+    } else if (distance <= 15) {
+      baseCharge = 80; // 10-15km
+    } else if (distance <= 20) {
+      baseCharge = 120; // 15-20km
+    } else {
+      baseCharge = 150; // Beyond 20km
+    }
+
+    // Free delivery for orders above ₹499
+    if (orderAmount >= 499) {
+      baseCharge = 0;
+    }
+
+    // Additional discount for orders above ₹999
+    if (orderAmount >= 999) {
+      baseCharge = Math.max(0, baseCharge - 20); // Additional ₹20 off
+    }
+
+    return baseCharge;
+  };
+
+  // Calculate total with delivery charges
+  const calculateTotal = () => {
+    const subtotal = cart.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0
+    );
+    const deliveryCharge = calculateDeliveryCharges(deliveryDistance, subtotal);
+    const gst = subtotal * 0.18; // 18% GST
+    return {
+      subtotal,
+      deliveryCharge,
+      gst,
+      total: subtotal + deliveryCharge + gst,
+    };
+  };
+
+  // Minimum order amount
+  const MIN_ORDER_AMOUNT = 150;
+
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       setError('Please select a shipping address.');
       return;
     }
+
+    const totals = calculateTotal();
+
+    // Check minimum order amount
+    if (totals.subtotal < MIN_ORDER_AMOUNT) {
+      setError(
+        `Minimum order amount is ₹${MIN_ORDER_AMOUNT}. Please add more items to your cart.`
+      );
+      return;
+    }
+
+    // Validate payment details based on selected method
+    if (selectedPaymentMethod === 'upi') {
+      if (!paymentDetails.upiId) {
+        setError('Please enter your UPI ID.');
+        return;
+      }
+      if (!paymentScreenshot) {
+        setError('Please upload a screenshot of your payment confirmation.');
+        return;
+      }
+    }
+
     setPlacing(true);
     setError('');
     setSuccess('');
     try {
-      const res = await ApiService.placeOrder({
+      const orderData = {
         shippingAddressId: selectedAddress,
-      });
+        paymentMode: selectedPaymentMethod,
+        paymentDetails:
+          selectedPaymentMethod === 'upi' ? paymentDetails : undefined,
+        paymentScreenshot: paymentScreenshot,
+        deliveryDistance: deliveryDistance,
+        deliveryCharges: totals.deliveryCharge,
+      };
+
+      const res = await ApiService.placeOrder(orderData);
       setSuccess('Order placed successfully!');
       setInvoice(res.invoice);
       setCart([]);
+      navigate('/orders');
     } catch (err) {
       setError(err.message || 'Failed to place order.');
     } finally {
@@ -71,211 +179,1800 @@ const OrderCheckout = () => {
     }
   };
 
+  const totals = calculateTotal();
+
+  // Enhanced responsive spacing based on device type
+  const getResponsiveSpacing = () => {
+    return getResponsiveValue(1, 1, 2, 3, 4, 5, 2);
+  };
+
+  // Enhanced responsive typography based on device type
+  const getResponsiveTypography = (variant) => {
+    if (isExtraSmall || isSmall) {
+      return variant === 'h5' ? 'h6' : 'body2';
+    }
+    if (isMedium) {
+      return variant === 'h5' ? 'h6' : 'body1';
+    }
+    if (isLarge) {
+      return variant === 'h5' ? 'h5' : 'body1';
+    }
+    return variant;
+  };
+
+  // Enhanced responsive container width
+  const getResponsiveContainerWidth = () => {
+    if (isExtraSmall || isSmall) return '95%';
+    if (isMedium) return '90%';
+    if (isLarge) return '85%';
+    if (isExtraLarge) return '80%';
+    return '75%';
+  };
+
+  // Enhanced responsive padding
+  const getResponsivePadding = () => {
+    return getResponsiveValue(1, 1, 2, 3, 4, 5, 2);
+  };
+
+  // Enhanced responsive margin
+  const getResponsiveMargin = () => {
+    return getResponsiveValue(1, 1, 2, 3, 4, 5, 2);
+  };
+
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+    <Box
+      sx={{
+        maxWidth: getResponsiveContainerWidth(),
+        mx: 'auto',
+        mt: getResponsiveMargin(),
+        px: getResponsivePadding(),
+        pb: getResponsivePadding() * 2,
+        // Enhanced mobile responsiveness
+        '@media (max-width: 600px)': {
+          px: 1,
+          mt: 2,
+          pb: 3,
+        },
+        '@media (max-width: 480px)': {
+          px: 0.5,
+          mt: 1,
+          pb: 2,
+        },
+      }}
+      className={`${getResponsiveSpacingClasses()} ${getResponsiveContainer()} responsive-container`}
+    >
       <Typography
-        variant="h5"
+        variant={getResponsiveTypography('h5')}
         fontWeight={700}
         align="center"
         sx={{
-          background:
-            'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+          background: 'var(--color-background-light-gradient)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          mb: 2,
+          mb: getResponsiveSpacing(),
+          fontSize: getResponsiveValue(
+            '1.25rem',
+            '1.5rem',
+            '1.75rem',
+            '2rem',
+            '2.25rem',
+            '2.5rem',
+            '1.75rem'
+          ),
+          lineHeight: getResponsiveValue(1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.4),
         }}
+        className={`golden-text ${getResponsiveTextClasses()}`}
       >
         Checkout
       </Typography>
+
+      {/* Delivery & Payment Summary */}
+      <Box
+        sx={{
+          mb: getResponsiveSpacing(),
+          p: getResponsiveValue(1, 1.5, 2, 2.5, 3, 3.5, 2),
+          background:
+            'linear-gradient(135deg, rgba(163,130,76,0.08) 0%, rgba(230,216,151,0.15) 100%)',
+          borderRadius: getResponsiveValue(1.5, 2, 2.5, 3, 3.5, 4, 2.5),
+          border: '2px solid rgba(163,130,76,0.25)',
+          boxShadow: '0 4px 20px rgba(163,130,76,0.08)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background:
+              'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%)',
+          },
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            color: 'var(--color-primary)',
+            fontSize: getResponsiveValue(
+              '0.85rem',
+              '0.9rem',
+              '0.95rem',
+              '1rem',
+              '1.05rem',
+              '1.1rem',
+              '0.95rem'
+            ),
+            mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+            textAlign: 'center',
+            textShadow: '0 1px 2px rgba(163,130,76,0.1)',
+            letterSpacing: '0.5px',
+          }}
+          className={getResponsiveTextClasses()}
+        >
+          🚚 Delivery & Payment Summary
+        </Typography>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'stretch', sm: 'flex-start' },
+            gap: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+            flexWrap: { xs: 'nowrap', sm: 'nowrap' },
+          }}
+        >
+          <Box
+            sx={{
+              flex: { xs: '1 1 100%', sm: '1 1 50%' },
+              p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+              background: 'rgba(163,130,76,0.05)',
+              borderRadius: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+              border: '1px solid rgba(163,130,76,0.15)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'rgba(163,130,76,0.08)',
+                borderColor: 'rgba(163,130,76,0.25)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(163,130,76,0.1)',
+              },
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 700,
+                color: 'var(--color-primary)',
+                fontSize: getResponsiveValue(
+                  '0.55rem',
+                  '0.6rem',
+                  '0.65rem',
+                  '0.7rem',
+                  '0.75rem',
+                  '0.8rem',
+                  '0.65rem'
+                ),
+                mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+              className={getResponsiveTextClasses()}
+            >
+              <Box
+                component="span"
+                sx={{
+                  fontSize: getResponsiveValue(
+                    '0.7rem',
+                    '0.75rem',
+                    '0.8rem',
+                    '0.85rem',
+                    '0.9rem',
+                    '0.95rem',
+                    '0.8rem'
+                  ),
+                }}
+              >
+                🚚
+              </Box>
+              Delivery Charges
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75) }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 0.5,
+                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  background: 'rgba(255,255,255,0.4)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.6)',
+                    borderColor: 'rgba(163,130,76,0.2)',
+                    transform: 'translateX(1px)',
+                  },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    fontSize: getResponsiveValue(
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.9rem',
+                      '0.75rem'
+                    ),
+                    color: 'var(--color-secondary)',
+                  }}
+                >
+                  🏠
+                </Box>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.75rem',
+                        '0.6rem'
+                      ),
+                      fontWeight: 600,
+                      mb: 0.25,
+                      lineHeight: 1.3,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    Mangalam Anantra Colony
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-secondary)',
+                      fontSize: getResponsiveValue(
+                        '0.45rem',
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.55rem'
+                      ),
+                      lineHeight: 1.4,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    Free delivery (no distance charges)
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 0.5,
+                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  background: 'rgba(255,255,255,0.4)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.6)',
+                    borderColor: 'rgba(163,130,76,0.2)',
+                    transform: 'translateX(1px)',
+                  },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    fontSize: getResponsiveValue(
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.9rem',
+                      '0.75rem'
+                    ),
+                    color: 'var(--color-secondary)',
+                  }}
+                >
+                  🎯
+                </Box>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.75rem',
+                        '0.6rem'
+                      ),
+                      fontWeight: 600,
+                      mb: 0.25,
+                      lineHeight: 1.3,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    Free Delivery Threshold
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-secondary)',
+                      fontSize: getResponsiveValue(
+                        '0.45rem',
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.55rem'
+                      ),
+                      lineHeight: 1.4,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    Free delivery for orders ≥ ₹499
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+                  background: 'rgba(163,130,76,0.08)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.2)',
+                  borderLeft: '2px solid var(--color-primary)',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'var(--color-primary-dark)',
+                    fontSize: getResponsiveValue(
+                      '0.5rem',
+                      '0.55rem',
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.6rem'
+                    ),
+                    fontWeight: 600,
+                    mb: 0.25,
+                    lineHeight: 1.4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.25,
+                  }}
+                  className={getResponsiveTextClasses()}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: getResponsiveValue(
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.75rem',
+                        '0.8rem',
+                        '0.85rem',
+                        '0.7rem'
+                      ),
+                      color: 'var(--color-primary)',
+                    }}
+                  >
+                    📍
+                  </Box>
+                  Distance-based Charges
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.125 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.45rem',
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.55rem'
+                      ),
+                      lineHeight: 1.4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.25,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: getResponsiveValue(
+                          '0.4rem',
+                          '0.45rem',
+                          '0.5rem',
+                          '0.55rem',
+                          '0.6rem',
+                          '0.65rem',
+                          '0.5rem'
+                        ),
+                        color: 'var(--color-primary)',
+                      }}
+                    >
+                      •
+                    </Box>
+                    Within 5km: ₹30 | 5-10km: ₹50 | 10-15km: ₹80
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.45rem',
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.55rem'
+                      ),
+                      lineHeight: 1.4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.25,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: getResponsiveValue(
+                          '0.4rem',
+                          '0.45rem',
+                          '0.5rem',
+                          '0.55rem',
+                          '0.6rem',
+                          '0.65rem',
+                          '0.5rem'
+                        ),
+                        color: 'var(--color-primary)',
+                      }}
+                    >
+                      •
+                    </Box>
+                    15-20km: ₹120 | Beyond 20km: ₹150
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              flex: { xs: '1 1 100%', sm: '1 1 50%' },
+              p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+              background: 'rgba(163,130,76,0.05)',
+              borderRadius: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+              border: '1px solid rgba(163,130,76,0.15)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'rgba(163,130,76,0.08)',
+                borderColor: 'rgba(163,130,76,0.25)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(163,130,76,0.1)',
+              },
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 700,
+                color: 'var(--color-primary)',
+                fontSize: getResponsiveValue(
+                  '0.55rem',
+                  '0.6rem',
+                  '0.65rem',
+                  '0.7rem',
+                  '0.75rem',
+                  '0.8rem',
+                  '0.65rem'
+                ),
+                mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+              className={getResponsiveTextClasses()}
+            >
+              <Box
+                component="span"
+                sx={{
+                  fontSize: getResponsiveValue(
+                    '0.7rem',
+                    '0.75rem',
+                    '0.8rem',
+                    '0.85rem',
+                    '0.9rem',
+                    '0.95rem',
+                    '0.8rem'
+                  ),
+                }}
+              >
+                💰
+              </Box>
+              Payment Methods
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75) }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 0.5,
+                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  background: 'rgba(255,255,255,0.4)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.6)',
+                    borderColor: 'rgba(163,130,76,0.2)',
+                    transform: 'translateX(1px)',
+                  },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    fontSize: getResponsiveValue(
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.9rem',
+                      '0.75rem'
+                    ),
+                    color: 'var(--color-secondary)',
+                  }}
+                >
+                  💳
+                </Box>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.75rem',
+                        '0.6rem'
+                      ),
+                      fontWeight: 600,
+                      mb: 0.25,
+                      lineHeight: 1.3,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    COD (Cash on Delivery)
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.45rem',
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.55rem'
+                      ),
+                      lineHeight: 1.4,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    Available for all orders
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 0.5,
+                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  background: 'rgba(255,255,255,0.4)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.6)',
+                    borderColor: 'rgba(163,130,76,0.2)',
+                    transform: 'translateX(1px)',
+                  },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    fontSize: getResponsiveValue(
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.9rem',
+                      '0.75rem'
+                    ),
+                    color: 'var(--color-secondary)',
+                  }}
+                >
+                  📱
+                </Box>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.75rem',
+                        '0.6rem'
+                      ),
+                      fontWeight: 600,
+                      mb: 0.25,
+                      lineHeight: 1.3,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    UPI Payment
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.45rem',
+                        '0.5rem',
+                        '0.55rem',
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.55rem'
+                      ),
+                      lineHeight: 1.4,
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    Available only at the store location
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+                  background: 'rgba(163,130,76,0.08)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.2)',
+                  borderLeft: '2px solid var(--color-primary)',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'var(--color-primary-dark)',
+                    fontSize: getResponsiveValue(
+                      '0.45rem',
+                      '0.5rem',
+                      '0.55rem',
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.55rem'
+                    ),
+                    fontWeight: 600,
+                    lineHeight: 1.5,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 0.25,
+                  }}
+                  className={getResponsiveTextClasses()}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: getResponsiveValue(
+                        '0.6rem',
+                        '0.65rem',
+                        '0.7rem',
+                        '0.75rem',
+                        '0.8rem',
+                        '0.85rem',
+                        '0.7rem'
+                      ),
+                      color: 'var(--color-primary)',
+                      mt: 0.1,
+                    }}
+                  >
+                    ⚠️
+                  </Box>
+                  <span>
+                    <strong>Note:</strong> If paying via UPI at store, please provide a screenshot of the successful transaction
+                  </span>
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  mt: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+                  background: 'rgba(163,130,76,0.08)',
+                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  border: '1px solid rgba(163,130,76,0.2)',
+                  textAlign: 'center',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'var(--color-primary-dark)',
+                    fontSize: getResponsiveValue(
+                      '0.55rem',
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.65rem'
+                    ),
+                    fontWeight: 700,
+                    lineHeight: 1.4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.25,
+                  }}
+                  className={getResponsiveTextClasses()}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: getResponsiveValue(
+                        '0.7rem',
+                        '0.75rem',
+                        '0.8rem',
+                        '0.85rem',
+                        '0.9rem',
+                        '0.95rem',
+                        '0.8rem'
+                      ),
+                      color: 'var(--color-primary)',
+                    }}
+                  >
+                    💰
+                  </Box>
+                  Minimum order: ₹{MIN_ORDER_AMOUNT}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
       {error && (
         <Alert
           severity="error"
           sx={{
-            mb: 2,
+            mb: getResponsiveSpacing(),
             background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-            color: '#a3824c',
-            border: '1px solid #e6d897',
+            color: 'var(--color-primary)',
+            border: '1px solid var(--color-primary-light)',
+            borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+            fontSize: getResponsiveValue(
+              '0.875rem',
+              '0.9rem',
+              '1rem',
+              '1.1rem',
+              '1.2rem',
+              '1.3rem',
+              '1rem'
+            ),
           }}
+          className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
         >
           {error}
         </Alert>
       )}
+
       {success && (
         <Alert
           severity="success"
           sx={{
-            mb: 2,
-            background: 'linear-gradient(90deg, #e6d897 0%, #b59961 100%)',
+            mb: getResponsiveSpacing(),
+            background:
+              'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-primary-light) 100%)',
             color: '#fff',
-            border: '1px solid #a3824c',
+            border: '1px solid var(--color-primary)',
+            borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+            fontSize: getResponsiveValue(
+              '0.875rem',
+              '0.9rem',
+              '1rem',
+              '1.1rem',
+              '1.2rem',
+              '1.3rem',
+              '1rem'
+            ),
           }}
+          className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
         >
           {success}
         </Alert>
       )}
+
       {loading ? (
         <Loading />
       ) : (
-        <>
-          <Paper
+        <Grid
+          container
+          spacing={{ xs: 2, sm: 3, md: 4, lg: 5 }}
+          sx={{
+            display: 'flex',
+            justifyContent: {
+              xs: 'center',
+              sm: 'center',
+              md: isTablet ? 'center' : 'flex-start',
+              lg: 'flex-start',
+            },
+          }}
+        >
+          {/* Left Column - Order Details (70%) */}
+          <Grid
             sx={{
-              p: 3,
-              mb: 3,
-              borderRadius: 3,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-              border: '1px solid #e6d897',
-              boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+              width: {
+                xs: '100%',
+                sm: isFoldable ? '100%' : '100%',
+                md: isTablet ? '100%' : '66%',
+                lg: '66%',
+              },
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: {
+                xs: 'center',
+                sm: isFoldable ? 'center' : 'center',
+                md: isTablet ? 'center' : 'flex-start',
+                lg: 'flex-start',
+              },
             }}
           >
-            <Typography fontWeight={600} mb={1} sx={{ color: '#a3824c' }}>
-              Select Shipping Address
-            </Typography>
-            <RadioGroup
-              value={selectedAddress}
-              onChange={(e) => setSelectedAddress(e.target.value)}
-            >
-              {addresses.map((addr) => (
-                <FormControlLabel
-                  key={addr._id}
-                  value={addr._id}
-                  control={<Radio sx={{ color: '#a3824c' }} />}
-                  label={
-                    <Box>
-                      <Typography fontWeight={600} sx={{ color: '#a3824c' }}>
-                        {addr.addressLine1}
-                      </Typography>
-                      {addr.addressLine2 && (
-                        <Typography sx={{ color: '#7d6033' }}>
-                          {addr.addressLine2}
-                        </Typography>
-                      )}
-                      <Typography sx={{ color: '#866422' }}>
-                        {addr.city}, {addr.state}, {addr.country} -{' '}
-                        {addr.pinCode}
-                      </Typography>
-                      <Typography sx={{ color: '#866422' }}>
-                        Phone: {addr.phoneNumber}
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{
-                    mb: 1,
-                    alignItems: 'flex-start',
-                  }}
-                />
-              ))}
-            </RadioGroup>
-            <Button
-              variant="outlined"
-              sx={{
-                mt: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                borderColor: '#a3824c',
-                color: '#a3824c',
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderRadius: 2,
-                '&:hover': {
-                  borderColor: '#e6d897',
+            <Stack spacing={{ xs: 1.5, sm: 2, md: 2.5, lg: 2.5 }}>
+              {/* Shipping Address */}
+              <Paper
+                sx={{
+                  p: getResponsiveValue(0.75, 1, 1.25, 1.5, 1.75, 2, 1.25),
+                  borderRadius: getResponsiveValue(1, 1, 1.5, 2, 2.5, 3, 1.5),
                   background:
-                    'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
-                  color: '#866422',
-                },
-              }}
-              onClick={() => navigate('/addresses')}
-            >
-              Manage Addresses
-            </Button>
-          </Paper>
-          <Paper
-            sx={{
-              p: 3,
-              mb: 3,
-              borderRadius: 3,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-              border: '1px solid #e6d897',
-              boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
-            }}
-          >
-            <Typography fontWeight={600} mb={1} sx={{ color: '#a3824c' }}>
-              Cart Summary
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            {cart.length === 0 ? (
-              <Typography sx={{ color: '#866422' }}>
-                No items in cart.
-              </Typography>
-            ) : (
-              cart.map((item) => (
-                <Box
-                  key={item.product._id}
+                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                  border: '1px solid var(--color-primary-light)',
+                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                }}
+                className={`card-golden ${getResponsiveCardSize()}`}
+              >
+                <Typography
+                  fontWeight={600}
+                  mb={getResponsiveValue(0.5, 0.5, 0.75, 1, 1.25, 1.5, 0.75)}
                   sx={{
-                    mb: 1,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+                    color: 'var(--color-primary)',
+                    fontSize: getResponsiveValue(
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.9rem',
+                      '1rem',
+                      '1.1rem',
+                      '0.8rem'
+                    ),
+                  }}
+                  className={getResponsiveTextClasses()}
+                >
+                  Select Shipping Address
+                </Typography>
+                <RadioGroup
+                  value={selectedAddress}
+                  onChange={(e) => setSelectedAddress(e.target.value)}
+                  sx={{
+                    gap: getResponsiveValue(0.125, 0.125, 0.25, 0.5, 0.75, 1, 0.25),
+                    // Enhanced mobile layout
+                    '@media (max-width: 600px)': {
+                      gap: 0.125,
+                    },
+                    '@media (max-width: 480px)': {
+                      gap: 0.0625,
+                    },
                   }}
                 >
-                  <Typography sx={{ color: '#a3824c', fontWeight: 600 }}>
-                    {item.product.name} × {item.quantity}
-                  </Typography>
-                  <Typography sx={{ color: '#7d6033', fontWeight: 600 }}>
-                    ₹{item.product.price * item.quantity}
-                  </Typography>
-                </Box>
-              ))
-            )}
-          </Paper>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handlePlaceOrder}
-            disabled={placing || cart.length === 0}
+                  {addresses.map((addr) => (
+                    <FormControlLabel
+                      key={addr._id}
+                      value={addr._id}
+                      control={<Radio sx={{ color: 'var(--color-primary)' }} />}
+                      label={
+                        <Box
+                          sx={{
+                            p: getResponsiveValue(0.25, 0.25, 0.5, 0.75, 1, 1.25, 0.5),
+                            borderRadius: getResponsiveValue(
+                              0.5,
+                              0.5,
+                              0.75,
+                              1,
+                              1.5,
+                              2,
+                              0.75
+                            ),
+                            background: 'rgba(163,130,76,0.05)',
+                            border: '1px solid rgba(163,130,76,0.1)',
+                            transition: 'all 0.3s ease',
+                            // Enhanced mobile responsiveness
+                            '@media (max-width: 600px)': {
+                              p: 0.5,
+                              borderRadius: 0.5,
+                            },
+                            '@media (max-width: 480px)': {
+                              p: 0.375,
+                              borderRadius: 0.375,
+                            },
+                            '&:hover': {
+                              background: 'rgba(163,130,76,0.1)',
+                              borderColor: 'var(--color-primary-light)',
+                            },
+                          }}
+                        >
+                          <Typography
+                            fontWeight={600}
+                            sx={{
+                              color: 'var(--color-primary)',
+                              fontSize: getResponsiveValue(
+                                '0.65rem',
+                                '0.7rem',
+                                '0.75rem',
+                                '0.8rem',
+                                '0.85rem',
+                                '0.9rem',
+                                '0.75rem'
+                              ),
+                              mb: getResponsiveValue(
+                                0.125,
+                                0.125,
+                                0.25,
+                                0.375,
+                                0.5,
+                                0.625,
+                                0.25
+                              ),
+                            }}
+                            className={getResponsiveTextClasses()}
+                          >
+                            {addr.addressLine1}
+                          </Typography>
+                          {addr.addressLine2 && (
+                            <Typography
+                              sx={{
+                                color: 'var(--color-primary-medium)',
+                                fontSize: getResponsiveValue(
+                                  '0.6rem',
+                                  '0.65rem',
+                                  '0.7rem',
+                                  '0.75rem',
+                                  '0.8rem',
+                                  '0.85rem',
+                                  '0.7rem'
+                                ),
+                                mb: getResponsiveValue(
+                                  0.125,
+                                  0.125,
+                                  0.25,
+                                  0.375,
+                                  0.5,
+                                  0.625,
+                                  0.25
+                                ),
+                              }}
+                              className={getResponsiveTextClasses()}
+                            >
+                              {addr.addressLine2}
+                            </Typography>
+                          )}
+                          <Typography
+                            sx={{
+                              color: 'var(--color-primary-dark)',
+                              fontSize: getResponsiveValue(
+                                '0.6rem',
+                                '0.65rem',
+                                '0.7rem',
+                                '0.75rem',
+                                '0.8rem',
+                                '0.85rem',
+                                '0.7rem'
+                              ),
+                              mb: getResponsiveValue(
+                                0.125,
+                                0.125,
+                                0.25,
+                                0.375,
+                                0.5,
+                                0.625,
+                                0.25
+                              ),
+                            }}
+                            className={getResponsiveTextClasses()}
+                          >
+                            {addr.city}, {addr.state}, {addr.country} -{' '}
+                            {addr.pinCode}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              color: 'var(--color-primary-dark)',
+                              fontSize: getResponsiveValue(
+                                '0.6rem',
+                                '0.65rem',
+                                '0.7rem',
+                                '0.75rem',
+                                '0.8rem',
+                                '0.85rem',
+                                '0.7rem'
+                              ),
+                            }}
+                            className={getResponsiveTextClasses()}
+                          >
+                            Phone: {addr.phoneNumber}
+                          </Typography>
+                        </Box>
+                      }
+                      sx={{
+                        mb: getResponsiveValue(0.5, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                        alignItems: 'flex-start',
+                        width: '100%',
+                      }}
+                    />
+                  ))}
+                </RadioGroup>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    mt: getResponsiveValue(0.75, 0.75, 1, 1.25, 1.5, 1.75, 1),
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderColor: 'var(--color-primary)',
+                    color: 'var(--color-primary)',
+                    background:
+                      'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                    borderRadius: getResponsiveValue(0.75, 0.75, 1.5, 2.25, 3, 3.75, 1.5),
+                    fontSize: getResponsiveValue(
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.9rem',
+                      '0.75rem'
+                    ),
+                    px: getResponsiveValue(0.75, 0.75, 1.5, 2.25, 3, 3.75, 1.5),
+                    py: getResponsiveValue(0.375, 0.375, 0.75, 1.125, 1.5, 1.875, 0.75),
+                    '&:hover': {
+                      borderColor: 'var(--color-primary-light)',
+                      background:
+                        'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-cream-light) 100%)',
+                      color: 'var(--color-primary-dark)',
+                    },
+                  }}
+                  onClick={() => navigate('/addresses')}
+                  className={getResponsiveButtonSize()}
+                >
+                  Manage Addresses
+                </Button>
+              </Paper>
+
+              {/* Payment Method */}
+              <Paper
+                sx={{
+                  p: getResponsiveValue(0.75, 1, 1.25, 1.5, 1.75, 2, 1.25),
+                  borderRadius: getResponsiveValue(1, 1, 1.5, 2, 2.5, 3, 1.5),
+                  background:
+                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                  border: '1px solid var(--color-primary-light)',
+                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                  '& .MuiTypography-root': {
+                    fontSize: getResponsiveValue(
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.7rem'
+                    ),
+                  },
+                  '& .MuiFormLabel-root': {
+                    fontSize: getResponsiveValue(
+                      '0.55rem',
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.65rem'
+                    ),
+                  },
+                  '& .MuiInputBase-root': {
+                    fontSize: getResponsiveValue(
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.85rem',
+                      '0.7rem'
+                    ),
+                  },
+                  '& .MuiButton-root': {
+                    fontSize: getResponsiveValue(
+                      '0.55rem',
+                      '0.6rem',
+                      '0.65rem',
+                      '0.7rem',
+                      '0.75rem',
+                      '0.8rem',
+                      '0.65rem'
+                    ),
+                  },
+                }}
+                className={`card-golden ${getResponsiveCardSize()}`}
+              >
+                <PaymentMethodSelector
+                  selectedMethod={selectedPaymentMethod}
+                  onMethodChange={setSelectedPaymentMethod}
+                  paymentDetails={paymentDetails}
+                  onPaymentDetailsChange={setPaymentDetails}
+                  onPaymentScreenshotChange={setPaymentScreenshot}
+                  paymentScreenshot={paymentScreenshot}
+                />
+              </Paper>
+            </Stack>
+          </Grid>
+
+          {/* Right Column - Order Summary (30%) */}
+          <Grid
             sx={{
-              fontWeight: 700,
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              color: '#fff',
-              textTransform: 'none',
-              borderRadius: 2,
-              fontSize: '1rem',
-              boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
-              mt: 2,
-              '&:hover': {
-                background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                color: '#866422',
-                boxShadow: '0 4px 16px rgba(163,130,76,0.18)',
+              width: {
+                xs: '100%',
+                sm: isFoldable ? '100%' : '100%',
+                md: isTablet ? '100%' : '30%',
+                lg: '30%',
               },
-              transition: 'all 0.3s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: {
+                xs: 'center',
+                sm: isFoldable ? 'center' : 'center',
+                md: isTablet ? 'center' : 'flex-start',
+                lg: 'flex-start',
+              },
             }}
           >
-            {placing ? 'Placing Order...' : 'Place Order'}
-          </Button>
-          {invoice && (
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                color: '#a3824c',
-                border: '1px solid #e6d897',
-                borderRadius: 2,
-                mt: 2,
-                '&:hover': {
+            <Stack spacing={{ xs: 3, sm: 4, md: 4, lg: 4 }}>
+              <Paper
+                sx={{
+                  p: 1.5,
+                  height: 'auto',
+                  maxHeight: 'none',
+                  overflow: 'visible',
+
+                  borderRadius: getResponsiveValue(2, 2, 3, 4, 5, 6, 3),
                   background:
-                    'linear-gradient(90deg, #e6d897 0%, #b59961 100%)',
-                  color: '#fff',
-                },
-              }}
-              href={`http://localhost:3000/api/invoice/${invoice._id}`}
-              target="_blank"
-            >
-              Download Invoice
-            </Button>
-          )}
-        </>
+                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                  border: '1px solid var(--color-primary-light)',
+                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                }}
+                className={`card-golden ${getResponsiveCardSize()} responsive-card`}
+              >
+                <Typography
+                  textAlign="center"
+                  fontWeight={600}
+                  mb={1}
+                  sx={{
+                    color: 'var(--color-primary)',
+                    fontSize: getResponsiveValue(
+                      '1rem',
+                      '1.1rem',
+                      '1.2rem',
+                      '1.3rem',
+                      '1.4rem',
+                      '1.5rem',
+                      '1.2rem'
+                    ),
+                  }}
+                  className={getResponsiveTextClasses()}
+                >
+                  Summary
+                </Typography>
+
+                <Divider
+                  sx={{ mb: 1, borderColor: 'var(--color-primary-light)' }}
+                />
+
+                {/* Cart Items */}
+                {cart.length === 0 ? (
+                  <Typography
+                    sx={{
+                      color: 'var(--color-primary-dark)',
+                      fontSize: getResponsiveValue(
+                        '0.875rem',
+                        '0.9rem',
+                        '1rem',
+                        '1.1rem',
+                        '1.2rem',
+                        '1.3rem',
+                        '1rem'
+                      ),
+                    }}
+                    className={getResponsiveTextClasses()}
+                  >
+                    No items in cart.
+                  </Typography>
+                ) : (
+                  <>
+                    {cart.map((item) => (
+                      <Box
+                        key={item.product._id}
+                        sx={{
+                          mb: 1,
+                          px: 1,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          borderRadius: getResponsiveValue(
+                            0.5,
+                            0.5,
+                            1,
+                            1.5,
+                            2,
+                            2.5,
+                            1
+                          ),
+                          background: 'rgba(163,130,76,0.05)',
+                          border: '1px solid rgba(163,130,76,0.1)',
+                        }}
+                      >
+                        <Box sx={{ flex: 1 }}>
+                          <Typography
+                            sx={{
+                              color: 'var(--color-primary)',
+                              fontWeight: 400,
+                              fontSize: getResponsiveValue(
+                                '0.65rem',
+                                '0.7rem',
+                                '0.75rem',
+                                '0.8rem',
+                                '0.85rem',
+                                '0.9rem',
+                                '0.75rem'
+                              ),
+                            }}
+                            className={getResponsiveTextClasses()}
+                          >
+                            {item.product.name}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              color: 'var(--color-primary-medium)',
+                              fontSize: getResponsiveValue(
+                                '0.6rem',
+                                '0.65rem',
+                                '0.7rem',
+                                '0.75rem',
+                                '0.8rem',
+                                '0.85rem',
+                                '0.7rem'
+                              ),
+                            }}
+                            className={getResponsiveTextClasses()}
+                          >
+                            Qty: {item.quantity}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-medium)',
+                            fontWeight: 400,
+                            fontSize: getResponsiveValue(
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.9rem',
+                              '0.75rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          ₹{(item.product.price * item.quantity).toFixed(2)}
+                        </Typography>
+                      </Box>
+                    ))}
+
+                    <Divider
+                      sx={{ borderColor: 'var(--color-primary-light)', my: 1 }}
+                    />
+
+                    {/* Price Breakdown */}
+                    <Box sx={{ mb: 1 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          px: 1,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-dark)',
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          Subtotal:
+                        </Typography>
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-dark)',
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          ₹{totals.subtotal.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          px: 1,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-dark)',
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          Delivery:
+                        </Typography>
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-dark)',
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          {totals.deliveryCharge === 0
+                            ? 'Free'
+                            : `₹${totals.deliveryCharge.toFixed(2)}`}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          px: 1,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-dark)',
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          GST (18%):
+                        </Typography>
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary-dark)',
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          ₹{totals.gst.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      <Divider
+                        sx={{
+                          my: 1,
+                          borderColor: 'var(--color-primary-light)',
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          p: 1,
+                          background: 'rgba(163,130,76,0.1)',
+                          borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary)',
+                            fontWeight: 700,
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          Total:
+                        </Typography>
+                        <Typography
+                          sx={{
+                            color: 'var(--color-primary)',
+                            fontWeight: 700,
+                            fontSize: getResponsiveValue(
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.7rem'
+                            ),
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          ₹{totals.total.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Payment Method Display */}
+                    <Box
+                      sx={{
+                        mb: 1,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          color: 'var(--color-primary-dark)',
+                          fontSize: getResponsiveValue(
+                            '0.6rem',
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.7rem'
+                          ),
+                          mb: 1,
+                        }}
+                        className={getResponsiveTextClasses()}
+                      >
+                        Payment Method:
+                      </Typography>
+                      <Chip
+                        label={selectedPaymentMethod.toUpperCase()}
+                        sx={{
+                          background: 'var(--color-background-light-gradient)',
+                          color: '#fff',
+                          fontWeight: 400,
+                          fontSize: getResponsiveValue(
+                            '0.5rem',
+                            '0.55rem',
+                            '0.6rem',
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.6rem'
+                          ),
+                          height: '24px',
+                        }}
+                      />
+                    </Box>
+
+                    {/* Minimum Order Notice */}
+                    {totals.subtotal < MIN_ORDER_AMOUNT && (
+                      <Alert
+                        severity="warning"
+                        sx={{
+                          mb: 1,
+                          borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+                          background:
+                            'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                          border: '1px solid var(--color-primary-light)',
+                          '& .MuiAlert-icon': {
+                            color: 'var(--color-primary)',
+                          },
+                        }}
+                        className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
+                      >
+                        <Typography
+                          variant="body2"
+                          className={getResponsiveTextClasses()}
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.9rem',
+                              '0.95rem',
+                              '0.8rem'
+                            ),
+                            fontWeight: 600,
+                            color: 'var(--color-primary)',
+                            mb: 0.5,
+                          }}
+                        >
+                          Heads Up!
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.9rem',
+                              '0.75rem'
+                            ),
+                            color: 'var(--color-primary-dark)',
+                            display: 'block',
+                            lineHeight: 1.3,
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          Almost there! Add ₹
+                          {(MIN_ORDER_AMOUNT - totals.subtotal).toFixed(2)} more
+                          items to reach our minimum order amount of ₹
+                          {MIN_ORDER_AMOUNT} and enjoy delivery to your
+                          doorstep!
+                        </Typography>
+                      </Alert>
+                    )}
+
+                    {/* Place Order Button */}
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      onClick={handlePlaceOrder}
+                      disabled={
+                        placing ||
+                        cart.length === 0 ||
+                        totals.subtotal < MIN_ORDER_AMOUNT
+                      }
+                      sx={{
+                        fontWeight: 500,
+                        background: 'var(--color-background-light-gradient)',
+                        color: '#fff',
+                        textTransform: 'none',
+                        borderRadius: getResponsiveValue(
+                          0.5,
+                          0.5,
+                          1,
+                          1.5,
+                          2,
+                          2.5,
+                          1
+                        ),
+                        fontSize: getResponsiveValue(
+                          '0.6rem',
+                          '0.65rem',
+                          '0.7rem',
+                          '0.75rem',
+                          '0.8rem',
+                          '0.85rem',
+                          '0.7rem'
+                        ),
+                        boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+                        mb: 1,
+                        py: 0.75,
+                        minHeight: '44px',
+                        '&:hover': {
+                          background:
+                            'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%)',
+                          color: '#fff',
+                          boxShadow: '0 4px 16px rgba(163,130,76,0.18)',
+                        },
+                        transition: 'all 0.3s ease',
+                      }}
+                      className={getResponsiveButtonSize()}
+                    >
+                      {placing ? 'Placing Order...' : 'Place Order'}
+                    </Button>
+
+                    {/* Navigate to catalogue */}
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      onClick={() => navigate('/catalogue')}
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        background:
+                          'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                        color: 'var(--color-primary)',
+                        border: '1px solid var(--color-primary-light)',
+                      }}
+                    >
+                      Continue Shopping
+                    </Button>
+
+                    {/* Download Invoice */}
+                    {invoice && (
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          background:
+                            'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                          color: 'var(--color-primary)',
+                          border: '1px solid var(--color-primary-light)',
+                          borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+                          fontSize: getResponsiveValue(
+                            '0.875rem',
+                            '0.9rem',
+                            '1rem',
+                            '1.1rem',
+                            '1.2rem',
+                            '1.3rem',
+                            '1rem'
+                          ),
+                          py: getResponsiveValue(
+                            0.75,
+                            0.75,
+                            1,
+                            1.25,
+                            1.5,
+                            1.75,
+                            1
+                          ),
+                          minHeight: getResponsiveValue(
+                            '44px',
+                            '48px',
+                            '52px',
+                            '56px',
+                            '60px',
+                            '64px',
+                            '52px'
+                          ),
+                          // Enhanced mobile responsiveness
+                          '@media (max-width: 600px)': {
+                            minHeight: '48px',
+                            fontSize: '1rem',
+                            py: 1,
+                            borderRadius: 2,
+                          },
+                          '@media (max-width: 480px)': {
+                            minHeight: '44px',
+                            fontSize: '0.9rem',
+                            py: 0.75,
+                            borderRadius: 1.5,
+                          },
+                          '&:hover': {
+                            background:
+                              'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary-medium) 100%)',
+                            color: '#fff',
+                          },
+                        }}
+                        href={`http://localhost:3000/api/invoice/${invoice._id}`}
+                        target="_blank"
+                        className={getResponsiveButtonSize()}
+                      >
+                        Download Invoice
+                      </Button>
+                    )}
+                  </>
+                )}
+              </Paper>
+            </Stack>
+          </Grid>
+        </Grid>
       )}
     </Box>
   );
