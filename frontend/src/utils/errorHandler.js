@@ -172,7 +172,7 @@ export const handleError = (error, context = '') => {
   const message = getErrorMessage(error, context);
 
   // Log error for debugging (in development)
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.NODE_ENV === 'development') {
     console.error('Error Details:', {
       category,
       severity,

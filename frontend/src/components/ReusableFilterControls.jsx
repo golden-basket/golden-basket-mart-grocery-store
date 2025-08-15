@@ -25,20 +25,20 @@ import CloseIcon from '@mui/icons-material/Close';
 
 /**
  * ReusableFilterControls - A comprehensive filter component with debouncing support
- * 
+ *
  * Features:
  * - Debounced search and price range inputs to reduce API calls
  * - Responsive design with mobile drawer support
  * - Customizable styling with theme integration
  * - Visual feedback during search operations
- * 
+ *
  * Debouncing Implementation:
  * - Search queries are debounced to prevent excessive API calls while typing
  * - Price range inputs are debounced to avoid rapid filter updates
  * - Visual spinner indicator shows when search is in progress
  * - Configurable debounce delay (default: 500ms)
  * - Option to disable debouncing for immediate updates
- * 
+ *
  * Usage Example:
  * ```jsx
  * <ReusableFilterControls
@@ -52,7 +52,7 @@ import CloseIcon from '@mui/icons-material/Close';
  *   enableDebouncing={true} // Enable/disable debouncing
  * />
  * ```
- * 
+ *
  * @param {Object} props - Component props
  * @param {boolean} [props.isMobile] - Force mobile view
  * @param {Object} props.filterConfig - Configuration for filter fields
@@ -91,8 +91,12 @@ const ReusableFilterControls = ({
   const isMobileView = isMobile !== undefined ? isMobile : mediaQueryResult;
 
   // Local state for debounced inputs
-  const [localSearchQuery, setLocalSearchQuery] = useState(filterValues.searchQuery || '');
-  const [localPriceRange, setLocalPriceRange] = useState(filterValues.priceRange || [0, 1000]);
+  const [localSearchQuery, setLocalSearchQuery] = useState(
+    filterValues.searchQuery || ''
+  );
+  const [localPriceRange, setLocalPriceRange] = useState(
+    filterValues.priceRange || [0, 1000]
+  );
   const [isSearching, setIsSearching] = useState(false);
 
   // Store timeout IDs for cleanup
@@ -115,7 +119,7 @@ const ReusableFilterControls = ({
       timeoutRefs.current[fieldName] = setTimeout(() => {
         onFilterChange(fieldName, value);
         delete timeoutRefs.current[fieldName];
-        
+
         // Clear searching state
         if (fieldName === 'searchQuery') {
           setIsSearching(false);
@@ -127,8 +131,9 @@ const ReusableFilterControls = ({
 
   // Cleanup timeouts on unmount
   useEffect(() => {
+    const currentTimeouts = timeoutRefs.current;
     return () => {
-      Object.values(timeoutRefs.current).forEach(timeoutId => {
+      Object.values(currentTimeouts).forEach((timeoutId) => {
         clearTimeout(timeoutId);
       });
     };
@@ -159,7 +164,12 @@ const ReusableFilterControls = ({
         onFilterChange('priceRange', newRange);
       }
     },
-    [localPriceRange, debouncedFilterChangeWithCleanup, enableDebouncing, onFilterChange]
+    [
+      localPriceRange,
+      debouncedFilterChangeWithCleanup,
+      enableDebouncing,
+      onFilterChange,
+    ]
   );
 
   // Sync local state with prop changes
