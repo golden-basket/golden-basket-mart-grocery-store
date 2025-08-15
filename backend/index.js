@@ -16,4 +16,4 @@ mongoose
       logger.info(`Server running at http://localhost:${PORT}`)
     );
   })
-  .catch((err) => logger.error('MongoDB connection error:', err));
+  .catch(err => logger.error('MongoDB connection error:', err));

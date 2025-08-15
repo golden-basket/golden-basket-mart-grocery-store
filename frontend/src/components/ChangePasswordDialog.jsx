@@ -33,22 +33,22 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (field) => (event) => {
-    setFormData((prev) => ({
+  const handleInputChange = field => event => {
+    setFormData(prev => ({
       ...prev,
       [field]: event.target.value,
     }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [field]: '',
       }));
     }
   };
 
-  const togglePasswordVisibility = (field) => {
-    setShowPasswords((prev) => ({
+  const togglePasswordVisibility = field => {
+    setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field],
     }));
@@ -127,7 +127,7 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
+      maxWidth='sm'
       fullWidth
       PaperProps={{
         sx: {
@@ -168,7 +168,7 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
       <DialogContent sx={{ pt: 4, pb: 2, px: { xs: 3, sm: 4 } }}>
         <Box sx={{ mb: 3 }}>
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               color: 'var(--color-text-secondary)',
               textAlign: 'center',
@@ -182,214 +182,218 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Current Password */}
-          <TextField
-            label="Current Password"
-            type={showPasswords.currentPassword ? 'text' : 'password'}
-            value={formData.currentPassword}
-            onChange={handleInputChange('currentPassword')}
-            error={!!errors.currentPassword}
-            helperText={errors.currentPassword}
-            FormHelperTextProps={{
-              sx: {
-                color: errors.currentPassword
-                  ? 'var(--color-error)'
-                  : 'var(--color-text-secondary)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-              },
-            }}
-            fullWidth
-            size="medium"
-            InputProps={{
-              startAdornment: (
-                <LockIcon
-                  sx={{
-                    mr: 2,
-                    color: 'var(--color-primary)',
-                    fontSize: '1.5rem',
-                  }}
-                />
-              ),
-              endAdornment: (
-                <IconButton
-                  onClick={() => togglePasswordVisibility('currentPassword')}
-                  edge="end"
-                  sx={{ mr: 1 }}
-                >
-                  {showPasswords.currentPassword ? (
-                    <VisibilityOffIcon />
-                  ) : (
-                    <VisibilityIcon />
-                  )}
-                </IconButton>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                border: '1px solid rgba(163, 130, 76, 0.2)',
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--color-primary)',
-                  borderWidth: '2px',
+        {isSubmitting ? (
+          <Loading size='small' variant='default' />
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Current Password */}
+            <TextField
+              label='Current Password'
+              type={showPasswords.currentPassword ? 'text' : 'password'}
+              value={formData.currentPassword}
+              onChange={handleInputChange('currentPassword')}
+              error={!!errors.currentPassword}
+              helperText={errors.currentPassword}
+              FormHelperTextProps={{
+                sx: {
+                  color: errors.currentPassword
+                    ? 'var(--color-error)'
+                    : 'var(--color-text-secondary)',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--color-primary)',
-                  borderWidth: '2px',
+              }}
+              fullWidth
+              size='medium'
+              InputProps={{
+                startAdornment: (
+                  <LockIcon
+                    sx={{
+                      mr: 2,
+                      color: 'var(--color-primary)',
+                      fontSize: '1.5rem',
+                    }}
+                  />
+                ),
+                endAdornment: (
+                  <IconButton
+                    onClick={() => togglePasswordVisibility('currentPassword')}
+                    edge='end'
+                    sx={{ mr: 1 }}
+                  >
+                    {showPasswords.currentPassword ? (
+                      <VisibilityOffIcon />
+                    ) : (
+                      <VisibilityIcon />
+                    )}
+                  </IconButton>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  border: '1px solid rgba(163, 130, 76, 0.2)',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--color-primary)',
+                    borderWidth: '2px',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--color-primary)',
+                    borderWidth: '2px',
+                  },
                 },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--color-text-secondary)',
-                fontWeight: 500,
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: 'var(--color-primary)',
-                fontWeight: 600,
-              },
-            }}
-          />
+                '& .MuiInputLabel-root': {
+                  color: 'var(--color-text-secondary)',
+                  fontWeight: 500,
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: 'var(--color-primary)',
+                  fontWeight: 600,
+                },
+              }}
+            />
 
-          {/* New Password */}
-          <TextField
-            label="New Password"
-            type={showPasswords.newPassword ? 'text' : 'password'}
-            value={formData.newPassword}
-            onChange={handleInputChange('newPassword')}
-            error={!!errors.newPassword}
-            helperText={errors.newPassword || 'Minimum 6 characters'}
-            FormHelperTextProps={{
-              sx: {
-                color: errors.newPassword
-                  ? 'var(--color-error)'
-                  : 'var(--color-text-secondary)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-              },
-            }}
-            fullWidth
-            size="medium"
-            InputProps={{
-              startAdornment: (
-                <LockIcon
-                  sx={{
-                    mr: 2,
-                    color: 'var(--color-primary)',
-                    fontSize: '1.5rem',
-                  }}
-                />
-              ),
-              endAdornment: (
-                <IconButton
-                  onClick={() => togglePasswordVisibility('newPassword')}
-                  edge="end"
-                  sx={{ mr: 1 }}
-                >
-                  {showPasswords.newPassword ? (
-                    <VisibilityOffIcon />
-                  ) : (
-                    <VisibilityIcon />
-                  )}
-                </IconButton>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                border: '1px solid rgba(163, 130, 76, 0.2)',
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--color-primary)',
-                  borderWidth: '2px',
+            {/* New Password */}
+            <TextField
+              label='New Password'
+              type={showPasswords.newPassword ? 'text' : 'password'}
+              value={formData.newPassword}
+              onChange={handleInputChange('newPassword')}
+              error={!!errors.newPassword}
+              helperText={errors.newPassword || 'Minimum 6 characters'}
+              FormHelperTextProps={{
+                sx: {
+                  color: errors.newPassword
+                    ? 'var(--color-error)'
+                    : 'var(--color-text-secondary)',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--color-primary)',
-                  borderWidth: '2px',
+              }}
+              fullWidth
+              size='medium'
+              InputProps={{
+                startAdornment: (
+                  <LockIcon
+                    sx={{
+                      mr: 2,
+                      color: 'var(--color-primary)',
+                      fontSize: '1.5rem',
+                    }}
+                  />
+                ),
+                endAdornment: (
+                  <IconButton
+                    onClick={() => togglePasswordVisibility('newPassword')}
+                    edge='end'
+                    sx={{ mr: 1 }}
+                  >
+                    {showPasswords.newPassword ? (
+                      <VisibilityOffIcon />
+                    ) : (
+                      <VisibilityIcon />
+                    )}
+                  </IconButton>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  border: '1px solid rgba(163, 130, 76, 0.2)',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--color-primary)',
+                    borderWidth: '2px',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--color-primary)',
+                    borderWidth: '2px',
+                  },
                 },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--color-text-secondary)',
-                fontWeight: 500,
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: 'var(--color-primary)',
-                fontWeight: 600,
-              },
-            }}
-          />
+                '& .MuiInputLabel-root': {
+                  color: 'var(--color-text-secondary)',
+                  fontWeight: 500,
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: 'var(--color-primary)',
+                  fontWeight: 600,
+                },
+              }}
+            />
 
-          {/* Confirm New Password */}
-          <TextField
-            label="Confirm New Password"
-            type={showPasswords.confirmPassword ? 'text' : 'password'}
-            value={formData.confirmPassword}
-            onChange={handleInputChange('confirmPassword')}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword}
-            FormHelperTextProps={{
-              sx: {
-                color: errors.confirmPassword
-                  ? 'var(--color-error)'
-                  : 'var(--color-text-secondary)',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-              },
-            }}
-            fullWidth
-            size="medium"
-            InputProps={{
-              startAdornment: (
-                <LockIcon
-                  sx={{
-                    mr: 2,
-                    color: 'var(--color-primary)',
-                    fontSize: '1.5rem',
-                  }}
-                />
-              ),
-              endAdornment: (
-                <IconButton
-                  onClick={() => togglePasswordVisibility('confirmPassword')}
-                  edge="end"
-                  sx={{ mr: 1 }}
-                >
-                  {showPasswords.confirmPassword ? (
-                    <VisibilityOffIcon />
-                  ) : (
-                    <VisibilityIcon />
-                  )}
-                </IconButton>
-              ),
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                border: '1px solid rgba(163, 130, 76, 0.2)',
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--color-primary)',
-                  borderWidth: '2px',
+            {/* Confirm New Password */}
+            <TextField
+              label='Confirm New Password'
+              type={showPasswords.confirmPassword ? 'text' : 'password'}
+              value={formData.confirmPassword}
+              onChange={handleInputChange('confirmPassword')}
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword}
+              FormHelperTextProps={{
+                sx: {
+                  color: errors.confirmPassword
+                    ? 'var(--color-error)'
+                    : 'var(--color-text-secondary)',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--color-primary)',
-                  borderWidth: '2px',
+              }}
+              fullWidth
+              size='medium'
+              InputProps={{
+                startAdornment: (
+                  <LockIcon
+                    sx={{
+                      mr: 2,
+                      color: 'var(--color-primary)',
+                      fontSize: '1.5rem',
+                    }}
+                  />
+                ),
+                endAdornment: (
+                  <IconButton
+                    onClick={() => togglePasswordVisibility('confirmPassword')}
+                    edge='end'
+                    sx={{ mr: 1 }}
+                  >
+                    {showPasswords.confirmPassword ? (
+                      <VisibilityOffIcon />
+                    ) : (
+                      <VisibilityIcon />
+                    )}
+                  </IconButton>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  border: '1px solid rgba(163, 130, 76, 0.2)',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--color-primary)',
+                    borderWidth: '2px',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--color-primary)',
+                    borderWidth: '2px',
+                  },
                 },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--color-text-secondary)',
-                fontWeight: 500,
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: 'var(--color-primary)',
-                fontWeight: 600,
-              },
-            }}
-          />
-        </Box>
+                '& .MuiInputLabel-root': {
+                  color: 'var(--color-text-secondary)',
+                  fontWeight: 500,
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: 'var(--color-primary)',
+                  fontWeight: 600,
+                },
+              }}
+            />
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ p: 4, gap: 3, justifyContent: 'center' }}>
         <Button
           onClick={handleClose}
-          variant="outlined"
+          variant='outlined'
           startIcon={<CloseIcon />}
           sx={{
             color: 'var(--color-text-secondary)',
@@ -416,9 +420,9 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
 
         <Button
           onClick={handleSubmit}
-          variant="contained"
+          variant='contained'
           disabled={isSubmitting}
-          startIcon={isSubmitting ? <Loading /> : <LockIcon />}
+          startIcon={<LockIcon />}
           sx={{
             background:
               'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
@@ -446,7 +450,7 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
             transition: 'all 0.3s ease',
           }}
         >
-          {isSubmitting ? 'Changing...' : 'Change Password'}
+          Change Password
         </Button>
       </DialogActions>
     </Dialog>

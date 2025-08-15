@@ -38,7 +38,7 @@ productSchema.index({ ratings: -1, createdAt: -1 });
 productSchema.index({ images: 1 }, { sparse: true });
 
 // Virtual for stock status
-productSchema.virtual('stockStatus').get(function() {
+productSchema.virtual('stockStatus').get(function () {
   if (this.stock === 0) return 'out_of_stock';
   if (this.stock <= 5) return 'low_stock';
   if (this.stock <= 15) return 'limited_stock';

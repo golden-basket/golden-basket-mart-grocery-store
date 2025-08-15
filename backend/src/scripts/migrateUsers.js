@@ -95,7 +95,11 @@ const migrateUsers = async () => {
         }
         if (user.profileCompleted === undefined) {
           // Calculate profile completion based on existing data
-          updates.profileCompleted = !!(user.firstName && user.lastName && user.phone);
+          updates.profileCompleted = !!(
+            user.firstName &&
+            user.lastName &&
+            user.phone
+          );
         }
         if (user.avatar === undefined) {
           updates.avatar = null;
@@ -116,7 +120,9 @@ const migrateUsers = async () => {
       }
     }
 
-    logger.info(`Migration completed. Updated: ${updatedCount}, Errors: ${errorCount}`);
+    logger.info(
+      `Migration completed. Updated: ${updatedCount}, Errors: ${errorCount}`
+    );
 
     // Create indexes for better performance
     logger.info('Creating indexes...');
@@ -131,7 +137,6 @@ const migrateUsers = async () => {
     await User.collection.createIndex({ isActive: 1 });
     await User.collection.createIndex({ isSuspended: 1 });
     logger.info('Indexes created successfully');
-
   } catch (error) {
     logger.error('Migration failed:', error);
     throw error;
@@ -146,60 +151,67 @@ const cleanupExpiredData = async () => {
     // Cleanup expired email verification tokens
     const expiredVerificationResult = await User.updateMany(
       {
-        emailVerificationExpires: { $lt: new Date() }
+        emailVerificationExpires: { $lt: new Date() },
       },
       {
         $unset: {
           emailVerificationToken: 1,
-          emailVerificationExpires: 1
-        }
+          emailVerificationExpires: 1,
+        },
       }
     );
-    logger.info(`Cleaned up ${expiredVerificationResult.modifiedCount} expired email verification tokens`);
+    logger.info(
+      `Cleaned up ${expiredVerificationResult.modifiedCount} expired email verification tokens`
+    );
 
     // Cleanup expired password reset tokens
     const expiredResetResult = await User.updateMany(
       {
-        passwordResetExpires: { $lt: new Date() }
+        passwordResetExpires: { $lt: new Date() },
       },
       {
         $unset: {
           passwordResetToken: 1,
-          passwordResetExpires: 1
-        }
+          passwordResetExpires: 1,
+        },
       }
     );
-    logger.info(`Cleaned up ${expiredResetResult.modifiedCount} expired password reset tokens`);
+    logger.info(
+      `Cleaned up ${expiredResetResult.modifiedCount} expired password reset tokens`
+    );
 
     // Cleanup expired account locks
     const expiredLocksResult = await User.updateMany(
       {
-        lockUntil: { $lt: new Date() }
+        lockUntil: { $lt: new Date() },
       },
       {
         $unset: {
           lockUntil: 1,
-          loginAttempts: 1
-        }
+          loginAttempts: 1,
+        },
       }
     );
-    logger.info(`Cleaned up ${expiredLocksResult.modifiedCount} expired account locks`);
+    logger.info(
+      `Cleaned up ${expiredLocksResult.modifiedCount} expired account locks`
+    );
 
     // Cleanup old failed login attempts (keep only last 10)
     const usersWithManyFailedAttempts = await User.find({
-      'failedLoginAttempts.10': { $exists: true }
+      'failedLoginAttempts.10': { $exists: true },
     });
 
     for (const user of usersWithManyFailedAttempts) {
       const recentAttempts = user.failedLoginAttempts.slice(-10);
       await User.findByIdAndUpdate(user._id, {
-        failedLoginAttempts: recentAttempts
+        failedLoginAttempts: recentAttempts,
       });
     }
-    logger.info(`Cleaned up failed login attempts for ${usersWithManyFailedAttempts.length} users`);
+    logger.info(
+      `Cleaned up failed login attempts for ${usersWithManyFailedAttempts.length} users`
+    );
 
     logger.info('Cleanup completed successfully');
-
   } catch (error) {
     logger.error('Cleanup failed:', error);
     throw error;
@@ -215,10 +227,12 @@ const validateData = async () => {
 
     // Check for users with invalid email formats
     const invalidEmailUsers = await User.find({
-      email: { $not: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
+      email: { $not: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
     });
     if (invalidEmailUsers.length > 0) {
-      issues.push(`Found ${invalidEmailUsers.length} users with invalid email formats`);
+      issues.push(
+        `Found ${invalidEmailUsers.length} users with invalid email formats`
+      );
     }
 
     // Check for users with missing required fields
@@ -226,11 +240,13 @@ const validateData = async () => {
       $or: [
         { firstName: { $exists: false } },
         { lastName: { $exists: false } },
-        { email: { $exists: false } }
-      ]
+        { email: { $exists: false } },
+      ],
     });
     if (missingFieldsUsers.length > 0) {
-      issues.push(`Found ${missingFieldsUsers.length} users with missing required fields`);
+      issues.push(
+        `Found ${missingFieldsUsers.length} users with missing required fields`
+      );
     }
 
     // Check for duplicate emails
@@ -239,14 +255,14 @@ const validateData = async () => {
         $group: {
           _id: { $toLower: '$email' },
           count: { $sum: 1 },
-          users: { $push: '$_id' }
-        }
+          users: { $push: '$_id' },
+        },
       },
       {
         $match: {
-          count: { $gt: 1 }
-        }
-      }
+          count: { $gt: 1 },
+        },
+      },
     ]);
     if (duplicateEmails.length > 0) {
       issues.push(`Found ${duplicateEmails.length} duplicate email addresses`);
@@ -254,7 +270,7 @@ const validateData = async () => {
 
     // Check for users with invalid roles
     const invalidRoleUsers = await User.find({
-      role: { $nin: ['user', 'admin'] }
+      role: { $nin: ['user', 'admin'] },
     });
     if (invalidRoleUsers.length > 0) {
       issues.push(`Found ${invalidRoleUsers.length} users with invalid roles`);
@@ -268,7 +284,6 @@ const validateData = async () => {
     }
 
     return issues;
-
   } catch (error) {
     logger.error('Data validation failed:', error);
     throw error;
@@ -291,7 +306,6 @@ const main = async () => {
 
     logger.info('All operations completed successfully');
     process.exit(0);
-
   } catch (error) {
     logger.error('Script execution failed:', error);
     process.exit(1);
@@ -306,5 +320,5 @@ if (require.main === module) {
 module.exports = {
   migrateUsers,
   cleanupExpiredData,
-  validateData
+  validateData,
 };

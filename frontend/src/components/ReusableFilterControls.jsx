@@ -133,7 +133,7 @@ const ReusableFilterControls = ({
   useEffect(() => {
     const currentTimeouts = timeoutRefs.current;
     return () => {
-      Object.values(currentTimeouts).forEach((timeoutId) => {
+      Object.values(currentTimeouts).forEach(timeoutId => {
         clearTimeout(timeoutId);
       });
     };
@@ -141,7 +141,7 @@ const ReusableFilterControls = ({
 
   // Handle search input with debouncing
   const handleSearchChange = useCallback(
-    (value) => {
+    value => {
       setLocalSearchQuery(value);
       if (enableDebouncing) {
         debouncedFilterChangeWithCleanup('searchQuery', value);
@@ -219,10 +219,10 @@ const ReusableFilterControls = ({
 
     return (
       <TextField
-        size="small"
+        size='small'
         placeholder={filterConfig.search.placeholder || 'Search...'}
         value={localSearchQuery}
-        onChange={(e) => handleSearchChange(e.target.value)}
+        onChange={e => handleSearchChange(e.target.value)}
         sx={{
           width: isMobileView ? '100%' : filterConfig.search.width || 150,
           maxWidth: isMobileView ? '100%' : filterConfig.search.maxWidth || 180,
@@ -232,12 +232,12 @@ const ReusableFilterControls = ({
         slotProps={{
           input: {
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position='start'>
                 <SearchIcon sx={{ color: '#a3824c', fontSize: 14 }} />
               </InputAdornment>
             ),
             endAdornment: isSearching ? (
-              <InputAdornment position="end">
+              <InputAdornment position='end'>
                 <Box
                   sx={{
                     width: 12,
@@ -264,8 +264,8 @@ const ReusableFilterControls = ({
   const renderSelectField = (fieldName, config) => {
     return (
       <FormControl
-        variant="outlined"
-        size="small"
+        variant='outlined'
+        size='small'
         sx={{
           minWidth: isMobileView ? '100%' : config.width || 120,
           maxWidth: isMobileView ? '100%' : config.maxWidth || 120,
@@ -273,9 +273,9 @@ const ReusableFilterControls = ({
         }}
       >
         <Select
-          size="small"
+          size='small'
           value={filterValues[fieldName] || ''}
-          onChange={(e) => onFilterChange(fieldName, e.target.value)}
+          onChange={e => onFilterChange(fieldName, e.target.value)}
           displayEmpty
           sx={{
             width: isMobileView ? '100%' : config.width || 120,
@@ -306,7 +306,7 @@ const ReusableFilterControls = ({
             },
           }}
         >
-          {config.options?.map((option) => (
+          {config.options?.map(option => (
             <MenuItem
               key={option.value}
               value={option.value}
@@ -329,17 +329,17 @@ const ReusableFilterControls = ({
         direction={isMobileView ? 'column' : 'row'}
         spacing={isMobileView ? 2 : 1}
         alignItems={isMobileView ? 'stretch' : 'center'}
-        justifyContent="flex-start"
+        justifyContent='flex-start'
         sx={{
           minWidth: isMobileView ? '100%' : 140,
           flex: 'none',
         }}
       >
         <TextField
-          size="small"
-          placeholder="Min"
+          size='small'
+          placeholder='Min'
           value={localPriceRange[0]}
-          onChange={(e) => {
+          onChange={e => {
             const value = parseInt(e.target.value) || 0;
             handlePriceRangeChange(0, value);
           }}
@@ -361,7 +361,7 @@ const ReusableFilterControls = ({
           slotProps={{
             input: {
               startAdornment: (
-                <InputAdornment position="start" sx={{ mr: 0 }}>
+                <InputAdornment position='start' sx={{ mr: 0 }}>
                   <Typography
                     sx={{
                       color: '#a3824c',
@@ -389,10 +389,10 @@ const ReusableFilterControls = ({
           </Typography>
         )}
         <TextField
-          size="small"
-          placeholder="Max"
+          size='small'
+          placeholder='Max'
           value={localPriceRange[1]}
-          onChange={(e) => {
+          onChange={e => {
             const value = parseInt(e.target.value) || 1000;
             handlePriceRangeChange(1, value);
           }}
@@ -414,7 +414,7 @@ const ReusableFilterControls = ({
           slotProps={{
             input: {
               startAdornment: (
-                <InputAdornment position="start" sx={{ mr: 0 }}>
+                <InputAdornment position='start' sx={{ mr: 0 }}>
                   <Typography
                     sx={{
                       color: '#a3824c',
@@ -438,8 +438,8 @@ const ReusableFilterControls = ({
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <FormControl
-          variant="outlined"
-          size="small"
+          variant='outlined'
+          size='small'
           sx={{
             minWidth: isMobileView ? '100%' : config.width || 140,
             maxWidth: isMobileView ? '100%' : config.maxWidth || 140,
@@ -449,8 +449,8 @@ const ReusableFilterControls = ({
           <DatePicker
             label={config.label}
             value={filterValues[fieldName]}
-            onChange={(date) => onFilterChange(fieldName, date)}
-            size="small"
+            onChange={date => onFilterChange(fieldName, date)}
+            size='small'
             sx={{
               width: isMobileView ? '100%' : config.width || 140,
               maxWidth: isMobileView ? '100%' : config.maxWidth || 140,
@@ -543,9 +543,9 @@ const ReusableFilterControls = ({
       <FormControlLabel
         control={
           <Checkbox
-            size="small"
+            size='small'
             checked={filterValues[fieldName] || false}
-            onChange={(e) => onFilterChange(fieldName, e.target.checked)}
+            onChange={e => onFilterChange(fieldName, e.target.checked)}
             sx={{
               color: '#a3824c',
               '&.Mui-checked': {
@@ -556,7 +556,7 @@ const ReusableFilterControls = ({
         }
         label={
           <Typography
-            variant="caption"
+            variant='caption'
             sx={{
               color: '#a3824c',
               fontWeight: 600,
@@ -573,10 +573,10 @@ const ReusableFilterControls = ({
   // Render filter controls
   const renderFilterControls = () => (
     <Stack
-      direction="row"
-      flexWrap="wrap"
-      justifyContent="flex-end"
-      alignItems="center"
+      direction='row'
+      flexWrap='wrap'
+      justifyContent='flex-end'
+      alignItems='center'
       spacing={1.5}
       sx={{
         width: '100%',
@@ -622,7 +622,7 @@ const ReusableFilterControls = ({
       {/* Reset Button */}
       <Button
         onClick={onClearFilters}
-        size="small"
+        size='small'
         sx={{
           height: 28,
           width: 60,
@@ -658,14 +658,14 @@ const ReusableFilterControls = ({
       <>
         <Box>
           <Stack
-            direction="column"
-            justifyContent="space-between"
-            alignItems="stretch"
+            direction='column'
+            justifyContent='space-between'
+            alignItems='stretch'
             spacing={1.5}
           >
             <Button
-              size="small"
-              variant="outlined"
+              size='small'
+              variant='outlined'
               startIcon={<FilterListIcon />}
               onClick={() => setFilterDrawerOpen(true)}
               sx={{
@@ -696,7 +696,7 @@ const ReusableFilterControls = ({
         </Box>
 
         <Drawer
-          anchor="right"
+          anchor='right'
           open={filterDrawerOpen}
           onClose={() => setFilterDrawerOpen(false)}
           PaperProps={{
@@ -719,9 +719,9 @@ const ReusableFilterControls = ({
           >
             {/* Header */}
             <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
+              direction='row'
+              justifyContent='space-between'
+              alignItems='center'
               mb={3}
               sx={{
                 borderBottom: '2px solid #e6d897',
@@ -730,7 +730,7 @@ const ReusableFilterControls = ({
               }}
             >
               <Typography
-                variant="h6"
+                variant='h6'
                 sx={{
                   color: '#a3824c',
                   fontWeight: 700,
@@ -752,7 +752,7 @@ const ReusableFilterControls = ({
 
             {/* Mobile Filter Layout */}
             <Stack
-              direction="column"
+              direction='column'
               spacing={3}
               sx={{
                 width: '100%',
@@ -764,7 +764,7 @@ const ReusableFilterControls = ({
               {renderSearchField() && (
                 <Box sx={{ width: '100%' }}>
                   <Typography
-                    variant="subtitle2"
+                    variant='subtitle2'
                     sx={{
                       color: '#a3824c',
                       fontWeight: 600,
@@ -791,7 +791,7 @@ const ReusableFilterControls = ({
                   return (
                     <Box key={fieldName} sx={{ width: '100%' }}>
                       <Typography
-                        variant="subtitle2"
+                        variant='subtitle2'
                         sx={{
                           color: '#a3824c',
                           fontWeight: 600,
@@ -813,7 +813,7 @@ const ReusableFilterControls = ({
                   return (
                     <Box key={fieldName} sx={{ width: '100%' }}>
                       <Typography
-                        variant="subtitle2"
+                        variant='subtitle2'
                         sx={{
                           color: '#a3824c',
                           fontWeight: 600,
@@ -838,7 +838,7 @@ const ReusableFilterControls = ({
               {renderPriceRange() && (
                 <Box sx={{ width: '100%' }}>
                   <Typography
-                    variant="subtitle2"
+                    variant='subtitle2'
                     sx={{
                       color: '#a3824c',
                       fontWeight: 600,
@@ -870,7 +870,7 @@ const ReusableFilterControls = ({
                   >
                     {hasCheckboxes && (
                       <Typography
-                        variant="subtitle2"
+                        variant='subtitle2'
                         sx={{
                           color: '#a3824c',
                           fontWeight: 600,
@@ -892,7 +892,7 @@ const ReusableFilterControls = ({
                     >
                       {/* Checkboxes */}
                       {hasCheckboxes && (
-                        <Stack direction="row" spacing={2} flexWrap="wrap">
+                        <Stack direction='row' spacing={2} flexWrap='wrap'>
                           {checkboxFields.map(([fieldName, config]) => (
                             <Box key={fieldName}>
                               {renderCheckbox(fieldName, config)}
@@ -904,7 +904,7 @@ const ReusableFilterControls = ({
                       {/* Reset Button */}
                       <Button
                         onClick={onClearFilters}
-                        size="small"
+                        size='small'
                         sx={{
                           height: 36,
                           width: hasCheckboxes ? 90 : '100%',

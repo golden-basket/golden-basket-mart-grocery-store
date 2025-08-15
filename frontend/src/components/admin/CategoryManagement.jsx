@@ -20,20 +20,19 @@ import {
   useMediaQuery,
   Card,
   CardContent,
-  CardActions,
   Stack,
-  Grid,
-  Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { createAdminStyles } from './adminStyles';
+import { useToastNotifications } from '../../hooks/useToast';
 
 const CategoryManagement = ({ categories, onCategoryUpdate }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  const { showSuccess, showError } = useToastNotifications();
 
   // Category state
   const [catDialogOpen, setCatDialogOpen] = useState(false);
@@ -57,19 +56,43 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
   const handleCatDialogClose = useCallback(() => setCatDialogOpen(false), []);
 
   const handleCatSave = useCallback(() => {
-    if (!catForm.name.trim()) return;
+    if (!catForm.name.trim()) {
+      showError('Category name is required.');
+      return;
+    }
 
-    onCategoryUpdate(catDialogMode, catForm);
-    handleCatDialogClose();
-  }, [catForm, catDialogMode, handleCatDialogClose, onCategoryUpdate]);
+    try {
+      onCategoryUpdate(catDialogMode, catForm);
+      showSuccess(
+        catDialogMode === 'add'
+          ? 'Category added successfully!'
+          : 'Category updated successfully!'
+      );
+      handleCatDialogClose();
+    } catch (error) {
+      console.error('Error in handleCatSave', error);
+      showError(
+        catDialogMode === 'add'
+          ? 'Failed to add category. Please try again.'
+          : 'Failed to update category. Please try again.'
+      );
+    }
+  }, [
+    catForm,
+    catDialogMode,
+    handleCatDialogClose,
+    onCategoryUpdate,
+    showSuccess,
+    showError,
+  ]);
 
   // Form change handlers
   const handleCatFormChange = useCallback((field, value) => {
-    setCatForm((f) => ({ ...f, [field]: value }));
+    setCatForm(f => ({ ...f, [field]: value }));
   }, []);
 
   // Enhanced mobile category card rendering
-  const renderMobileCategoryCard = (category) => (
+  const renderMobileCategoryCard = category => (
     <Card
       key={category._id}
       sx={{
@@ -79,7 +102,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         border: '1px solid var(--color-primary-light)',
         borderRadius: 2,
       }}
-      className="card-golden"
+      className='card-golden'
     >
       <CardContent sx={{ p: 2 }}>
         <Box
@@ -92,12 +115,12 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         >
           <Box sx={{ flex: 1 }}>
             <Typography
-              variant="h6"
+              variant='h6'
               sx={{ color: 'var(--color-primary)', fontWeight: 600, mb: 1 }}
             >
               {category.name}
             </Typography>
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant='body2' color='textSecondary'>
               {category.description || 'No description available'}
             </Typography>
           </Box>
@@ -105,8 +128,8 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
 
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button
-            size="small"
-            variant="outlined"
+            size='small'
+            variant='outlined'
             startIcon={<EditIcon />}
             onClick={() => handleCatDialogOpen('edit', category)}
             sx={{
@@ -132,7 +155,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         <Box>
           {categories.length === 0 ? (
             <Box sx={{ textAlign: 'center', p: 4 }}>
-              <Typography color="textSecondary">No categories found</Typography>
+              <Typography color='textSecondary'>No categories found</Typography>
             </Box>
           ) : (
             categories.map(renderMobileCategoryCard)
@@ -154,22 +177,22 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map((category) => (
+            {categories.map(category => (
               <TableRow key={category._id} sx={styles.tableRowStyles}>
                 <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
                     {category.name}
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2">
+                  <Typography variant='body2'>
                     {category.description || 'No description available'}
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
-                      size="small"
+                      size='small'
                       onClick={() => handleCatDialogOpen('edit', category)}
                       sx={{ color: 'var(--color-primary)' }}
                     >
@@ -189,7 +212,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
     <Box sx={styles.sectionStyles}>
       <Stack
         direction={isMobile ? 'column' : 'row'}
-        justifyContent="space-between"
+        justifyContent='space-between'
         alignItems={isMobile ? 'stretch' : 'center'}
         mb={3}
         spacing={2}
@@ -198,7 +221,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
           Manage Categories
         </Typography>
         <Button
-          variant="contained"
+          variant='contained'
           startIcon={<AddIcon />}
           onClick={() => handleCatDialogOpen('add')}
           size={isMobile ? 'medium' : 'small'}
@@ -262,16 +285,16 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         >
           <Stack spacing={isMobile ? 2 : 3}>
             <TextField
-              label="Name"
+              label='Name'
               value={catForm.name}
-              onChange={(e) => handleCatFormChange('name', e.target.value)}
+              onChange={e => handleCatFormChange('name', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
             <TextField
-              label="Description"
+              label='Description'
               value={catForm.description}
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.value.length <= 500) {
                   handleCatFormChange('description', e.target.value);
                 }
@@ -311,7 +334,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
           </Button>
           <Button
             onClick={handleCatSave}
-            variant="contained"
+            variant='contained'
             sx={{
               ...styles.buttonStyles,
               px: 3,

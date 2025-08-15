@@ -12,21 +12,18 @@ import {
   CardContent,
   Alert,
   Button,
-  IconButton,
   Chip,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
 import {
-  CreditCard as CardIcon,
-  AccountBalance as BankIcon,
-  Payment as UpiIcon,
   LocalShipping as CodIcon,
   QrCode as QrCodeIcon,
   CloudUpload as UploadIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import { useToastNotifications } from '../hooks/useToast';
 
 const PaymentMethodSelector = ({
   selectedMethod,
@@ -38,6 +35,7 @@ const PaymentMethodSelector = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { showSuccess, showError } = useToastNotifications();
 
   // Enhanced responsive utilities
   const {
@@ -76,10 +74,10 @@ const PaymentMethodSelector = ({
   ];
 
   const selectedMethodData = paymentMethods.find(
-    (method) => method.value === selectedMethod
+    method => method.value === selectedMethod
   );
 
-  const handleMethodChange = (event) => {
+  const handleMethodChange = event => {
     const newMethod = event.target.value;
     onMethodChange(newMethod);
     // Clear payment details when method changes
@@ -95,15 +93,29 @@ const PaymentMethodSelector = ({
     });
   };
 
-  const handleScreenshotUpload = (event) => {
+  const handleScreenshotUpload = event => {
     const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showError('Please select an image file (JPEG, PNG, etc.)');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('File size must be less than 5MB');
+        return;
+      }
+
       onPaymentScreenshotChange(file);
+      showSuccess('Payment screenshot uploaded successfully!');
     }
   };
 
   const removeScreenshot = () => {
     onPaymentScreenshotChange(null);
+    showSuccess('Payment screenshot removed');
   };
 
   const getResponsiveSpacing = () => {
@@ -113,7 +125,7 @@ const PaymentMethodSelector = ({
     return 4;
   };
 
-  const getResponsiveTypography = (variant) => {
+  const getResponsiveTypography = variant => {
     if (isExtraSmall || isSmall) {
       return variant === 'h6' ? 'h6' : 'body2';
     }
@@ -140,7 +152,7 @@ const PaymentMethodSelector = ({
 
       {/* Payment Method Info Alert */}
       <Alert
-        severity="info"
+        severity='info'
         sx={{
           mb: getResponsiveSpacing(),
           background: 'rgba(163,130,76,0.1)',
@@ -151,7 +163,7 @@ const PaymentMethodSelector = ({
         }}
         className={getResponsiveAlertSize()}
       >
-        <Typography variant="body2" className={getResponsiveTextClasses()}>
+        <Typography variant='body2' className={getResponsiveTextClasses()}>
           <strong>Note:</strong> We currently support Cash on Delivery (COD) and
           UPI payments only. For UPI payments, please upload a screenshot of
           your payment confirmation.
@@ -161,11 +173,16 @@ const PaymentMethodSelector = ({
       <RadioGroup
         value={selectedMethod}
         onChange={handleMethodChange}
-        sx={{ mb: getResponsiveSpacing(), display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        sx={{
+          mb: getResponsiveSpacing(),
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
         <Grid container spacing={getResponsiveSpacing()}>
-          {paymentMethods.map((method) => (
-            <Grid item xs={12} sm={6} key={method.value}>
+          {paymentMethods.map(method => (
+            <Grid item size={{ xs: 12, sm: 6 }} key={method.value}>
               <Card
                 sx={{
                   cursor: 'pointer',
@@ -187,10 +204,10 @@ const PaymentMethodSelector = ({
                   ...getResponsiveCardSize(),
                 }}
                 onClick={() => onMethodChange(method.value)}
-                className="card-golden hover-responsive"
+                className='card-golden hover-responsive'
               >
                 <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
-                  <Box display="flex" alignItems="center" mb={1}>
+                  <Box display='flex' alignItems='center' mb={1}>
                     <Box
                       sx={{
                         color: method.color,
@@ -208,7 +225,7 @@ const PaymentMethodSelector = ({
                         <Typography
                           variant={isMobile ? 'body2' : 'body1'}
                           fontWeight={600}
-                          color="var(--color-text-primary)"
+                          color='var(--color-text-primary)'
                         >
                           {method.label}
                         </Typography>
@@ -223,8 +240,8 @@ const PaymentMethodSelector = ({
                     />
                   </Box>
                   <Typography
-                    variant="body2"
-                    color="textSecondary"
+                    variant='body2'
+                    color='textSecondary'
                     sx={{ ml: 4 }}
                     className={getResponsiveTextClasses()}
                   >
@@ -250,7 +267,7 @@ const PaymentMethodSelector = ({
               borderRadius: 2,
               mb: getResponsiveSpacing(),
             }}
-            className="card-golden"
+            className='card-golden'
           >
             <Typography
               variant={getResponsiveTypography('h6')}
@@ -266,15 +283,15 @@ const PaymentMethodSelector = ({
             </Typography>
 
             <Grid container spacing={getResponsiveSpacing()}>
-              {selectedMethodData.fields.map((field) => (
-                <Grid item xs={12} sm={6} key={field.name}>
+              {selectedMethodData.fields.map(field => (
+                <Grid item size={{ xs: 12, sm: 6 }} key={field.name}>
                   <TextField
                     fullWidth
                     label={field.label}
                     type={field.type}
                     placeholder={field.placeholder}
                     value={paymentDetails[field.name] || ''}
-                    onChange={(e) =>
+                    onChange={e =>
                       handleFieldChange(field.name, e.target.value)
                     }
                     className={getResponsiveInputSize()}
@@ -315,7 +332,7 @@ const PaymentMethodSelector = ({
             borderRadius: 2,
             mb: getResponsiveSpacing(),
           }}
-          className="card-golden"
+          className='card-golden'
         >
           <Typography
             variant={getResponsiveTypography('h6')}
@@ -332,7 +349,7 @@ const PaymentMethodSelector = ({
 
           {/* QR Code Section */}
           <Box sx={{ mb: getResponsiveSpacing(), textAlign: 'center' }}>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+            <Typography variant='body2' color='textSecondary' sx={{ mb: 1 }}>
               Scan this QR code to pay via UPI:
             </Typography>
             <Box
@@ -357,8 +374,8 @@ const PaymentMethodSelector = ({
               />
             </Box>
             <Typography
-              variant="caption"
-              color="textSecondary"
+              variant='caption'
+              color='textSecondary'
               sx={{ mt: 1, display: 'block' }}
             >
               UPI ID: goldenbasket@upi
@@ -367,14 +384,14 @@ const PaymentMethodSelector = ({
 
           {/* Payment Screenshot Upload */}
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+            <Typography variant='body2' color='textSecondary' sx={{ mb: 1 }}>
               After payment, upload a screenshot of your payment confirmation:
             </Typography>
 
             {!paymentScreenshot ? (
               <Button
-                variant="outlined"
-                component="label"
+                variant='outlined'
+                component='label'
                 startIcon={<UploadIcon />}
                 sx={{
                   borderColor: 'var(--color-primary)',
@@ -388,24 +405,24 @@ const PaymentMethodSelector = ({
               >
                 Upload Payment Screenshot
                 <input
-                  type="file"
+                  type='file'
                   hidden
-                  accept="image/*"
+                  accept='image/*'
                   onChange={handleScreenshotUpload}
                 />
               </Button>
             ) : (
               <Box sx={{ textAlign: 'center' }}>
                 <Chip
-                  label="Screenshot uploaded"
-                  color="success"
+                  label='Screenshot uploaded'
+                  color='success'
                   icon={<UploadIcon />}
                   sx={{ mb: 1 }}
                 />
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                   <Button
-                    variant="outlined"
-                    size="small"
+                    variant='outlined'
+                    size='small'
                     onClick={removeScreenshot}
                     startIcon={<DeleteIcon />}
                     sx={{
@@ -429,7 +446,7 @@ const PaymentMethodSelector = ({
       {/* COD Notice */}
       {selectedMethod === 'cod' && (
         <Alert
-          severity="warning"
+          severity='warning'
           sx={{
             background: 'rgba(255,152,0,0.1)',
             border: '1px solid var(--color-warning)',
@@ -439,7 +456,7 @@ const PaymentMethodSelector = ({
           }}
           className={getResponsiveAlertSize()}
         >
-          <Typography variant="body2" className={getResponsiveTextClasses()}>
+          <Typography variant='body2' className={getResponsiveTextClasses()}>
             <strong>Cash on Delivery:</strong> Please have exact change ready.
             Additional delivery charges may apply based on your location and
             order amount.
@@ -449,7 +466,7 @@ const PaymentMethodSelector = ({
 
       {/* Security Notice */}
       <Alert
-        severity="info"
+        severity='info'
         sx={{
           mt: getResponsiveSpacing(),
           background: 'rgba(163,130,76,0.1)',
@@ -460,7 +477,7 @@ const PaymentMethodSelector = ({
         }}
         className={getResponsiveAlertSize()}
       >
-        <Typography variant="body2" className={getResponsiveTextClasses()}>
+        <Typography variant='body2' className={getResponsiveTextClasses()}>
           <strong>Security:</strong> Your payment information is encrypted and
           secure. We do not store your payment details.
         </Typography>

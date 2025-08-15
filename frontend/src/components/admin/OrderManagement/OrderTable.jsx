@@ -35,7 +35,7 @@ const OrderTable = ({
   const { isExtraSmall, isSmall } = useFoldableDisplay();
 
   // Enhanced mobile order card
-  const renderMobileOrderCard = (order) => (
+  const renderMobileOrderCard = order => (
     <Card
       key={order._id}
       sx={{
@@ -51,7 +51,7 @@ const OrderTable = ({
           boxShadow: '0 4px 16px rgba(163, 130, 76, 0.2)',
         },
       }}
-      className="card-golden"
+      className='card-golden'
     >
       <CardContent sx={{ p: 2 }}>
         {/* Order Header */}
@@ -67,7 +67,7 @@ const OrderTable = ({
         >
           <Box>
             <Typography
-              variant="subtitle2"
+              variant='subtitle2'
               sx={{
                 fontWeight: 700,
                 color: 'var(--color-primary)',
@@ -78,7 +78,7 @@ const OrderTable = ({
               #{order._id.slice(-8)}
             </Typography>
             <Typography
-              variant="caption"
+              variant='caption'
               sx={{
                 color: 'var(--color-primary-light)',
                 fontWeight: 500,
@@ -90,7 +90,7 @@ const OrderTable = ({
           <Chip
             label={order.orderStatus || 'Pending'}
             color={getStatusColor(order.orderStatus)}
-            size="small"
+            size='small'
             sx={getChipStyles('orderStatus', order.orderStatus)}
           />
         </Box>
@@ -98,7 +98,7 @@ const OrderTable = ({
         {/* Customer Info */}
         <Box sx={{ mb: 2 }}>
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               fontWeight: 600,
               color: 'var(--color-primary)',
@@ -108,7 +108,7 @@ const OrderTable = ({
             {order.user?.firstName + ' ' + order.user?.lastName || 'N/A'}
           </Typography>
           <Typography
-            variant="caption"
+            variant='caption'
             sx={{
               color: 'var(--color-primary-light)',
               fontWeight: 500,
@@ -132,7 +132,7 @@ const OrderTable = ({
           }}
         >
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               fontWeight: 600,
               color: 'var(--color-primary)',
@@ -141,7 +141,7 @@ const OrderTable = ({
             Amount:
           </Typography>
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               fontWeight: 700,
               color: 'var(--color-accent)',
@@ -162,7 +162,7 @@ const OrderTable = ({
           }}
         >
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               fontWeight: 600,
               color: 'var(--color-primary)',
@@ -173,7 +173,7 @@ const OrderTable = ({
           <Chip
             label={order.paymentMethod || 'Pending'}
             color={getPaymentStatusColor(order.paymentMethod)}
-            size="small"
+            size='small'
             sx={getChipStyles('paymentMethod', order.paymentMethod)}
           />
         </Box>
@@ -188,7 +188,7 @@ const OrderTable = ({
           }}
         >
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               fontWeight: 600,
               color: 'var(--color-primary)',
@@ -199,9 +199,9 @@ const OrderTable = ({
           <Chip
             label={order.paymentStatus || 'Pending'}
             color={getPaymentStatusColor(order.paymentStatus)}
-            size="small"
+            size='small'
             sx={getChipStyles('paymentStatus', order.paymentStatus)}
-            variant="outlined"
+            variant='outlined'
           />
         </Box>
 
@@ -215,9 +215,9 @@ const OrderTable = ({
             borderTop: '1px solid rgba(163, 130, 76, 0.2)',
           }}
         >
-          <Tooltip title="Update Status">
+          <Tooltip title='Update Status'>
             <IconButton
-              size="small"
+              size='small'
               onClick={() => onStatusUpdate(order)}
               sx={{
                 color: 'var(--color-primary)',
@@ -229,12 +229,12 @@ const OrderTable = ({
                 transition: 'all 0.2s ease',
               }}
             >
-              <EditIcon fontSize="small" />
+              <EditIcon fontSize='small' />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Update Payment">
+          <Tooltip title='Update Payment'>
             <IconButton
-              size="small"
+              size='small'
               onClick={() => onPaymentUpdate(order)}
               sx={{
                 color: 'var(--color-accent)',
@@ -246,7 +246,7 @@ const OrderTable = ({
                 transition: 'all 0.2s ease',
               }}
             >
-              <PaymentIcon fontSize="small" />
+              <PaymentIcon fontSize='small' />
             </IconButton>
           </Tooltip>
         </Box>
@@ -280,7 +280,7 @@ const OrderTable = ({
                 No orders found
               </Typography>
               <Typography
-                variant="body2"
+                variant='body2'
                 sx={{
                   color: 'var(--color-primary-light)',
                   mt: 1,
@@ -402,7 +402,7 @@ const OrderTable = ({
           <TableBody>
             {orders.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={7} align='center'>
                   <Box
                     sx={{
                       py: 4,
@@ -420,7 +420,7 @@ const OrderTable = ({
                       No orders found
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant='body2'
                       sx={{
                         color: 'var(--color-primary-light)',
                         mt: 1,
@@ -433,7 +433,7 @@ const OrderTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order) => (
+              orders.map(order => (
                 <TableRow
                   key={order._id}
                   hover
@@ -446,7 +446,7 @@ const OrderTable = ({
                 >
                   <TableCell>
                     <Typography
-                      variant="body2"
+                      variant='body2'
                       sx={{
                         fontWeight: 600,
                         color: 'var(--color-primary)',
@@ -458,7 +458,7 @@ const OrderTable = ({
                   </TableCell>
                   <TableCell>
                     <Typography
-                      variant="body2"
+                      variant='body2'
                       sx={{
                         fontWeight: 600,
                         color: 'var(--color-primary)',
@@ -468,7 +468,7 @@ const OrderTable = ({
                         'N/A'}
                     </Typography>
                     <Typography
-                      variant="caption"
+                      variant='caption'
                       sx={{
                         color: 'var(--color-primary-light)',
                         fontWeight: 500,
@@ -479,7 +479,7 @@ const OrderTable = ({
                   </TableCell>
                   <TableCell>
                     <Typography
-                      variant="body2"
+                      variant='body2'
                       sx={{
                         fontWeight: 700,
                         color: 'var(--color-accent)',
@@ -493,7 +493,7 @@ const OrderTable = ({
                     <Chip
                       label={order.orderStatus || 'Pending'}
                       color={getStatusColor(order.orderStatus)}
-                      size="small"
+                      size='small'
                       sx={getChipStyles('orderStatus', order.orderStatus)}
                     />
                   </TableCell>
@@ -501,7 +501,7 @@ const OrderTable = ({
                     <Chip
                       label={(order.paymentMode || '').toUpperCase()}
                       color={getPaymentStatusColor(order.paymentMode)}
-                      size="small"
+                      size='small'
                       sx={getChipStyles('paymentMode', order.paymentMode)}
                     />
                   </TableCell>
@@ -509,13 +509,13 @@ const OrderTable = ({
                     <Chip
                       label={order.paymentStatus || 'Pending'}
                       color={getPaymentStatusColor(order.paymentStatus)}
-                      size="small"
+                      size='small'
                       sx={getChipStyles('paymentStatus', order.paymentStatus)}
                     />
                   </TableCell>
                   <TableCell>
                     <Typography
-                      variant="body2"
+                      variant='body2'
                       sx={{
                         color: 'var(--color-primary)',
                         fontWeight: 500,
@@ -526,9 +526,9 @@ const OrderTable = ({
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title="Update Status">
+                      <Tooltip title='Update Status'>
                         <IconButton
-                          size="small"
+                          size='small'
                           onClick={() => onStatusUpdate(order)}
                           sx={{
                             color: 'var(--color-primary)',
@@ -540,12 +540,12 @@ const OrderTable = ({
                             transition: 'all 0.2s ease',
                           }}
                         >
-                          <EditIcon fontSize="small" />
+                          <EditIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Update Payment">
+                      <Tooltip title='Update Payment'>
                         <IconButton
-                          size="small"
+                          size='small'
                           onClick={() => onPaymentUpdate(order)}
                           sx={{
                             color: 'var(--color-accent)',
@@ -557,7 +557,7 @@ const OrderTable = ({
                             transition: 'all 0.2s ease',
                           }}
                         >
-                          <PaymentIcon fontSize="small" />
+                          <PaymentIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -586,7 +586,7 @@ const OrderTable = ({
       }}
     >
       <TablePagination
-        component="div"
+        component='div'
         count={totalOrders}
         page={page}
         onPageChange={onPageChange}
@@ -621,13 +621,13 @@ const OrderTable = ({
     <Box sx={{ position: 'relative' }}>
       {renderOrdersTable()}
       {renderPagination()}
-      
+
       {/* Loading overlay for filter updates */}
       {loading && (
         <Loading
-          message="Loading orders..."
-          size="small"
-          variant="default"
+          message='Loading orders...'
+          size='small'
+          variant='default'
           showDots={false}
           showIcon={true}
         />
@@ -637,7 +637,7 @@ const OrderTable = ({
 };
 
 // Enhanced color coding functions
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   switch (status?.toLowerCase()) {
     case 'pending':
       return 'warning';
@@ -654,7 +654,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const getPaymentStatusColor = (status) => {
+const getPaymentStatusColor = status => {
   switch (status?.toLowerCase()) {
     case 'pending':
       return 'warning';

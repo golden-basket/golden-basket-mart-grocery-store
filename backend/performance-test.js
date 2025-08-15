@@ -17,24 +17,24 @@ class PerformanceTester {
         method,
         url: `${BASE_URL}${endpoint}`,
         data,
-        timeout: 10000
+        timeout: 10000,
       });
       const duration = Date.now() - start;
       return { success: true, status: response.status, duration };
     } catch (error) {
       const duration = Date.now() - start;
-      return { 
-        success: false, 
-        status: error.response?.status || 'timeout', 
+      return {
+        success: false,
+        status: error.response?.status || 'timeout',
         duration,
-        error: error.message 
+        error: error.message,
       };
     }
   }
 
   async testEndpoint(endpoint, method = 'GET', data = null) {
     console.log(`\n🧪 Testing ${method} ${endpoint}...`);
-    
+
     const promises = [];
     for (let i = 0; i < TOTAL_REQUESTS; i++) {
       promises.push(this.makeRequest(endpoint, method, data));
@@ -43,18 +43,19 @@ class PerformanceTester {
     const results = await Promise.all(promises);
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
-    
+
     if (successful.length > 0) {
       const durations = successful.map(r => r.duration);
-      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+      const avgDuration =
+        durations.reduce((a, b) => a + b, 0) / durations.length;
       const minDuration = Math.min(...durations);
       const maxDuration = Math.max(...durations);
-      
+
       // Calculate percentiles
       const sortedDurations = durations.sort((a, b) => a - b);
       const p95Index = Math.floor(sortedDurations.length * 0.95);
       const p99Index = Math.floor(sortedDurations.length * 0.99);
-      
+
       console.log(`✅ Success: ${successful.length}/${TOTAL_REQUESTS}`);
       console.log(`📊 Duration Stats:`);
       console.log(`   Average: ${avgDuration.toFixed(2)}ms`);
@@ -63,7 +64,7 @@ class PerformanceTester {
       console.log(`   P95: ${sortedDurations[p95Index]}ms`);
       console.log(`   P99: ${sortedDurations[p99Index]}ms`);
     }
-    
+
     if (failed.length > 0) {
       console.log(`❌ Failed: ${failed.length}/${TOTAL_REQUESTS}`);
       const errorCounts = {};
@@ -72,19 +73,21 @@ class PerformanceTester {
       });
       console.log(`   Errors:`, errorCounts);
     }
-    
+
     return { successful, failed };
   }
 
   async runTests() {
     console.log('🚀 Starting Performance Tests...');
-    console.log(`📈 Testing with ${CONCURRENT_REQUESTS} concurrent requests, ${TOTAL_REQUESTS} total per endpoint`);
-    
+    console.log(
+      `📈 Testing with ${CONCURRENT_REQUESTS} concurrent requests, ${TOTAL_REQUESTS} total per endpoint`
+    );
+
     const tests = [
       { endpoint: '/products', method: 'GET' },
       { endpoint: '/products?page=1&limit=10', method: 'GET' },
       { endpoint: '/categories', method: 'GET' },
-      { endpoint: '/products/search?q=organic', method: 'GET' }
+      { endpoint: '/products/search?q=organic', method: 'GET' },
     ];
 
     for (const test of tests) {

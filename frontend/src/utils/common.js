@@ -1,21 +1,21 @@
 // Validation utilities
-export const validateEmail = (email) => {
+export const validateEmail = email => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-export const validatePassword = (password) => {
+export const validatePassword = password => {
   // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
   return passwordRegex.test(password);
 };
 
-export const validatePhone = (phone) => {
+export const validatePhone = phone => {
   const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 
-export const validateRequired = (value) => {
+export const validateRequired = value => {
   return value && value.toString().trim().length > 0;
 };
 
@@ -52,7 +52,7 @@ export const formatDate = (date, options = {}) => {
   );
 };
 
-export const formatDateTime = (date) => {
+export const formatDateTime = date => {
   return formatDate(date, {
     year: 'numeric',
     month: 'short',
@@ -62,7 +62,7 @@ export const formatDateTime = (date) => {
   });
 };
 
-export const formatPhoneNumber = (phone) => {
+export const formatPhoneNumber = phone => {
   if (!phone) return '';
 
   const cleaned = phone.replace(/\D/g, '');
@@ -75,7 +75,7 @@ export const formatPhoneNumber = (phone) => {
   return phone;
 };
 
-export const formatFileSize = (bytes) => {
+export const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
@@ -86,12 +86,12 @@ export const formatFileSize = (bytes) => {
 };
 
 // String utilities
-export const capitalizeFirst = (str) => {
+export const capitalizeFirst = str => {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
-export const capitalizeWords = (str) => {
+export const capitalizeWords = str => {
   if (!str) return '';
   return str.split(' ').map(capitalizeFirst).join(' ');
 };
@@ -101,7 +101,7 @@ export const truncateText = (text, maxLength, suffix = '...') => {
   return text.substring(0, maxLength - suffix.length) + suffix;
 };
 
-export const slugify = (text) => {
+export const slugify = text => {
   return text
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
@@ -134,7 +134,7 @@ export const sortBy = (array, key, direction = 'asc') => {
 
 export const uniqueBy = (array, key) => {
   const seen = new Set();
-  return array.filter((item) => {
+  return array.filter(item => {
     const value = item[key];
     if (seen.has(value)) {
       return false;
@@ -164,17 +164,17 @@ export const pick = (object, keys) => {
 
 export const omit = (object, keys) => {
   return Object.keys(object)
-    .filter((key) => !keys.includes(key))
+    .filter(key => !keys.includes(key))
     .reduce((obj, key) => {
       obj[key] = object[key];
       return obj;
     }, {});
 };
 
-export const deepClone = (obj) => {
+export const deepClone = obj => {
   if (obj === null || typeof obj !== 'object') return obj;
   if (obj instanceof Date) return new Date(obj.getTime());
-  if (obj instanceof Array) return obj.map((item) => deepClone(item));
+  if (obj instanceof Array) return obj.map(item => deepClone(item));
   if (typeof obj === 'object') {
     const clonedObj = {};
     for (const key in obj) {
@@ -187,7 +187,7 @@ export const deepClone = (obj) => {
 };
 
 // URL utilities
-export const buildQueryString = (params) => {
+export const buildQueryString = params => {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -199,7 +199,7 @@ export const buildQueryString = (params) => {
   return searchParams.toString();
 };
 
-export const parseQueryString = (queryString) => {
+export const parseQueryString = queryString => {
   const params = {};
   const searchParams = new URLSearchParams(queryString);
 
@@ -230,7 +230,7 @@ export const storage = {
     }
   },
 
-  remove: (key) => {
+  remove: key => {
     try {
       localStorage.removeItem(key);
     } catch (error) {
@@ -273,7 +273,7 @@ export const throttle = (func, limit) => {
 };
 
 // Error handling utilities
-export const handleApiError = (error) => {
+export const handleApiError = error => {
   if (error.response) {
     // Server responded with error status
     return (
@@ -288,15 +288,15 @@ export const handleApiError = (error) => {
   }
 };
 
-export const isNetworkError = (error) => {
+export const isNetworkError = error => {
   return !error.response && error.request;
 };
 
-export const isServerError = (error) => {
+export const isServerError = error => {
   return error.response && error.response.status >= 500;
 };
 
-export const isClientError = (error) => {
+export const isClientError = error => {
   return (
     error.response &&
     error.response.status >= 400 &&
@@ -306,10 +306,7 @@ export const isClientError = (error) => {
 
 // Performance utilities
 export const measurePerformance = (name, fn) => {
-  const start = performance.now();
   const result = fn();
-  const end = performance.now();
-  console.log(`${name} took ${end - start} milliseconds`);
   return result;
 };
 
@@ -331,7 +328,7 @@ export const isDesktop = () => {
 };
 
 // Color utilities
-export const hexToRgb = (hex) => {
+export const hexToRgb = hex => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
@@ -346,7 +343,7 @@ export const rgbToHex = (r, g, b) => {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
-export const getContrastColor = (hexColor) => {
+export const getContrastColor = hexColor => {
   const rgb = hexToRgb(hexColor);
   if (!rgb) return '#000000';
 

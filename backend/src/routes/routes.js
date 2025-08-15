@@ -12,13 +12,15 @@ const {
   validateObjectId,
   registerValidation,
   loginValidation,
-  createUserValidation,
+  profileValidation,
+  changePasswordValidation,
   productValidation,
+  productUpdateValidation,
   cartValidation,
-  cartRemoveValidation,
+  cartUpdateValidation,
   addressValidation,
   orderValidation,
-  handleValidationErrors,
+  searchValidation,
 } = require('../middleware/validation');
 const { cacheMiddleware, clearCache } = require('../middleware/cache');
 
@@ -65,7 +67,6 @@ router.post(
   '/auth/register',
   authLimiter,
   registerValidation,
-  handleValidationErrors,
   authController.register
 );
 
@@ -96,13 +97,7 @@ router.post(
  *       400:
  *         description: Invalid credentials
  */
-router.post(
-  '/auth/login',
-  authLimiter,
-  loginValidation,
-  handleValidationErrors,
-  authController.login
-);
+router.post('/auth/login', authLimiter, loginValidation, authController.login);
 
 /**
  * @swagger
@@ -148,7 +143,11 @@ router.get('/auth/verify/:token', authController.verifyEmail);
  *       400:
  *         description: Validation error
  */
-router.post('/auth/forgot-password', authLimiter, authController.forgotPassword);
+router.post(
+  '/auth/forgot-password',
+  authLimiter,
+  authController.forgotPassword
+);
 
 /**
  * @swagger
@@ -203,7 +202,11 @@ router.post('/auth/reset-password', authLimiter, authController.resetPassword);
  *       400:
  *         description: Validation error
  */
-router.post('/auth/resend-verification', authLimiter, authController.resendVerification);
+router.post(
+  '/auth/resend-verification',
+  authLimiter,
+  authController.resendVerification
+);
 
 /**
  * @swagger
@@ -268,13 +271,7 @@ router.get('/cart', auth, cartController.getCart);
  *       400:
  *         description: Validation error or insufficient stock
  */
-router.post(
-  '/cart/add',
-  auth,
-  cartValidation,
-  handleValidationErrors,
-  cartController.addToCart
-);
+router.post('/cart/add', auth, cartValidation, cartController.addToCart);
 
 /**
  * @swagger
@@ -306,13 +303,7 @@ router.post(
  *       400:
  *         description: Validation error or insufficient stock
  */
-router.put(
-  '/cart/update',
-  auth,
-  cartValidation,
-  handleValidationErrors,
-  cartController.updateCartItem
-);
+router.put('/cart/update', auth, cartValidation, cartController.updateCartItem);
 
 /**
  * @swagger
@@ -343,8 +334,7 @@ router.put(
 router.delete(
   '/cart/remove',
   auth,
-  cartRemoveValidation,
-  handleValidationErrors,
+  cartValidation,
   cartController.removeFromCart
 );
 
@@ -389,13 +379,7 @@ router.post('/cart/clear', auth, cartController.clearCart);
  *       400:
  *         description: Cart is empty or insufficient stock
  */
-router.post(
-  '/orders/place',
-  auth,
-  orderValidation,
-  handleValidationErrors,
-  orderController.placeOrder
-);
+router.post('/orders/place', auth, orderValidation, orderController.placeOrder);
 
 /**
  * @swagger
@@ -744,7 +728,6 @@ router.post(
   auth,
   admin,
   productValidation,
-  handleValidationErrors,
   (req, res, next) => {
     clearCache('/products');
     next();
@@ -874,7 +857,6 @@ router.put(
   admin,
   validateObjectId,
   productValidation,
-  handleValidationErrors,
   (req, res, next) => {
     clearCache('/products');
     next();
@@ -989,7 +971,6 @@ router.post(
   '/addresses',
   auth,
   addressValidation,
-  handleValidationErrors,
   addressController.addAddress
 );
 
@@ -1052,7 +1033,6 @@ router.put(
   auth,
   validateObjectId,
   addressValidation,
-  handleValidationErrors,
   addressController.updateAddress
 );
 
@@ -1131,8 +1111,7 @@ router.post(
   '/users',
   auth,
   admin,
-  createUserValidation,
-  handleValidationErrors,
+  registerValidation,
   authController.createUser
 );
 

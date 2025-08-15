@@ -37,13 +37,7 @@ export const PageContainer = ({
 };
 
 // Page header with title and optional subtitle
-export const PageHeader = ({
-  title,
-  subtitle,
-  action,
-  sx = {},
-  ...props
-}) => {
+export const PageHeader = ({ title, subtitle, action, sx = {}, ...props }) => {
   return (
     <Box
       sx={{
@@ -59,8 +53,8 @@ export const PageHeader = ({
     >
       <Box>
         <Typography
-          variant="h4"
-          component="h1"
+          variant='h4'
+          component='h1'
           sx={{
             fontWeight: 700,
             background: GRADIENTS.primary,
@@ -73,8 +67,8 @@ export const PageHeader = ({
         </Typography>
         {subtitle && (
           <Typography
-            variant="body1"
-            color="text.secondary"
+            variant='body1'
+            color='text.secondary'
             sx={{ fontWeight: 500 }}
           >
             {subtitle}
@@ -115,7 +109,7 @@ export const Section = ({
           <Box>
             {title && (
               <Typography
-                variant="h6"
+                variant='h6'
                 sx={{
                   fontWeight: 600,
                   color: COLORS.text.primary,
@@ -127,8 +121,8 @@ export const Section = ({
             )}
             {subtitle && (
               <Typography
-                variant="body2"
-                color="text.secondary"
+                variant='body2'
+                color='text.secondary'
                 sx={{ fontWeight: 500 }}
               >
                 {subtitle}
@@ -182,7 +176,7 @@ export const ContentCard = ({
               <Box>
                 {title && (
                   <Typography
-                    variant="h6"
+                    variant='h6'
                     sx={{
                       fontWeight: 600,
                       color: COLORS.text.primary,
@@ -194,8 +188,8 @@ export const ContentCard = ({
                 )}
                 {subtitle && (
                   <Typography
-                    variant="body2"
-                    color="text.secondary"
+                    variant='body2'
+                    color='text.secondary'
                     sx={{ fontWeight: 500 }}
                   >
                     {subtitle}
@@ -233,7 +227,7 @@ export const ContentSkeleton = ({
       {Array.from({ length: lines }).map((_, index) => (
         <Skeleton
           key={index}
-          variant="text"
+          variant='text'
           height={height}
           width={index === lines - 1 ? '60%' : width}
           sx={{ mb: index < lines - 1 ? 1 : 0 }}
@@ -263,9 +257,11 @@ export const LoadingState = ({
       }}
       {...props}
     >
-      <CircularProgress size={size === 'small' ? 24 : size === 'large' ? 48 : 32} />
+      <CircularProgress
+        size={size === 'small' ? 24 : size === 'large' ? 48 : 32}
+      />
       {message && (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant='body2' color='text.secondary'>
           {message}
         </Typography>
       )}
@@ -274,12 +270,7 @@ export const LoadingState = ({
 };
 
 // Error state component
-export const ErrorState = ({
-  error,
-  onRetry,
-  sx = {},
-  ...props
-}) => {
+export const ErrorState = ({ error, onRetry, sx = {}, ...props }) => {
   return (
     <Box
       sx={{
@@ -293,13 +284,13 @@ export const ErrorState = ({
       }}
       {...props}
     >
-      <Alert severity="error" sx={{ maxWidth: 400 }}>
+      <Alert severity='error' sx={{ maxWidth: 400 }}>
         {error || 'Something went wrong. Please try again.'}
       </Alert>
       {onRetry && (
         <Typography
-          variant="body2"
-          color="primary"
+          variant='body2'
+          color='primary'
           sx={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={onRetry}
         >
@@ -332,10 +323,10 @@ export const EmptyState = ({
       }}
       {...props}
     >
-      <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+      <Typography variant='h6' color='text.secondary' sx={{ fontWeight: 600 }}>
         {title}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant='body2' color='text.secondary'>
         {message}
       </Typography>
       {action && <Box>{action}</Box>}
@@ -360,7 +351,7 @@ export const ResponsiveGrid = ({
       }}
       {...props}
     >
-      {React.Children.map(children, (child) => (
+      {React.Children.map(children, child => (
         <Grid
           item
           xs={columns.xs || 12}
@@ -377,11 +368,7 @@ export const ResponsiveGrid = ({
 };
 
 // Divider with text
-export const SectionDivider = ({
-  text,
-  sx = {},
-  ...props
-}) => {
+export const SectionDivider = ({ text, sx = {}, ...props }) => {
   return (
     <Box
       sx={{
@@ -395,8 +382,8 @@ export const SectionDivider = ({
       <Divider sx={{ flex: 1 }} />
       {text && (
         <Typography
-          variant="body2"
-          color="text.secondary"
+          variant='body2'
+          color='text.secondary'
           sx={{ px: 2, fontWeight: 500 }}
         >
           {text}

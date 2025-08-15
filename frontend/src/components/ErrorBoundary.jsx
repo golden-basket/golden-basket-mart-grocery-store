@@ -1,154 +1,280 @@
-import { Box, Typography, Button, Alert } from '@mui/material';
-import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
-import PropTypes from 'prop-types';
-import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import React from 'react';
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  Alert,
+  AlertTitle,
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import HomeIcon from '@mui/icons-material/Home';
+import ReportIcon from '@mui/icons-material/Report';
 
-const ErrorFallback = ({ error, resetErrorBoundary }) => {
-  const { isFoldable, getFoldableClasses, getResponsiveValue } =
-    useFoldableDisplay();
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: null,
+    };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Generate unique error ID for tracking
+    const errorId = `error_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    this.setState({
+      error,
+      errorInfo,
+      errorId,
+    });
+
+    // Log error to console
+    console.error('Error Boundary caught an error:', error, errorInfo);
+  }
+
+  handleRetry = () => {
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: null,
+    });
+  };
+
+  handleGoHome = () => {
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: null,
+    });
+    window.location.href = '/';
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <ErrorFallback
+          error={this.state.error}
+          errorInfo={this.state.errorInfo}
+          errorId={this.state.errorId}
+          onRetry={this.handleRetry}
+          onGoHome={this.handleGoHome}
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const ErrorFallback = ({ error, errorInfo, errorId, onRetry, onGoHome }) => {
+  const handleGoHome = () => {
+    onGoHome();
+    // Use window.location instead of navigate when outside Router context
+    window.location.href = '/';
+  };
 
   return (
     <Box
-      className={getFoldableClasses()}
       sx={{
+        minHeight: '100vh',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: isFoldable ? '60vh' : '50vh',
-        p: getResponsiveValue(3, 4, 5, isFoldable ? 3.5 : undefined),
-        textAlign: 'center',
-        transition: 'all 0.3s ease',
+        p: 3,
+        backgroundColor: 'background.default',
       }}
     >
-      <Alert
-        severity="error"
+      <Paper
+        elevation={3}
         sx={{
-          mb: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined),
-          maxWidth: getResponsiveValue(
-            500,
-            550,
-            600,
-            isFoldable ? 525 : undefined
-          ),
-          borderRadius: getResponsiveValue(
-            8,
-            12,
-            16,
-            isFoldable ? 10 : undefined
-          ),
-          '& .MuiAlert-message': {
-            width: '100%',
-          },
+          maxWidth: 600,
+          width: '100%',
+          p: 4,
+          textAlign: 'center',
+          borderRadius: 3,
         }}
       >
-        <Typography
-          variant={getResponsiveValue(
-            'h6',
-            'h5',
-            'h4',
-            isFoldable ? 'h5' : undefined
-          )}
-          gutterBottom
+        <ReportIcon
           sx={{
-            fontSize: isFoldable
-              ? 'clamp(1.125rem, 3.5vw, 1.375rem)'
-              : getResponsiveValue('1.25rem', '1.5rem', '1.75rem', undefined),
-            fontWeight: 600,
-            mb: getResponsiveValue(1, 1.5, 2, isFoldable ? 1.25 : undefined),
-            transition: 'all 0.2s ease',
+            fontSize: 64,
+            color: 'error.main',
+            mb: 2,
           }}
-        >
-          Something went wrong
+        />
+
+        <Typography variant='h4' component='h1' gutterBottom color='error.main'>
+          Oops! Something went wrong
         </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: getResponsiveValue(1.5, 2, 2.5, isFoldable ? 1.75 : undefined),
-            fontSize: isFoldable
-              ? 'clamp(0.875rem, 2.5vw, 1rem)'
-              : getResponsiveValue('0.875rem', '1rem', '1.125rem', undefined),
-            lineHeight: 1.5,
-            transition: 'color 0.2s ease',
-          }}
-        >
-          {error.message || 'An unexpected error occurred'}
+
+        <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
+          We're sorry, but something unexpected happened. Our team has been
+          notified.
         </Typography>
-        <Button
-          variant="contained"
-          onClick={resetErrorBoundary}
+
+        {errorId && (
+          <Alert severity='info' sx={{ mb: 3, textAlign: 'left' }}>
+            <AlertTitle>Error Reference</AlertTitle>
+            If this problem persists, please contact support with this ID:{' '}
+            <strong>{errorId}</strong>
+          </Alert>
+        )}
+
+        {error && (
+          <Alert severity='error' sx={{ mb: 3, textAlign: 'left' }}>
+            <AlertTitle>Error Details</AlertTitle>
+            <Typography
+              variant='body2'
+              component='pre'
+              sx={{ fontSize: '0.75rem', overflow: 'auto' }}
+            >
+              {error.toString()}
+            </Typography>
+            {errorInfo && errorInfo.componentStack && (
+              <Typography
+                variant='body2'
+                component='pre'
+                sx={{ fontSize: '0.75rem', overflow: 'auto', mt: 1 }}
+              >
+                {errorInfo.componentStack}
+              </Typography>
+            )}
+          </Alert>
+        )}
+
+        <Box
           sx={{
-            fontWeight: 600,
-            background:
-              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-            textTransform: 'none',
-            color: '#fff',
-            fontSize: getResponsiveValue(
-              '0.875rem',
-              '1rem',
-              '1.125rem',
-              isFoldable ? '0.95rem' : undefined
-            ),
-            minHeight: isFoldable ? '48px' : 'auto',
-            px: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined),
-            py: getResponsiveValue(
-              1,
-              1.25,
-              1.5,
-              isFoldable ? 1.125 : undefined
-            ),
-            borderRadius: getResponsiveValue(
-              6,
-              8,
-              10,
-              isFoldable ? 7 : undefined
-            ),
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-              color: '#000',
-              transform: isFoldable ? 'scale(1.02)' : 'none',
-              boxShadow: isFoldable
-                ? '0 4px 12px rgba(163, 130, 76, 0.3)'
-                : '0 4px 12px rgba(163, 130, 76, 0.3)',
-            },
+            display: 'flex',
+            gap: 2,
+            justifyContent: 'center',
+            flexWrap: 'wrap',
           }}
         >
-          Try Again
-        </Button>
-      </Alert>
+          <Button
+            variant='contained'
+            startIcon={<RefreshIcon />}
+            onClick={onRetry}
+            sx={{ minWidth: 120 }}
+          >
+            Try Again
+          </Button>
+
+          <Button
+            variant='outlined'
+            startIcon={<HomeIcon />}
+            onClick={handleGoHome}
+            sx={{ minWidth: 120 }}
+          >
+            Go Home
+          </Button>
+        </Box>
+
+        <Typography variant='body2' color='text.secondary' sx={{ mt: 3 }}>
+          If the problem continues, please refresh the page or contact our
+          support team.
+        </Typography>
+
+        {/* Contact Information */}
+        <Box
+          sx={{
+            mt: 3,
+            p: 2,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Typography variant='subtitle2' gutterBottom color='primary.main'>
+            📞 Contact Support
+          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              textAlign: 'left',
+            }}
+          >
+            <Typography variant='body2' color='text.secondary'>
+              <strong>Email:</strong> support@goldenbasketmart.com
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              <strong>Phone:</strong> +91-1800-123-4567
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              <strong>WhatsApp:</strong> +91-98765-43210
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              <strong>Business Hours:</strong> Mon-Sat: 9:00 AM - 8:00 PM IST
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              <strong>Emergency:</strong> Available 24/7 for critical issues
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Additional Help Options */}
+        <Box
+          sx={{
+            mt: 2,
+            display: 'flex',
+            gap: 1,
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
+          <Button
+            variant='text'
+            size='small'
+            onClick={() =>
+              window.open(
+                'mailto:support@goldenbasketmart.com?subject=Error Report - ' +
+                  (errorId || 'Unknown'),
+                '_blank'
+              )
+            }
+            sx={{ fontSize: '0.75rem' }}
+          >
+            📧 Email Support
+          </Button>
+          <Button
+            variant='text'
+            size='small'
+            onClick={() =>
+              window.open(
+                'https://wa.me/919876543210?text=Error Report - ' +
+                  (errorId || 'Unknown'),
+                '_blank'
+              )
+            }
+            sx={{ fontSize: '0.75rem' }}
+          >
+            💬 WhatsApp Support
+          </Button>
+          <Button
+            variant='text'
+            size='small'
+            onClick={() => window.open('tel:+9118001234567', '_blank')}
+            sx={{ fontSize: '0.75rem' }}
+          >
+            📞 Call Support
+          </Button>
+        </Box>
+      </Paper>
     </Box>
   );
-};
-
-const ErrorBoundary = ({ children }) => {
-  return (
-    <ReactErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onError={(error, errorInfo) => {
-        // Log error to console in development
-        if (import.meta.env.DEV) {
-          console.error('Error caught by ErrorBoundary:', error);
-          console.error('Error info:', errorInfo);
-        }
-        // In production, you could send this to an error reporting service
-        // like Sentry, LogRocket, etc.
-      }}
-    >
-      {children}
-    </ReactErrorBoundary>
-  );
-};
-
-// Props validation
-ErrorFallback.propTypes = {
-  error: PropTypes.object.isRequired,
-  resetErrorBoundary: PropTypes.func.isRequired,
-};
-
-ErrorBoundary.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default ErrorBoundary;

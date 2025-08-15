@@ -41,7 +41,7 @@ export const FormTextField = ({
   const [showPassword, setShowPassword] = React.useState(false);
   const isPassword = type === 'password';
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     if (maxLength && e.target.value.length > maxLength) return;
     onChange(e);
   };
@@ -68,11 +68,11 @@ export const FormTextField = ({
       }}
       InputProps={{
         endAdornment: isPassword ? (
-          <InputAdornment position="end">
+          <InputAdornment position='end'>
             <IconButton
               onClick={() => setShowPassword(!showPassword)}
-              edge="end"
-              size="small"
+              edge='end'
+              size='small'
             >
               {showPassword ? <VisibilityOff /> : <Visibility />}
             </IconButton>
@@ -120,19 +120,19 @@ export const FormSelect = ({
         label={label}
         {...props}
       >
-        {options.map((option) => (
+        {options.map(option => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
         ))}
       </Select>
       {error && (
-        <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+        <Typography variant='caption' color='error' sx={{ mt: 0.5 }}>
           {error}
         </Typography>
       )}
       {helperText && !error && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        <Typography variant='caption' color='text.secondary' sx={{ mt: 0.5 }}>
           {helperText}
         </Typography>
       )}
@@ -204,7 +204,7 @@ export const FormButton = ({
     >
       {loading ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CircularProgress size={15} color="inherit" />
+          <CircularProgress size={15} color='inherit' />
           Loading...
         </Box>
       ) : (
@@ -219,7 +219,7 @@ export const FormError = ({ error, sx = {} }) => {
   if (!error) return null;
 
   return (
-    <Alert severity="error" sx={{ mb: 2, ...sx }}>
+    <Alert severity='error' sx={{ mb: 2, ...sx }}>
       {error}
     </Alert>
   );
@@ -230,7 +230,7 @@ export const FormSuccess = ({ message, sx = {} }) => {
   if (!message) return null;
 
   return (
-    <Alert severity="success" sx={{ mb: 2, ...sx }}>
+    <Alert severity='success' sx={{ mb: 2, ...sx }}>
       {message}
     </Alert>
   );
@@ -248,8 +248,8 @@ export const FormField = ({
     <Box sx={{ mb: 2, ...sx }}>
       {label && (
         <Typography
-          variant="body2"
-          color="text.secondary"
+          variant='body2'
+          color='text.secondary'
           sx={{ mb: 1, fontWeight: 500 }}
         >
           {label}
@@ -258,7 +258,11 @@ export const FormField = ({
       )}
       {children}
       {error && (
-        <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+        <Typography
+          variant='caption'
+          color='error'
+          sx={{ mt: 0.5, display: 'block' }}
+        >
           {error}
         </Typography>
       )}

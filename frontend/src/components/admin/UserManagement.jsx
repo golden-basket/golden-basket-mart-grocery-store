@@ -20,13 +20,10 @@ import {
   useMediaQuery,
   Card,
   CardContent,
-  CardActions,
   Stack,
-  Grid,
   Chip,
   Select,
   MenuItem,
-  Divider,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -34,11 +31,14 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { createAdminStyles } from './adminStyles';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import { useToastNotifications } from '../../hooks/useToast';
 
 const UserManagement = ({ users, onUserUpdate }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  const { showSuccess, showError } = useToastNotifications();
 
   // User state
   const [userDialogOpen, setUserDialogOpen] = useState(false);
@@ -83,37 +83,65 @@ const UserManagement = ({ users, onUserUpdate }) => {
   }, []);
 
   const handleUserDialogSave = useCallback(() => {
-    onUserUpdate(userDialogMode, userDialogForm, editUser?._id);
-    handleUserDialogClose();
+    try {
+      onUserUpdate(userDialogMode, userDialogForm, editUser?._id);
+      showSuccess(
+        userDialogMode === 'add'
+          ? 'User added successfully!'
+          : 'User updated successfully!'
+      );
+      handleUserDialogClose();
+    } catch (error) {
+      console.error('Failed to save user:', error);
+      showError(
+        userDialogMode === 'add'
+          ? 'Failed to add user. Please try again.'
+          : 'Failed to update user. Please try again.'
+      );
+    }
   }, [
     userDialogMode,
     userDialogForm,
     editUser,
     handleUserDialogClose,
     onUserUpdate,
+    showSuccess,
+    showError,
   ]);
 
   const handleDeleteUser = useCallback(
-    (id) => {
-      onUserUpdate('delete', null, id);
+    id => {
+      try {
+        onUserUpdate('delete', null, id);
+        showSuccess('User deleted successfully!');
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+        showError('Failed to delete user. Please try again.');
+      }
     },
-    [onUserUpdate]
+    [onUserUpdate, showSuccess, showError]
   );
 
   const handleInviteUser = useCallback(
-    (userId) => {
-      onUserUpdate('invite', null, userId);
+    userId => {
+      try {
+        onUserUpdate('invite', null, userId);
+        showSuccess('User invitation sent successfully!');
+      } catch (error) {
+        console.error('Failed to send invitation:', error);
+        showError('Failed to send invitation. Please try again.');
+      }
     },
-    [onUserUpdate]
+    [onUserUpdate, showSuccess, showError]
   );
 
   // Form change handlers
   const handleUserFormChange = useCallback((field, value) => {
-    setUserDialogForm((f) => ({ ...f, [field]: value }));
+    setUserDialogForm(f => ({ ...f, [field]: value }));
   }, []);
 
   // Enhanced mobile user card rendering
-  const renderMobileUserCard = (user) => (
+  const renderMobileUserCard = user => (
     <Card
       key={user._id}
       sx={{
@@ -123,7 +151,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
         border: '1px solid var(--color-primary-light)',
         borderRadius: 2,
       }}
-      className="card-golden"
+      className='card-golden'
     >
       <CardContent sx={{ p: 2 }}>
         <Box
@@ -136,27 +164,27 @@ const UserManagement = ({ users, onUserUpdate }) => {
         >
           <Box>
             <Typography
-              variant="h6"
+              variant='h6'
               sx={{ color: 'var(--color-primary)', fontWeight: 600 }}
             >
               {user.firstName} {user.lastName}
             </Typography>
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant='body2' color='textSecondary'>
               {user.email}
             </Typography>
           </Box>
           <Chip
             label={user.role}
             color={user.role === 'admin' ? 'error' : 'primary'}
-            size="small"
+            size='small'
             sx={{ fontWeight: 600 }}
           />
         </Box>
 
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button
-            size="small"
-            variant="outlined"
+            size='small'
+            variant='outlined'
             startIcon={<EditIcon />}
             onClick={() => handleUserDialogOpen('edit', user)}
             sx={{
@@ -171,9 +199,16 @@ const UserManagement = ({ users, onUserUpdate }) => {
             Edit
           </Button>
           <Button
-            size="small"
-            variant="outlined"
-            startIcon={<NotificationsIcon />}
+            size='small'
+            variant='outlined'
+            startIcon={
+              !user.isDefaultPassword && user.isVerified ? (
+                <VerifiedIcon />
+              ) : (
+                <NotificationsIcon />
+              )
+            }
+            disabled={!user.isDefaultPassword && user.isVerified}
             onClick={() => handleInviteUser(user._id)}
             sx={{
               borderColor: 'var(--color-accent)',
@@ -182,14 +217,21 @@ const UserManagement = ({ users, onUserUpdate }) => {
                 borderColor: 'var(--color-accent-dark)',
                 backgroundColor: 'rgba(56,142,60,0.1)',
               },
+              '&:disabled': {
+                color: 'var(--color-primary) !important',
+                opacity: 0.5,
+              },
             }}
+            title={
+              !user.isDefaultPassword && user.isVerified ? 'Verified' : 'Invite'
+            }
           >
-            Invite
+            {!user.isDefaultPassword && user.isVerified ? 'Verified' : 'Invite'}
           </Button>
           <Button
-            size="small"
-            variant="outlined"
-            color="error"
+            size='small'
+            variant='outlined'
+            color='error'
             startIcon={<DeleteIcon />}
             onClick={() => handleDeleteUser(user._id)}
             sx={{
@@ -212,7 +254,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
         <Box>
           {users.length === 0 ? (
             <Box sx={{ textAlign: 'center', p: 4 }}>
-              <Typography color="textSecondary">No users found</Typography>
+              <Typography color='textSecondary'>No users found</Typography>
             </Box>
           ) : (
             users.map(renderMobileUserCard)
@@ -233,42 +275,57 @@ const UserManagement = ({ users, onUserUpdate }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user) => (
+            {users.map(user => (
               <TableRow key={user._id} sx={styles.tableRowStyles}>
                 <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  <Typography variant='body1' sx={{ fontWeight: 600 }}>
                     {user.firstName} {user.lastName}
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2">{user.email}</Typography>
+                  <Typography variant='body2'>{user.email}</Typography>
                 </TableCell>
                 <TableCell>
                   <Chip
                     label={user.role}
                     color={user.role === 'admin' ? 'error' : 'primary'}
-                    size="small"
+                    size='small'
                     sx={{ fontWeight: 600 }}
                   />
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
-                      size="small"
+                      size='small'
                       onClick={() => handleUserDialogOpen('edit', user)}
                       sx={{ color: 'var(--color-primary)' }}
                     >
                       <EditIcon />
                     </IconButton>
+
                     <IconButton
-                      size="small"
+                      size='small'
+                      disabled={!user.isDefaultPassword && user.isVerified}
                       onClick={() => handleInviteUser(user._id)}
-                      sx={{ color: 'var(--color-accent)' }}
+                      sx={{
+                        color: 'var(--color-accent)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(56,142,60,0.1)',
+                        },
+                        '&:disabled': {
+                          color: 'var(--color-primary) !important',
+                          opacity: 0.5,
+                        },
+                      }}
                     >
-                      <NotificationsIcon />
+                      {!user.isDefaultPassword && user.isVerified ? (
+                        <VerifiedIcon />
+                      ) : (
+                        <NotificationsIcon />
+                      )}
                     </IconButton>
                     <IconButton
-                      size="small"
+                      size='small'
                       onClick={() => handleDeleteUser(user._id)}
                       sx={{ color: 'var(--color-error)' }}
                     >
@@ -288,7 +345,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
     <Box sx={styles.sectionStyles}>
       <Stack
         direction={isMobile ? 'column' : 'row'}
-        justifyContent="space-between"
+        justifyContent='space-between'
         alignItems={isMobile ? 'stretch' : 'center'}
         mb={3}
         spacing={2}
@@ -297,7 +354,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
           Manage Users
         </Typography>
         <Button
-          variant="contained"
+          variant='contained'
           startIcon={<AddIcon />}
           onClick={() => handleUserDialogOpen('add')}
           size={isMobile ? 'medium' : 'small'}
@@ -361,31 +418,29 @@ const UserManagement = ({ users, onUserUpdate }) => {
         >
           <Stack spacing={isMobile ? 2 : 3}>
             <TextField
-              label="First Name"
+              label='First Name'
               value={userDialogForm.firstName}
-              onChange={(e) =>
-                handleUserFormChange('firstName', e.target.value)
-              }
+              onChange={e => handleUserFormChange('firstName', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
             <TextField
-              label="Last Name"
+              label='Last Name'
               value={userDialogForm.lastName}
-              onChange={(e) => handleUserFormChange('lastName', e.target.value)}
+              onChange={e => handleUserFormChange('lastName', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
             <TextField
-              label="Email"
+              label='Email'
               value={userDialogForm.email}
-              onChange={(e) => handleUserFormChange('email', e.target.value)}
+              onChange={e => handleUserFormChange('email', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
             <Select
               value={userDialogForm.role}
-              onChange={(e) => handleUserFormChange('role', e.target.value)}
+              onChange={e => handleUserFormChange('role', e.target.value)}
               displayEmpty
               sx={{
                 ...styles.inputStyles['& .MuiOutlinedInput-root'],
@@ -393,8 +448,8 @@ const UserManagement = ({ users, onUserUpdate }) => {
                 fontWeight: 500,
               }}
             >
-              <MenuItem value="user">User</MenuItem>
-              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value='user'>User</MenuItem>
+              <MenuItem value='admin'>Admin</MenuItem>
             </Select>
           </Stack>
         </DialogContent>
@@ -425,7 +480,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
           </Button>
           <Button
             onClick={handleUserDialogSave}
-            variant="contained"
+            variant='contained'
             sx={{
               ...styles.buttonStyles,
               px: 3,

@@ -475,7 +475,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
       }
     });
 
-    stream.on('error', (error) => {
+    stream.on('error', error => {
       clearTimeout(timeout);
       // Clean up the stream
       stream.destroy();
@@ -484,7 +484,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
 
     // Handle doc errors
     if (doc) {
-      doc.on('error', (error) => {
+      doc.on('error', error => {
         clearTimeout(timeout);
         if (stream) {
           stream.destroy();
@@ -536,7 +536,7 @@ exports.placeOrder = async (req, res) => {
 
     // Calculate total
     let totalAmount = 0;
-    const orderItems = cart.items.map((item) => {
+    const orderItems = cart.items.map(item => {
       totalAmount += item.product.price * item.quantity;
       return {
         product: item.product._id,
@@ -743,8 +743,8 @@ exports.getUserOrderStats = async (req, res) => {
 
     // Get top category from orders
     const categoryCounts = {};
-    orders.forEach((order) => {
-      order.items?.forEach((item) => {
+    orders.forEach(order => {
+      order.items?.forEach(item => {
         if (item.product?.category?.name) {
           const categoryName = item.product.category.name;
           categoryCounts[categoryName] =
@@ -958,12 +958,26 @@ exports.getOrdersWithFilters = async (req, res) => {
       if (endDate) filter.createdAt.$lte = new Date(endDate);
     }
 
-    // Search filter (search in user email or order ID)
+    // Search filter - handle ObjectId search properly
     if (search) {
-      filter.$or = [{ _id: { $regex: search, $options: 'i' } }];
+      // Try to convert search to ObjectId if it looks like one
+      if (search.length === 24 && /^[0-9a-fA-F]{24}$/.test(search)) {
+        try {
+          const mongoose = require('mongoose');
+          const objectId = new mongoose.Types.ObjectId(search);
+          filter._id = objectId;
+        } catch (error) {
+          // If it's not a valid ObjectId, ignore the search
+          console.log('Invalid ObjectId format:', search);
+        }
+      } else if (search.length < 24 && /^[0-9a-fA-F]+$/.test(search)) {
+        // For partial ObjectId searches, we'll need to handle this differently
+        // since we can't use regex on ObjectId fields
+        console.log('Partial ObjectId search not supported:', search);
+      }
     }
 
-    const orders = await Order.find(filter)
+    let orders = await Order.find(filter)
       .populate('user', 'firstName lastName email')
       .populate('items.product', 'name price images')
       .populate('invoice')
@@ -972,7 +986,71 @@ exports.getOrdersWithFilters = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await Order.countDocuments(filter);
+    // Apply search filter after population if it's not an ObjectId search
+    if (search && (!/^[0-9a-fA-F]{24}$/.test(search) || search.length !== 24)) {
+      const searchLower = search.toLowerCase();
+      orders = orders.filter(order => {
+        // Search in user email
+        if (
+          order.user &&
+          order.user.email &&
+          order.user.email.toLowerCase().includes(searchLower)
+        ) {
+          return true;
+        }
+        // Search in user name
+        if (
+          order.user &&
+          ((order.user.firstName &&
+            order.user.firstName.toLowerCase().includes(searchLower)) ||
+            (order.user.lastName &&
+              order.user.lastName.toLowerCase().includes(searchLower)))
+        ) {
+          return true;
+        }
+        // Search in order ID (convert to string for partial matching)
+        if (order._id.toString().toLowerCase().includes(searchLower)) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    // Get total count - if we filtered after population, we need to adjust
+    let total;
+    if (search && (!/^[0-9a-fA-F]{24}$/.test(search) || search.length !== 24)) {
+      // For post-population filtering, we need to get all orders and filter
+      const allOrders = await Order.find(filter)
+        .populate('user', 'firstName lastName email')
+        .sort({ createdAt: -1 });
+
+      const searchLower = search.toLowerCase();
+      const filteredOrders = allOrders.filter(order => {
+        if (
+          order.user &&
+          order.user.email &&
+          order.user.email.toLowerCase().includes(searchLower)
+        ) {
+          return true;
+        }
+        if (
+          order.user &&
+          ((order.user.firstName &&
+            order.user.firstName.toLowerCase().includes(searchLower)) ||
+            (order.user.lastName &&
+              order.user.lastName.toLowerCase().includes(searchLower)))
+        ) {
+          return true;
+        }
+        if (order._id.toString().toLowerCase().includes(searchLower)) {
+          return true;
+        }
+        return false;
+      });
+      total = filteredOrders.length;
+    } else {
+      total = await Order.countDocuments(filter);
+    }
 
     res.json({
       orders,

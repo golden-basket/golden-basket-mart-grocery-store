@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateProfile = async (profileData) => {
+  const updateProfile = async profileData => {
     try {
       const updatedProfile = await ApiService.updateProfile(profileData);
       setUser(updatedProfile);

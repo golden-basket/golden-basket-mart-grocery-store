@@ -19,7 +19,7 @@ export const ERROR_CATEGORIES = {
 export const HTTP_STATUS_MESSAGES = {
   400: 'Bad Request - Please check your input and try again.',
   401: 'Unauthorized - Please log in to continue.',
-  403: 'Access Denied - You don\'t have permission to perform this action.',
+  403: "Access Denied - You don't have permission to perform this action.",
   404: 'Not Found - The requested resource was not found.',
   409: 'Conflict - This resource already exists.',
   422: 'Validation Error - Please check your input and try again.',
@@ -27,7 +27,7 @@ export const HTTP_STATUS_MESSAGES = {
   429: 'Too Many Requests - Please wait a moment before trying again.',
   500: 'Server Error - Something went wrong on our end. Please try again later.',
   502: 'Bad Gateway - Service temporarily unavailable. Please try again later.',
-  503: 'Service Unavailable - We\'re experiencing high traffic. Please try again later.',
+  503: "Service Unavailable - We're experiencing high traffic. Please try again later.",
   504: 'Gateway Timeout - Request timed out. Please try again.',
 };
 
@@ -42,11 +42,14 @@ export const ERROR_SEVERITY = {
 /**
  * Categorize error based on response status and error type
  */
-export const categorizeError = (error) => {
+export const categorizeError = error => {
   if (!error) return ERROR_CATEGORIES.UNKNOWN;
 
   // Network errors
-  if (error.code === 'NETWORK_ERROR' || error.message?.includes('Network Error')) {
+  if (
+    error.code === 'NETWORK_ERROR' ||
+    error.message?.includes('Network Error')
+  ) {
     return ERROR_CATEGORIES.NETWORK;
   }
 
@@ -123,7 +126,10 @@ export const getErrorMessage = (error, context = '') => {
     if (error.response?.status === 423) {
       return 'Account is temporarily locked due to multiple failed attempts. Please try again later.';
     }
-    if (error.response?.status === 403 && error.response?.data?.error?.includes('verify')) {
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.error?.includes('verify')
+    ) {
       return 'Please verify your email before logging in.';
     }
   }
@@ -146,7 +152,10 @@ export const getErrorMessage = (error, context = '') => {
   }
 
   // Network errors
-  if (error.code === 'NETWORK_ERROR' || error.message?.includes('Network Error')) {
+  if (
+    error.code === 'NETWORK_ERROR' ||
+    error.message?.includes('Network Error')
+  ) {
     return 'Network connection error. Please check your internet connection and try again.';
   }
 
@@ -197,14 +206,14 @@ export const handleError = (error, context = '') => {
 /**
  * Handle authentication-specific errors
  */
-export const handleAuthError = (error) => {
+export const handleAuthError = error => {
   return handleError(error, 'authentication');
 };
 
 /**
  * Handle form validation errors
  */
-export const handleValidationError = (error) => {
+export const handleValidationError = error => {
   return handleError(error, 'validation');
 };
 
@@ -213,9 +222,12 @@ export const handleValidationError = (error) => {
  */
 export const handleApiError = (error, retryCount = 0, maxRetries = 3) => {
   const errorInfo = handleError(error);
-  
+
   // Auto-retry for network errors (up to maxRetries)
-  if (errorInfo.category === ERROR_CATEGORIES.NETWORK && retryCount < maxRetries) {
+  if (
+    errorInfo.category === ERROR_CATEGORIES.NETWORK &&
+    retryCount < maxRetries
+  ) {
     return {
       ...errorInfo,
       shouldRetry: true,
@@ -235,12 +247,13 @@ export const handleApiError = (error, retryCount = 0, maxRetries = 3) => {
  */
 export const createSnackbarConfig = (error, context = '') => {
   const errorInfo = handleError(error, context);
-  
+
   return {
     open: true,
     message: errorInfo.message,
     severity: errorInfo.severity,
-    autoHideDuration: errorInfo.category === ERROR_CATEGORIES.RATE_LIMIT ? 8000 : 6000,
+    autoHideDuration:
+      errorInfo.category === ERROR_CATEGORIES.RATE_LIMIT ? 8000 : 6000,
     persistent: errorInfo.category === ERROR_CATEGORIES.SERVER,
   };
 };
@@ -284,11 +297,13 @@ export const createWarningConfig = (message, autoHideDuration = 7000) => {
 /**
  * Check if error is retryable
  */
-export const isRetryableError = (error) => {
+export const isRetryableError = error => {
   const category = categorizeError(error);
-  return category === ERROR_CATEGORIES.NETWORK || 
-         category === ERROR_CATEGORIES.SERVER ||
-         error.response?.status === 503;
+  return (
+    category === ERROR_CATEGORIES.NETWORK ||
+    category === ERROR_CATEGORIES.SERVER ||
+    error.response?.status === 503
+  );
 };
 
 /**
@@ -296,15 +311,15 @@ export const isRetryableError = (error) => {
  */
 export const getRetryDelay = (error, retryCount) => {
   const category = categorizeError(error);
-  
+
   if (category === ERROR_CATEGORIES.RATE_LIMIT) {
     return Math.min(1000 * Math.pow(2, retryCount), 30000); // Exponential backoff, max 30s
   }
-  
+
   if (category === ERROR_CATEGORIES.NETWORK) {
     return Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff, max 10s
   }
-  
+
   return 1000; // Default 1 second
 };
 
@@ -313,7 +328,7 @@ export const getRetryDelay = (error, retryCount) => {
  */
 export const handleBoundaryError = (error, errorInfo) => {
   console.error('Error Boundary Caught Error:', error, errorInfo);
-  
+
   return {
     category: ERROR_CATEGORIES.UNKNOWN,
     severity: ERROR_SEVERITY.ERROR,

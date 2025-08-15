@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import ApiService from '../../../services/api';
+import { useToastNotifications } from '../../../hooks/useToast';
 
 const OrderDialogs = ({
   statusDialogOpen,
@@ -25,6 +26,7 @@ const OrderDialogs = ({
   onPaymentDialogClose,
   onUpdateSuccess,
 }) => {
+  const { showError } = useToastNotifications();
   const [statusForm, setStatusForm] = useState({
     orderStatus: '',
     trackingNumber: '',
@@ -68,19 +70,19 @@ const OrderDialogs = ({
       onStatusDialogClose();
     } catch (error) {
       console.error('Failed to update order status:', error);
-      // You can add error handling here if needed
+      showError('Failed to update order status. Please try again.');
     }
   };
 
   // Update payment status
   const handlePaymentUpdate = async () => {
     try {
-      await ApiService.updatePaymentStatus(selectedOrder._id, paymentForm);
+      await ApiService.updateOrderStatus(selectedOrder._id, paymentForm);
       onUpdateSuccess('Payment status updated successfully');
       onPaymentDialogClose();
     } catch (error) {
       console.error('Failed to update payment status:', error);
-      // You can add error handling here if needed
+      showError('Failed to update payment status. Please try again.');
     }
   };
 
@@ -135,16 +137,17 @@ const OrderDialogs = ({
               <InputLabel>Order Status</InputLabel>
               <Select
                 value={statusForm.orderStatus}
-                onChange={(e) =>
-                  setStatusForm((prev) => ({
+                onChange={e =>
+                  setStatusForm(prev => ({
                     ...prev,
                     orderStatus: e.target.value,
                   }))
                 }
-                label="Order Status"
+                label='Order Status'
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                    background:
+                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                     borderRadius: isMobile ? 2 : 1.5,
                     boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                     '&:hover fieldset': { borderColor: '#a3824c' },
@@ -162,27 +165,28 @@ const OrderDialogs = ({
                   },
                 }}
               >
-                <MenuItem value="processing">Processing</MenuItem>
-                <MenuItem value="shipped">Shipped</MenuItem>
-                <MenuItem value="delivered">Delivered</MenuItem>
-                <MenuItem value="cancelled">Cancelled</MenuItem>
+                <MenuItem value='processing'>Processing</MenuItem>
+                <MenuItem value='shipped'>Shipped</MenuItem>
+                <MenuItem value='delivered'>Delivered</MenuItem>
+                <MenuItem value='cancelled'>Cancelled</MenuItem>
               </Select>
             </FormControl>
 
             <TextField
               fullWidth
-              label="Tracking Number"
+              label='Tracking Number'
               value={statusForm.trackingNumber}
-              onChange={(e) =>
-                setStatusForm((prev) => ({
+              onChange={e =>
+                setStatusForm(prev => ({
                   ...prev,
                   trackingNumber: e.target.value,
                 }))
               }
-              placeholder="Enter tracking number"
+              placeholder='Enter tracking number'
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                  background:
+                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                   borderRadius: isMobile ? 2 : 1.5,
                   boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                   '&:hover fieldset': { borderColor: '#a3824c' },
@@ -200,18 +204,19 @@ const OrderDialogs = ({
 
             <TextField
               fullWidth
-              label="Tracking URL"
+              label='Tracking URL'
               value={statusForm.trackingUrl}
-              onChange={(e) =>
-                setStatusForm((prev) => ({
+              onChange={e =>
+                setStatusForm(prev => ({
                   ...prev,
                   trackingUrl: e.target.value,
                 }))
               }
-              placeholder="Enter tracking URL"
+              placeholder='Enter tracking URL'
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                  background:
+                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                   borderRadius: isMobile ? 2 : 1.5,
                   boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                   '&:hover fieldset': { borderColor: '#a3824c' },
@@ -229,17 +234,18 @@ const OrderDialogs = ({
 
             <TextField
               fullWidth
-              label="Admin Notes"
+              label='Admin Notes'
               value={statusForm.notes}
-              onChange={(e) =>
-                setStatusForm((prev) => ({ ...prev, notes: e.target.value }))
+              onChange={e =>
+                setStatusForm(prev => ({ ...prev, notes: e.target.value }))
               }
-              placeholder="Add notes (optional)"
+              placeholder='Add notes (optional)'
               multiline
               rows={isMobile ? 2 : 3}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                  background:
+                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                   borderRadius: isMobile ? 2 : 1.5,
                   boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                   '&:hover fieldset': { borderColor: '#a3824c' },
@@ -283,9 +289,10 @@ const OrderDialogs = ({
           </Button>
           <Button
             onClick={handleStatusUpdate}
-            variant="contained"
+            variant='contained'
             sx={{
-              background: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background:
+                'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
               color: '#fff',
               textTransform: 'none',
               boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
@@ -354,16 +361,17 @@ const OrderDialogs = ({
               <InputLabel>Payment Status</InputLabel>
               <Select
                 value={paymentForm.paymentStatus}
-                onChange={(e) =>
-                  setPaymentForm((prev) => ({
+                onChange={e =>
+                  setPaymentForm(prev => ({
                     ...prev,
                     paymentStatus: e.target.value,
                   }))
                 }
-                label="Payment Status"
+                label='Payment Status'
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                    background:
+                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                     borderRadius: isMobile ? 2 : 1.5,
                     boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                     '&:hover fieldset': { borderColor: '#a3824c' },
@@ -381,9 +389,9 @@ const OrderDialogs = ({
                   },
                 }}
               >
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="paid">Paid</MenuItem>
-                <MenuItem value="failed">Failed</MenuItem>
+                <MenuItem value='pending'>Pending</MenuItem>
+                <MenuItem value='paid'>Paid</MenuItem>
+                <MenuItem value='failed'>Failed</MenuItem>
               </Select>
             </FormControl>
 
@@ -391,16 +399,17 @@ const OrderDialogs = ({
               <InputLabel>Payment Method</InputLabel>
               <Select
                 value={paymentForm.paymentMethod}
-                onChange={(e) =>
-                  setPaymentForm((prev) => ({
+                onChange={e =>
+                  setPaymentForm(prev => ({
                     ...prev,
                     paymentMethod: e.target.value,
                   }))
                 }
-                label="Payment Method"
+                label='Payment Method'
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                    background:
+                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                     borderRadius: isMobile ? 2 : 1.5,
                     boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                     '&:hover fieldset': { borderColor: '#a3824c' },
@@ -418,25 +427,26 @@ const OrderDialogs = ({
                   },
                 }}
               >
-                <MenuItem value="cod">Cash on Delivery</MenuItem>
-                <MenuItem value="upi">UPI</MenuItem>
+                <MenuItem value='cod'>Cash on Delivery</MenuItem>
+                <MenuItem value='upi'>UPI</MenuItem>
               </Select>
             </FormControl>
 
             <TextField
               fullWidth
-              label="Transaction ID"
+              label='Transaction ID'
               value={paymentForm.transactionId}
-              onChange={(e) =>
-                setPaymentForm((prev) => ({
+              onChange={e =>
+                setPaymentForm(prev => ({
                   ...prev,
                   transactionId: e.target.value,
                 }))
               }
-              placeholder="Enter transaction ID (optional)"
+              placeholder='Enter transaction ID (optional)'
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+                  background:
+                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                   borderRadius: isMobile ? 2 : 1.5,
                   boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
                   '&:hover fieldset': { borderColor: '#a3824c' },
@@ -480,9 +490,10 @@ const OrderDialogs = ({
           </Button>
           <Button
             onClick={handlePaymentUpdate}
-            variant="contained"
+            variant='contained'
             sx={{
-              background: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background:
+                'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
               color: '#fff',
               textTransform: 'none',
               boxShadow: '0 4px 12px rgba(163,130,76,0.3)',

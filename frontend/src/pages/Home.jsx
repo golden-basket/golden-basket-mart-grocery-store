@@ -20,17 +20,13 @@ import { useState, useEffect } from 'react';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
-import ThemeSnackbar from '../components/ThemeSnackbar';
+import { useToastNotifications } from '../hooks/useToast';
 
 const HomeComponent = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToastNotifications();
   const [actionLoading, setActionLoading] = useState({});
   const [buyNowLoading, setBuyNowLoading] = useState({});
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
 
   // Pagination state for home page
   const [page, setPage] = useState(1);
@@ -81,8 +77,8 @@ const HomeComponent = () => {
     window.scrollTo(0, 0);
   };
 
-  const filterProducts = (category) => {
-    return displayProducts?.filter((p) =>
+  const filterProducts = category => {
+    return displayProducts?.filter(p =>
       p?.category?.name?.toLowerCase().includes(category)
     );
   };
@@ -90,7 +86,7 @@ const HomeComponent = () => {
   const uniqueCategories = Array.from(
     new Set(
       displayProducts
-        ?.map((p) => p?.category?.name?.toLowerCase())
+        ?.map(p => p?.category?.name?.toLowerCase())
         .filter(Boolean)
     )
   );
@@ -101,48 +97,32 @@ const HomeComponent = () => {
   }, {});
 
   // Add to cart handler
-  const handleAddToCart = async (productId) => {
-    setActionLoading((prev) => ({ ...prev, [productId]: true }));
+  const handleAddToCart = async productId => {
+    setActionLoading(prev => ({ ...prev, [productId]: true }));
 
     try {
       await addToCartMutation.mutateAsync({ productId, quantity: 1 });
-      setSnackbar({
-        open: true,
-        message: 'Item added to cart successfully!',
-        severity: 'success',
-      });
+      showSuccess('Item added to cart successfully!');
     } catch (err) {
       console.error('Failed to add to cart:', err);
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to add item to cart',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to add item to cart');
     } finally {
-      setActionLoading((prev) => ({ ...prev, [productId]: false }));
+      setActionLoading(prev => ({ ...prev, [productId]: false }));
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
   // Buy now handler
-  const handleBuyNow = async (productId) => {
-    setBuyNowLoading((prev) => ({ ...prev, [productId]: true }));
+  const handleBuyNow = async productId => {
+    setBuyNowLoading(prev => ({ ...prev, [productId]: true }));
 
     try {
       await addToCartMutation.mutateAsync({ productId, quantity: 1 });
       navigate('/checkout');
     } catch (err) {
       console.error('Failed to process buy now:', err);
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to process buy now',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to process buy now');
     } finally {
-      setBuyNowLoading((prev) => ({ ...prev, [productId]: false }));
+      setBuyNowLoading(prev => ({ ...prev, [productId]: false }));
     }
   };
 
@@ -152,7 +132,7 @@ const HomeComponent = () => {
 
   return (
     <Container
-      maxWidth="xl"
+      maxWidth='xl'
       className={`${getResponsiveContainer()} ${getResponsiveSpacingClasses()}`}
       sx={{
         px: {
@@ -237,7 +217,7 @@ const HomeComponent = () => {
         </Box>
       )}
 
-      {Object.keys(filteredProducts).map((category) => (
+      {Object.keys(filteredProducts).map(category => (
         <Box
           key={category}
           className={getResponsiveSpacingClasses()}
@@ -298,15 +278,15 @@ const HomeComponent = () => {
 
           <ProductCarousel
             products={filteredProducts[category]}
-            renderActions={(product) => (
+            renderActions={product => (
               <Stack
-                direction="column"
+                direction='column'
                 spacing={isMobile ? 0.5 : isTablet ? 0.75 : 1}
-                width="100%"
+                width='100%'
               >
                 <Button
                   fullWidth
-                  variant="contained"
+                  variant='contained'
                   className={getResponsiveButtonSize()}
                   startIcon={
                     buyNowLoading[product._id] ? (
@@ -372,7 +352,7 @@ const HomeComponent = () => {
                 </Button>
 
                 <Button
-                  variant="outlined"
+                  variant='outlined'
                   fullWidth
                   className={getResponsiveButtonSize()}
                   startIcon={
@@ -468,7 +448,7 @@ const HomeComponent = () => {
           <FilterStatusBar
             showing={displayProducts.length}
             total={displayProducts.length}
-            itemType="products"
+            itemType='products'
             sx={{
               textAlign: 'center',
               background: 'transparent',
@@ -488,7 +468,7 @@ const HomeComponent = () => {
             }}
           />
           <Typography
-            variant="body2"
+            variant='body2'
             className={getResponsiveTextClasses()}
             sx={{
               color: '#a3824c',
@@ -520,7 +500,7 @@ const HomeComponent = () => {
               count={totalPages}
               page={page}
               onChange={handlePageChange}
-              color="primary"
+              color='primary'
               size={isMobile ? 'small' : 'medium'}
               sx={{
                 '& .MuiPaginationItem-root': {
@@ -541,7 +521,7 @@ const HomeComponent = () => {
             {/* Load More Button */}
             {page < totalPages && (
               <Button
-                variant="outlined"
+                variant='outlined'
                 className={getResponsiveButtonSize()}
                 onClick={() => handlePageChange(null, page + 1)}
                 sx={{
@@ -578,13 +558,6 @@ const HomeComponent = () => {
           </Box>
         </Box>
       )}
-
-      <ThemeSnackbar
-        open={snackbar.open}
-        onClose={handleCloseSnackbar}
-        message={snackbar.message}
-        severity={snackbar.severity}
-      />
     </Container>
   );
 };

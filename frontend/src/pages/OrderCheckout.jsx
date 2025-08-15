@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import ApiService from '../services/api';
 import {
@@ -19,9 +19,13 @@ import Loading from '../components/Loading';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
 import { useNavigate } from 'react-router-dom';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import { useToastNotifications } from '../hooks/useToast';
 
 const OrderCheckout = () => {
   const { token } = useAuth();
+  const { showSuccess, showError } = useToastNotifications();
+  const showErrorRef = useRef();
+  showErrorRef.current = showError;
   const [addresses, setAddresses] = useState([]);
   const [cart, setCart] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -29,8 +33,6 @@ const OrderCheckout = () => {
   const [paymentDetails, setPaymentDetails] = useState({});
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [deliveryDistance] = useState(0);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [invoice, setInvoice] = useState(null);
@@ -67,14 +69,16 @@ const OrderCheckout = () => {
       })
       .catch(() => {
         if (isMounted) {
-          setError('Failed to load addresses or cart.');
+          showErrorRef.current(
+            'Failed to load addresses or cart. Please try again.'
+          );
           setLoading(false);
         }
       });
     return () => {
       isMounted = false;
     };
-  }, [token]);
+  }, [token]); // Only depend on token
 
   // Calculate delivery charges based on distance and order amount
   const calculateDeliveryCharges = (distance, orderAmount) => {
@@ -127,15 +131,15 @@ const OrderCheckout = () => {
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
-      setError('Please select a shipping address.');
+      showError('Please select a shipping address.');
       return;
     }
 
     const totals = calculateTotal();
 
     // Check minimum order amount
-    if (totals.subtotal < MIN_ORDER_AMOUNT) {
-      setError(
+    if (totals.total < MIN_ORDER_AMOUNT) {
+      showError(
         `Minimum order amount is ₹${MIN_ORDER_AMOUNT}. Please add more items to your cart.`
       );
       return;
@@ -144,18 +148,16 @@ const OrderCheckout = () => {
     // Validate payment details based on selected method
     if (selectedPaymentMethod === 'upi') {
       if (!paymentDetails.upiId) {
-        setError('Please enter your UPI ID.');
+        showError('Please enter your UPI ID.');
         return;
       }
       if (!paymentScreenshot) {
-        setError('Please upload a screenshot of your payment confirmation.');
+        showError('Please upload a screenshot of your payment confirmation.');
         return;
       }
     }
 
     setPlacing(true);
-    setError('');
-    setSuccess('');
     try {
       const orderData = {
         shippingAddressId: selectedAddress,
@@ -168,12 +170,12 @@ const OrderCheckout = () => {
       };
 
       const res = await ApiService.placeOrder(orderData);
-      setSuccess('Order placed successfully!');
+      showSuccess('Order placed successfully!');
       setInvoice(res.invoice);
       setCart([]);
       navigate('/orders');
     } catch (err) {
-      setError(err.message || 'Failed to place order.');
+      showError(err.message || 'Failed to place order. Please try again.');
     } finally {
       setPlacing(false);
     }
@@ -187,7 +189,7 @@ const OrderCheckout = () => {
   };
 
   // Enhanced responsive typography based on device type
-  const getResponsiveTypography = (variant) => {
+  const getResponsiveTypography = variant => {
     if (isExtraSmall || isSmall) {
       return variant === 'h5' ? 'h6' : 'body2';
     }
@@ -244,7 +246,7 @@ const OrderCheckout = () => {
       <Typography
         variant={getResponsiveTypography('h5')}
         fontWeight={700}
-        align="center"
+        align='center'
         sx={{
           background: 'var(--color-background-light-gradient)',
           WebkitBackgroundClip: 'text',
@@ -291,7 +293,7 @@ const OrderCheckout = () => {
         }}
       >
         <Typography
-          variant="h6"
+          variant='h6'
           sx={{
             fontWeight: 800,
             color: 'var(--color-primary)',
@@ -329,7 +331,15 @@ const OrderCheckout = () => {
               flex: { xs: '1 1 100%', sm: '1 1 50%' },
               p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
               background: 'rgba(163,130,76,0.05)',
-              borderRadius: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+              borderRadius: getResponsiveValue(
+                0.5,
+                0.75,
+                1,
+                1.25,
+                1.5,
+                1.75,
+                1
+              ),
               border: '1px solid rgba(163,130,76,0.15)',
               transition: 'all 0.3s ease',
               '&:hover': {
@@ -341,7 +351,7 @@ const OrderCheckout = () => {
             }}
           >
             <Typography
-              variant="body2"
+              variant='body2'
               sx={{
                 fontWeight: 700,
                 color: 'var(--color-primary)',
@@ -362,7 +372,7 @@ const OrderCheckout = () => {
               className={getResponsiveTextClasses()}
             >
               <Box
-                component="span"
+                component='span'
                 sx={{
                   fontSize: getResponsiveValue(
                     '0.7rem',
@@ -379,8 +389,14 @@ const OrderCheckout = () => {
               </Box>
               Delivery Charges
             </Typography>
-            
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75) }}>
+
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
@@ -388,7 +404,15 @@ const OrderCheckout = () => {
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
                   background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.1)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -399,7 +423,7 @@ const OrderCheckout = () => {
                 }}
               >
                 <Box
-                  component="span"
+                  component='span'
                   sx={{
                     fontSize: getResponsiveValue(
                       '0.65rem',
@@ -417,7 +441,7 @@ const OrderCheckout = () => {
                 </Box>
                 <Box>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -438,7 +462,7 @@ const OrderCheckout = () => {
                     Mangalam Anantra Colony
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-secondary)',
                       fontSize: getResponsiveValue(
@@ -466,7 +490,15 @@ const OrderCheckout = () => {
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
                   background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.1)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -477,7 +509,7 @@ const OrderCheckout = () => {
                 }}
               >
                 <Box
-                  component="span"
+                  component='span'
                   sx={{
                     fontSize: getResponsiveValue(
                       '0.65rem',
@@ -495,7 +527,7 @@ const OrderCheckout = () => {
                 </Box>
                 <Box>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -516,7 +548,7 @@ const OrderCheckout = () => {
                     Free Delivery Threshold
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-secondary)',
                       fontSize: getResponsiveValue(
@@ -541,13 +573,21 @@ const OrderCheckout = () => {
                 sx={{
                   p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
                   background: 'rgba(163,130,76,0.08)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.2)',
                   borderLeft: '2px solid var(--color-primary)',
                 }}
               >
                 <Typography
-                  variant="body2"
+                  variant='body2'
                   sx={{
                     color: 'var(--color-primary-dark)',
                     fontSize: getResponsiveValue(
@@ -569,7 +609,7 @@ const OrderCheckout = () => {
                   className={getResponsiveTextClasses()}
                 >
                   <Box
-                    component="span"
+                    component='span'
                     sx={{
                       fontSize: getResponsiveValue(
                         '0.6rem',
@@ -587,9 +627,11 @@ const OrderCheckout = () => {
                   </Box>
                   Distance-based Charges
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.125 }}>
+                <Box
+                  sx={{ display: 'flex', flexDirection: 'column', gap: 0.125 }}
+                >
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -609,7 +651,7 @@ const OrderCheckout = () => {
                     className={getResponsiveTextClasses()}
                   >
                     <Box
-                      component="span"
+                      component='span'
                       sx={{
                         fontSize: getResponsiveValue(
                           '0.4rem',
@@ -628,7 +670,7 @@ const OrderCheckout = () => {
                     Within 5km: ₹30 | 5-10km: ₹50 | 10-15km: ₹80
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -648,7 +690,7 @@ const OrderCheckout = () => {
                     className={getResponsiveTextClasses()}
                   >
                     <Box
-                      component="span"
+                      component='span'
                       sx={{
                         fontSize: getResponsiveValue(
                           '0.4rem',
@@ -676,7 +718,15 @@ const OrderCheckout = () => {
               flex: { xs: '1 1 100%', sm: '1 1 50%' },
               p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
               background: 'rgba(163,130,76,0.05)',
-              borderRadius: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
+              borderRadius: getResponsiveValue(
+                0.5,
+                0.75,
+                1,
+                1.25,
+                1.5,
+                1.75,
+                1
+              ),
               border: '1px solid rgba(163,130,76,0.15)',
               transition: 'all 0.3s ease',
               '&:hover': {
@@ -688,7 +738,7 @@ const OrderCheckout = () => {
             }}
           >
             <Typography
-              variant="body2"
+              variant='body2'
               sx={{
                 fontWeight: 700,
                 color: 'var(--color-primary)',
@@ -709,7 +759,7 @@ const OrderCheckout = () => {
               className={getResponsiveTextClasses()}
             >
               <Box
-                component="span"
+                component='span'
                 sx={{
                   fontSize: getResponsiveValue(
                     '0.7rem',
@@ -726,8 +776,14 @@ const OrderCheckout = () => {
               </Box>
               Payment Methods
             </Typography>
-            
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75) }}>
+
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
@@ -735,7 +791,15 @@ const OrderCheckout = () => {
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
                   background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.1)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -746,7 +810,7 @@ const OrderCheckout = () => {
                 }}
               >
                 <Box
-                  component="span"
+                  component='span'
                   sx={{
                     fontSize: getResponsiveValue(
                       '0.65rem',
@@ -764,7 +828,7 @@ const OrderCheckout = () => {
                 </Box>
                 <Box>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -785,7 +849,7 @@ const OrderCheckout = () => {
                     COD (Cash on Delivery)
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -813,7 +877,15 @@ const OrderCheckout = () => {
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
                   background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.1)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -824,7 +896,7 @@ const OrderCheckout = () => {
                 }}
               >
                 <Box
-                  component="span"
+                  component='span'
                   sx={{
                     fontSize: getResponsiveValue(
                       '0.65rem',
@@ -842,7 +914,7 @@ const OrderCheckout = () => {
                 </Box>
                 <Box>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -863,7 +935,7 @@ const OrderCheckout = () => {
                     UPI Payment
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-primary-dark)',
                       fontSize: getResponsiveValue(
@@ -888,13 +960,21 @@ const OrderCheckout = () => {
                 sx={{
                   p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
                   background: 'rgba(163,130,76,0.08)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.2)',
                   borderLeft: '2px solid var(--color-primary)',
                 }}
               >
                 <Typography
-                  variant="body2"
+                  variant='body2'
                   sx={{
                     color: 'var(--color-primary-dark)',
                     fontSize: getResponsiveValue(
@@ -915,7 +995,7 @@ const OrderCheckout = () => {
                   className={getResponsiveTextClasses()}
                 >
                   <Box
-                    component="span"
+                    component='span'
                     sx={{
                       fontSize: getResponsiveValue(
                         '0.6rem',
@@ -933,7 +1013,8 @@ const OrderCheckout = () => {
                     ⚠️
                   </Box>
                   <span>
-                    <strong>Note:</strong> If paying via UPI at store, please provide a screenshot of the successful transaction
+                    <strong>Note:</strong> If paying via UPI at store, please
+                    provide a screenshot of the successful transaction
                   </span>
                 </Typography>
               </Box>
@@ -943,13 +1024,21 @@ const OrderCheckout = () => {
                   mt: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
                   p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
                   background: 'rgba(163,130,76,0.08)',
-                  borderRadius: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                  borderRadius: getResponsiveValue(
+                    0.25,
+                    0.5,
+                    0.75,
+                    1,
+                    1.25,
+                    1.5,
+                    0.75
+                  ),
                   border: '1px solid rgba(163,130,76,0.2)',
                   textAlign: 'center',
                 }}
               >
                 <Typography
-                  variant="body2"
+                  variant='body2'
                   sx={{
                     color: 'var(--color-primary-dark)',
                     fontSize: getResponsiveValue(
@@ -971,7 +1060,7 @@ const OrderCheckout = () => {
                   className={getResponsiveTextClasses()}
                 >
                   <Box
-                    component="span"
+                    component='span'
                     sx={{
                       fontSize: getResponsiveValue(
                         '0.7rem',
@@ -994,57 +1083,6 @@ const OrderCheckout = () => {
           </Box>
         </Box>
       </Box>
-
-      {error && (
-        <Alert
-          severity="error"
-          sx={{
-            mb: getResponsiveSpacing(),
-            background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-            color: 'var(--color-primary)',
-            border: '1px solid var(--color-primary-light)',
-            borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
-            fontSize: getResponsiveValue(
-              '0.875rem',
-              '0.9rem',
-              '1rem',
-              '1.1rem',
-              '1.2rem',
-              '1.3rem',
-              '1rem'
-            ),
-          }}
-          className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
-        >
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert
-          severity="success"
-          sx={{
-            mb: getResponsiveSpacing(),
-            background:
-              'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-primary-light) 100%)',
-            color: '#fff',
-            border: '1px solid var(--color-primary)',
-            borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
-            fontSize: getResponsiveValue(
-              '0.875rem',
-              '0.9rem',
-              '1rem',
-              '1.1rem',
-              '1.2rem',
-              '1.3rem',
-              '1rem'
-            ),
-          }}
-          className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
-        >
-          {success}
-        </Alert>
-      )}
 
       {loading ? (
         <Loading />
@@ -1115,9 +1153,17 @@ const OrderCheckout = () => {
                 </Typography>
                 <RadioGroup
                   value={selectedAddress}
-                  onChange={(e) => setSelectedAddress(e.target.value)}
+                  onChange={e => setSelectedAddress(e.target.value)}
                   sx={{
-                    gap: getResponsiveValue(0.125, 0.125, 0.25, 0.5, 0.75, 1, 0.25),
+                    gap: getResponsiveValue(
+                      0.125,
+                      0.125,
+                      0.25,
+                      0.5,
+                      0.75,
+                      1,
+                      0.25
+                    ),
                     // Enhanced mobile layout
                     '@media (max-width: 600px)': {
                       gap: 0.125,
@@ -1127,7 +1173,7 @@ const OrderCheckout = () => {
                     },
                   }}
                 >
-                  {addresses.map((addr) => (
+                  {addresses.map(addr => (
                     <FormControlLabel
                       key={addr._id}
                       value={addr._id}
@@ -1135,7 +1181,15 @@ const OrderCheckout = () => {
                       label={
                         <Box
                           sx={{
-                            p: getResponsiveValue(0.25, 0.25, 0.5, 0.75, 1, 1.25, 0.5),
+                            p: getResponsiveValue(
+                              0.25,
+                              0.25,
+                              0.5,
+                              0.75,
+                              1,
+                              1.25,
+                              0.5
+                            ),
                             borderRadius: getResponsiveValue(
                               0.5,
                               0.5,
@@ -1265,7 +1319,15 @@ const OrderCheckout = () => {
                         </Box>
                       }
                       sx={{
-                        mb: getResponsiveValue(0.5, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
+                        mb: getResponsiveValue(
+                          0.5,
+                          0.5,
+                          0.75,
+                          1,
+                          1.25,
+                          1.5,
+                          0.75
+                        ),
                         alignItems: 'flex-start',
                         width: '100%',
                       }}
@@ -1273,7 +1335,7 @@ const OrderCheckout = () => {
                   ))}
                 </RadioGroup>
                 <Button
-                  variant="outlined"
+                  variant='outlined'
                   sx={{
                     mt: getResponsiveValue(0.75, 0.75, 1, 1.25, 1.5, 1.75, 1),
                     textTransform: 'none',
@@ -1282,7 +1344,15 @@ const OrderCheckout = () => {
                     color: 'var(--color-primary)',
                     background:
                       'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                    borderRadius: getResponsiveValue(0.75, 0.75, 1.5, 2.25, 3, 3.75, 1.5),
+                    borderRadius: getResponsiveValue(
+                      0.75,
+                      0.75,
+                      1.5,
+                      2.25,
+                      3,
+                      3.75,
+                      1.5
+                    ),
                     fontSize: getResponsiveValue(
                       '0.65rem',
                       '0.7rem',
@@ -1293,7 +1363,15 @@ const OrderCheckout = () => {
                       '0.75rem'
                     ),
                     px: getResponsiveValue(0.75, 0.75, 1.5, 2.25, 3, 3.75, 1.5),
-                    py: getResponsiveValue(0.375, 0.375, 0.75, 1.125, 1.5, 1.875, 0.75),
+                    py: getResponsiveValue(
+                      0.375,
+                      0.375,
+                      0.75,
+                      1.125,
+                      1.5,
+                      1.875,
+                      0.75
+                    ),
                     '&:hover': {
                       borderColor: 'var(--color-primary-light)',
                       background:
@@ -1412,7 +1490,7 @@ const OrderCheckout = () => {
                 className={`card-golden ${getResponsiveCardSize()} responsive-card`}
               >
                 <Typography
-                  textAlign="center"
+                  textAlign='center'
                   fontWeight={600}
                   mb={1}
                   sx={{
@@ -1457,7 +1535,7 @@ const OrderCheckout = () => {
                   </Typography>
                 ) : (
                   <>
-                    {cart.map((item) => (
+                    {cart.map(item => (
                       <Box
                         key={item.product._id}
                         sx={{
@@ -1772,9 +1850,9 @@ const OrderCheckout = () => {
                     </Box>
 
                     {/* Minimum Order Notice */}
-                    {totals.subtotal < MIN_ORDER_AMOUNT && (
+                    {totals.total < MIN_ORDER_AMOUNT && (
                       <Alert
-                        severity="warning"
+                        severity='warning'
                         sx={{
                           mb: 1,
                           borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
@@ -1788,7 +1866,7 @@ const OrderCheckout = () => {
                         className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
                       >
                         <Typography
-                          variant="body2"
+                          variant='body2'
                           className={getResponsiveTextClasses()}
                           sx={{
                             fontSize: getResponsiveValue(
@@ -1808,7 +1886,7 @@ const OrderCheckout = () => {
                           Heads Up!
                         </Typography>
                         <Typography
-                          variant="caption"
+                          variant='caption'
                           sx={{
                             fontSize: getResponsiveValue(
                               '0.65rem',
@@ -1826,7 +1904,7 @@ const OrderCheckout = () => {
                           className={getResponsiveTextClasses()}
                         >
                           Almost there! Add ₹
-                          {(MIN_ORDER_AMOUNT - totals.subtotal).toFixed(2)} more
+                          {(MIN_ORDER_AMOUNT - totals.total).toFixed(2)} more
                           items to reach our minimum order amount of ₹
                           {MIN_ORDER_AMOUNT} and enjoy delivery to your
                           doorstep!
@@ -1836,13 +1914,13 @@ const OrderCheckout = () => {
 
                     {/* Place Order Button */}
                     <Button
-                      variant="contained"
+                      variant='contained'
                       fullWidth
                       onClick={handlePlaceOrder}
                       disabled={
                         placing ||
                         cart.length === 0 ||
-                        totals.subtotal < MIN_ORDER_AMOUNT
+                        totals.total < MIN_ORDER_AMOUNT
                       }
                       sx={{
                         fontWeight: 500,
@@ -1886,7 +1964,7 @@ const OrderCheckout = () => {
 
                     {/* Navigate to catalogue */}
                     <Button
-                      variant="outlined"
+                      variant='outlined'
                       fullWidth
                       onClick={() => navigate('/catalogue')}
                       sx={{
@@ -1904,7 +1982,7 @@ const OrderCheckout = () => {
                     {/* Download Invoice */}
                     {invoice && (
                       <Button
-                        variant="outlined"
+                        variant='outlined'
                         fullWidth
                         sx={{
                           textTransform: 'none',
@@ -1961,7 +2039,7 @@ const OrderCheckout = () => {
                           },
                         }}
                         href={`http://localhost:3000/api/invoice/${invoice._id}`}
-                        target="_blank"
+                        target='_blank'
                         className={getResponsiveButtonSize()}
                       >
                         Download Invoice

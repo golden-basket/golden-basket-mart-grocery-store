@@ -14,13 +14,19 @@ const FilterStatusBar = ({
   loading = false,
 }) => {
   // Determine if filters are active
-  const filtersActive = customActiveCheck || isActive || 
+  const filtersActive =
+    customActiveCheck ||
+    isActive ||
     Object.values(filters).some(value => {
       if (Array.isArray(value)) {
         // Handle array values like amountRange [0, 10000]
-        return value.some(v => v !== 0 && v !== 10000 && v !== null && v !== '');
+        return value.some(
+          v => v !== 0 && v !== 10000 && v !== null && v !== ''
+        );
       }
-      return value !== '' && value !== null && value !== undefined && value !== false;
+      return (
+        value !== '' && value !== null && value !== undefined && value !== false
+      );
     });
 
   return (
@@ -40,8 +46,8 @@ const FilterStatusBar = ({
       }}
     >
       <Typography
-        variant="body2"
-        textAlign="center"
+        variant='body2'
+        textAlign='center'
         sx={{
           color: '#a3824c',
           fontWeight: 600,
@@ -54,7 +60,7 @@ const FilterStatusBar = ({
         Showing {showing} of {total} {itemType}
         {loading && (
           <Box
-            component="span"
+            component='span'
             sx={{
               width: 12,
               height: 12,
@@ -73,8 +79,8 @@ const FilterStatusBar = ({
       </Typography>
       {filtersActive && !isMobileView && (
         <Chip
-          label="Filters Active"
-          size="small"
+          label='Filters Active'
+          size='small'
           sx={{
             background: 'linear-gradient(90deg, #a3824c20 0%, #a3824c40 100%)',
             color: '#a3824c',

@@ -18,13 +18,14 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PaymentIcon from '@mui/icons-material/Payment';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DownloadIcon from '@mui/icons-material/Download';
-import ThemeSnackbar from '../components/ThemeSnackbar';
 import FilterStatusBar from '../components/FilterStatusBar';
 import ReusableFilterControls from '../components/ReusableFilterControls';
+import { useToastNotifications } from '../hooks/useToast';
 
 const OrderHistory = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { showError } = useToastNotifications();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,29 +45,19 @@ const OrderHistory = () => {
   });
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'info',
-  });
 
   // Handle filter changes - consistent with OrderManagement pattern
   const handleFilterChange = (field, value) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+    setFilters(prev => ({ ...prev, [field]: value }));
   };
 
   // Handle date range changes with validation
   const handleDateRangeChange = (index, date) => {
-    console.log('This is here for test', index, date);
     if (index === 0) {
       // Start date selected
       if (filters.endDate && date && date > filters.endDate) {
         // If start date is after end date, show error and don't update
-        setSnackbar({
-          open: true,
-          message: 'Start date cannot be after end date',
-          severity: 'error',
-        });
+        showError('Start date cannot be after end date');
         return;
       }
       handleFilterChange('startDate', date);
@@ -74,20 +65,11 @@ const OrderHistory = () => {
       // End date selected
       if (filters.startDate && date && date < filters.startDate) {
         // If end date is before start date, show error and don't update
-        setSnackbar({
-          open: true,
-          message: 'End date cannot be before start date',
-          severity: 'error',
-        });
+        showError('End date cannot be before start date');
         return;
       }
       handleFilterChange('endDate', date);
     }
-  };
-
-  // Close snackbar
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   // Clear all filters - consistent with OrderManagement pattern
@@ -106,14 +88,14 @@ const OrderHistory = () => {
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
+    return orders.filter(order => {
       // Search filter
       if (filters.searchQuery) {
         const searchLower = filters.searchQuery.toLowerCase();
         const orderId = order._id.slice(-8).toLowerCase();
         const productNames =
           order.items
-            ?.map((item) => item.product?.name?.toLowerCase() || '')
+            ?.map(item => item.product?.name?.toLowerCase() || '')
             .join(' ') || '';
 
         if (
@@ -171,7 +153,6 @@ const OrderHistory = () => {
 
       // Invoice filter
       if (filters.hasInvoice && (!order.invoice || !order.invoice._id)) {
-        console.log('No invoice found');
         return false;
       }
 
@@ -179,9 +160,9 @@ const OrderHistory = () => {
     });
   }, [orders, filters]);
 
-  const handleDownloadInvoice = async (invoiceId) => {
+  const handleDownloadInvoice = async invoiceId => {
     try {
-      setDownloadingInvoices((prev) => new Set(prev).add(invoiceId));
+      setDownloadingInvoices(prev => new Set(prev).add(invoiceId));
       const response = await ApiService.downloadInvoice(invoiceId);
       // Create a blob from the PDF data
       const blob = new Blob([response], { type: 'application/pdf' });
@@ -197,7 +178,7 @@ const OrderHistory = () => {
       console.error('Failed to download invoice:', error);
       setError('Failed to download invoice. Please try again.');
     } finally {
-      setDownloadingInvoices((prev) => {
+      setDownloadingInvoices(prev => {
         const newSet = new Set(prev);
         newSet.delete(invoiceId);
         return newSet;
@@ -205,7 +186,7 @@ const OrderHistory = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'pending':
         return '#ff9800';
@@ -222,7 +203,7 @@ const OrderHistory = () => {
     }
   };
 
-  const getPaymentStatusColor = (status) => {
+  const getPaymentStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'pending':
         return '#ff9800';
@@ -238,10 +219,10 @@ const OrderHistory = () => {
   useEffect(() => {
     setLoading(true);
     ApiService.getUserOrders()
-      .then((orderList) => {
+      .then(orderList => {
         setOrders(orderList || []);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Error fetching orders:', err);
         setError('Failed to load orders.');
       })
@@ -252,10 +233,10 @@ const OrderHistory = () => {
     <>
       <Box sx={{ maxWidth: '100%', width: '90%', mx: 'auto', pt: 2, mt: 2 }}>
         <Typography
-          variant="h4"
+          variant='h4'
           fontWeight={700}
           mb={3}
-          align="center"
+          align='center'
           sx={{
             background:
               'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
@@ -387,7 +368,7 @@ const OrderHistory = () => {
             onClearFilters={clearFilters}
             filterDrawerOpen={filterDrawerOpen}
             setFilterDrawerOpen={setFilterDrawerOpen}
-            drawerTitle="Filter Orders"
+            drawerTitle='Filter Orders'
           />
         </Box>
 
@@ -396,7 +377,7 @@ const OrderHistory = () => {
           <FilterStatusBar
             showing={filteredOrders.length}
             total={orders.length}
-            itemType="orders"
+            itemType='orders'
             filters={filters}
             customActiveCheck={
               filters.searchQuery ||
@@ -428,7 +409,7 @@ const OrderHistory = () => {
       >
         {error && (
           <Alert
-            severity="error"
+            severity='error'
             sx={{
               mb: 3,
               background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
@@ -457,12 +438,12 @@ const OrderHistory = () => {
             }}
           >
             <ShoppingBagIcon sx={{ fontSize: 64, color: '#a3824c', mb: 2 }} />
-            <Typography variant="h6" color="#a3824c" fontWeight={600} mb={1}>
+            <Typography variant='h6' color='#a3824c' fontWeight={600} mb={1}>
               {orders.length === 0
                 ? 'No Orders Found'
                 : 'No Orders Match Filters'}
             </Typography>
-            <Typography color="#b59961">
+            <Typography color='#b59961'>
               {orders.length === 0
                 ? 'Start shopping to see your order history here'
                 : 'Try adjusting your filters to see more orders'}
@@ -470,7 +451,7 @@ const OrderHistory = () => {
           </Box>
         ) : (
           <Stack spacing={3}>
-            {filteredOrders.map((order) => (
+            {filteredOrders.map(order => (
               <Paper
                 key={order._id}
                 sx={{
@@ -490,16 +471,16 @@ const OrderHistory = () => {
                 {/* Order Header */}
                 <Box sx={{ mb: 2 }}>
                   <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="flex-start"
-                    flexWrap="wrap"
+                    direction='row'
+                    justifyContent='space-between'
+                    alignItems='flex-start'
+                    flexWrap='wrap'
                     gap={2}
                   >
                     <Box>
-                      <Stack direction="row" alignItems="center" gap={1} mb={1}>
+                      <Stack direction='row' alignItems='center' gap={1} mb={1}>
                         <Typography
-                          variant="h6"
+                          variant='h6'
                           fontWeight={700}
                           sx={{
                             background:
@@ -515,7 +496,7 @@ const OrderHistory = () => {
                         {order.invoice && order.invoice._id ? (
                           <Box sx={{ textAlign: 'center' }}>
                             <IconButton
-                              size="small"
+                              size='small'
                               onClick={() =>
                                 handleDownloadInvoice(order.invoice._id)
                               }
@@ -557,9 +538,9 @@ const OrderHistory = () => {
                         ) : (
                           <Box sx={{ textAlign: 'center' }}>
                             <Typography
-                              variant="body2"
-                              color="#b59961"
-                              fontStyle="italic"
+                              variant='body2'
+                              color='#b59961'
+                              fontStyle='italic'
                             >
                               Invoice pending payment
                             </Typography>
@@ -567,11 +548,11 @@ const OrderHistory = () => {
                         )}
                       </Stack>
 
-                      <Stack direction="row" alignItems="center" gap={1} mb={1}>
+                      <Stack direction='row' alignItems='center' gap={1} mb={1}>
                         <CalendarTodayIcon
                           sx={{ fontSize: 16, color: '#a3824c' }}
                         />
-                        <Typography variant="body2" color="#b59961">
+                        <Typography variant='body2' color='#b59961'>
                           {new Date(order.createdAt).toLocaleDateString(
                             'en-IN',
                             {
@@ -583,14 +564,14 @@ const OrderHistory = () => {
                         </Typography>
                       </Stack>
 
-                      <Stack direction="row" gap={2} flexWrap="wrap">
+                      <Stack direction='row' gap={2} flexWrap='wrap'>
                         <Chip
                           icon={<LocalShippingIcon />}
                           label={
                             order.orderStatus.charAt(0).toUpperCase() +
                               order.orderStatus.slice(1) || 'Processing'
                           }
-                          size="small"
+                          size='small'
                           sx={{
                             background: `linear-gradient(90deg, ${getStatusColor(
                               order.orderStatus
@@ -610,7 +591,7 @@ const OrderHistory = () => {
                             order.paymentStatus.charAt(0).toUpperCase() +
                               order.paymentStatus.slice(1) || 'Pending'
                           }`}
-                          size="small"
+                          size='small'
                           sx={{
                             background: `linear-gradient(90deg, ${getPaymentStatusColor(
                               order.paymentStatus
@@ -627,7 +608,7 @@ const OrderHistory = () => {
                         <Chip
                           icon={<PaymentIcon />}
                           label={order.paymentMode.toUpperCase() || 'COD'}
-                          size="small"
+                          size='small'
                           sx={{
                             background: `linear-gradient(90deg, ${getPaymentStatusColor(
                               order.paymentStatus
@@ -645,11 +626,11 @@ const OrderHistory = () => {
                     </Box>
 
                     <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="caption" color="#b59961">
+                      <Typography variant='caption' color='#b59961'>
                         Total Amount
                       </Typography>
                       <Typography
-                        variant="h5"
+                        variant='h5'
                         fontWeight={700}
                         sx={{
                           background:
@@ -667,7 +648,7 @@ const OrderHistory = () => {
                 {/* Order Items */}
                 <Box sx={{ mb: 3 }}>
                   <Typography
-                    variant="subtitle1"
+                    variant='subtitle1'
                     fontWeight={600}
                     mb={2}
                     sx={{
@@ -699,7 +680,7 @@ const OrderHistory = () => {
                           <Box sx={{ flex: 1 }}>
                             <Typography
                               fontWeight={500}
-                              color="#a3824c"
+                              color='#a3824c'
                               sx={{
                                 fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               }}
@@ -707,8 +688,8 @@ const OrderHistory = () => {
                               {item.product?.name || 'Product Name Unavailable'}
                             </Typography>
                             <Typography
-                              variant="body2"
-                              color="#b59961"
+                              variant='body2'
+                              color='#b59961'
                               sx={{
                                 fontSize: { xs: '0.6875rem', sm: '0.75rem' },
                               }}
@@ -718,8 +699,8 @@ const OrderHistory = () => {
                           </Box>
                           <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
                             <Typography
-                              variant="body2"
-                              color="#b59961"
+                              variant='body2'
+                              color='#b59961'
                               sx={{
                                 fontSize: { xs: '0.6875rem', sm: '0.75rem' },
                               }}
@@ -743,8 +724,8 @@ const OrderHistory = () => {
                       ))
                     ) : (
                       <Typography
-                        color="#b59961"
-                        textAlign="center"
+                        color='#b59961'
+                        textAlign='center'
                         py={{ xs: 1.5, sm: 2 }}
                         sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
                       >
@@ -757,14 +738,6 @@ const OrderHistory = () => {
             ))}
           </Stack>
         )}
-
-        {/* Theme Snackbar */}
-        <ThemeSnackbar
-          open={snackbar.open}
-          message={snackbar.message}
-          severity={snackbar.severity}
-          onClose={handleCloseSnackbar}
-        />
       </Box>
     </>
   );

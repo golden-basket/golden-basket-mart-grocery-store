@@ -25,9 +25,9 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import ThemeSnackbar from '../components/ThemeSnackbar';
+import { useToastNotifications } from '../hooks/useToast';
 
-const getStockStatus = (stock) => {
+const getStockStatus = stock => {
   if (stock === 0) return { label: 'Out of Stock', color: 'error' };
   if (stock <= 5)
     return { label: `Hurry! Only ${stock} left`, color: 'warning' };
@@ -39,6 +39,7 @@ const getStockStatus = (stock) => {
 const Catalogue = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { showSuccess, showError } = useToastNotifications();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -55,11 +56,6 @@ const Catalogue = () => {
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = useState({});
   const [buyNowLoading, setBuyNowLoading] = useState({});
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -71,10 +67,10 @@ const Catalogue = () => {
   // Load categories from backend
   useEffect(() => {
     ApiService.getCategories()
-      .then((cats) => {
+      .then(cats => {
         const options = [
           { value: '', label: 'All' },
-          ...cats.map((cat) => ({
+          ...cats.map(cat => ({
             value: cat._id,
             label: cat.name,
           })),
@@ -136,7 +132,7 @@ const Catalogue = () => {
     }
 
     return filteredProducts.filter(
-      (product) =>
+      product =>
         product.name
           .toLowerCase()
           .includes(debouncedSearchQuery.toLowerCase()) ||
@@ -165,82 +161,66 @@ const Catalogue = () => {
     setPage(1); // Reset to first page when clearing filters
   };
 
-  const handleStockAvailability = (stock) => {
+  const handleStockAvailability = stock => {
     if (stock === 0) return '#f44336';
     if (stock <= 5) return '#ff9800';
     if (stock <= 15) return '#2196f3';
     return '#4caf50';
   };
 
-  const handleAddToCart = async (productId) => {
+  const handleAddToCart = async productId => {
     if (!user || !token) {
       navigate('/login');
       return;
     }
 
-    setActionLoading((prev) => ({ ...prev, [productId]: true }));
+    setActionLoading(prev => ({ ...prev, [productId]: true }));
 
     try {
       await addToCartMutation.mutateAsync({ productId, quantity: 1 });
-      setSnackbar({
-        open: true,
-        message: 'Item added to cart successfully!',
-        severity: 'success',
-      });
+      showSuccess('Item added to cart successfully!');
     } catch (err) {
       console.error('Error adding to cart:', err);
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to add item to cart',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to add item to cart');
     } finally {
-      setActionLoading((prev) => ({ ...prev, [productId]: false }));
+      setActionLoading(prev => ({ ...prev, [productId]: false }));
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
   // Buy now handler
-  const handleBuyNow = async (productId) => {
+  const handleBuyNow = async productId => {
     if (!user || !token) {
       navigate('/login');
       return;
     }
 
-    setBuyNowLoading((prev) => ({ ...prev, [productId]: true }));
+    setBuyNowLoading(prev => ({ ...prev, [productId]: true }));
 
     try {
       await addToCartMutation.mutateAsync({ productId, quantity: 1 });
       navigate('/checkout');
     } catch (err) {
       console.error('Error in buy now:', err);
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to process buy now',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to process buy now');
     } finally {
-      setBuyNowLoading((prev) => ({ ...prev, [productId]: false }));
+      setBuyNowLoading(prev => ({ ...prev, [productId]: false }));
     }
   };
 
   // Handle search input change
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     setSearchQuery(e.target.value);
   };
 
   // Handle category change
-  const handleCategoryChange = (e) => {
+  const handleCategoryChange = e => {
     setSelectedCategory(e.target.value);
     setPage(1); // Reset to first page when filter changes
   };
 
   // Handle price range change
   const handlePriceRangeChange = (_, value) => {
-    setPriceRange((prev) => {
+    setPriceRange(prev => {
       const newRange = [...prev];
       newRange[0] = Math.max(0, Math.min(value[0], newRange[1] || 10000));
       newRange[1] = Math.max(value[1] || 10000, newRange[0]);
@@ -251,7 +231,7 @@ const Catalogue = () => {
   };
 
   // Handle stock filter change
-  const handleStockFilterChange = (e) => {
+  const handleStockFilterChange = e => {
     setInStockOnly(e.target.checked);
     setPage(1); // Reset to first page when filter changes
   };
@@ -259,9 +239,9 @@ const Catalogue = () => {
   return (
     <Box sx={{ mt: 1, p: { xs: 2, md: 5 } }}>
       <Typography
-        variant="h4"
+        variant='h4'
         gutterBottom
-        align="center"
+        align='center'
         sx={{
           fontWeight: 700,
           fontSize: isMobile ? '1.25rem' : '2.5rem',
@@ -311,7 +291,7 @@ const Catalogue = () => {
           onClearFilters={clearFilters}
           filterDrawerOpen={filterDrawerOpen}
           setFilterDrawerOpen={setFilterDrawerOpen}
-          drawerTitle="Filter Products"
+          drawerTitle='Filter Products'
         />
       </Box>
 
@@ -338,10 +318,10 @@ const Catalogue = () => {
             color: '#d32f2f',
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography variant='h6' sx={{ mb: 2 }}>
             Error loading products
           </Typography>
-          <Typography variant="body1">
+          <Typography variant='body1'>
             Please try again later or contact support if the problem persists.
           </Typography>
         </Box>
@@ -350,7 +330,7 @@ const Catalogue = () => {
           <FilterStatusBar
             showing={finalFilteredProducts.length}
             total={filteredProducts.length}
-            itemType="products"
+            itemType='products'
             filters={{
               searchQuery,
               selectedCategory,
@@ -384,7 +364,7 @@ const Catalogue = () => {
                 justifyItems: 'space-between',
               }}
             >
-              {finalFilteredProducts.map((p) => {
+              {finalFilteredProducts.map(p => {
                 const stockStatus = getStockStatus(p.stock);
                 const stockPercent = Math.min(
                   100,
@@ -426,7 +406,7 @@ const Catalogue = () => {
                       <Chip
                         label={stockStatus.label}
                         color={stockStatus.color}
-                        size="small"
+                        size='small'
                         sx={{
                           position: 'absolute',
                           top: 8,
@@ -478,12 +458,12 @@ const Catalogue = () => {
                             filter: p.stock === 0 ? 'grayscale(1)' : 'none',
                             transition: 'transform 0.3s ease',
                           }}
-                          onMouseEnter={(e) => {
+                          onMouseEnter={e => {
                             if (p.stock > 0) {
                               e.target.style.transform = 'scale(1.05)';
                             }
                           }}
-                          onMouseLeave={(e) => {
+                          onMouseLeave={e => {
                             e.target.style.transform = 'scale(1)';
                           }}
                         />
@@ -512,8 +492,8 @@ const Catalogue = () => {
                           }}
                         >
                           <Typography
-                            variant="h6"
-                            component="h2"
+                            variant='h6'
+                            component='h2'
                             sx={{
                               fontWeight: 700,
                               flex: 1,
@@ -531,8 +511,8 @@ const Catalogue = () => {
                           </Typography>
                         </Box>
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant='body2'
+                          color='text.secondary'
                           sx={{
                             mb: 2,
                             flex: 1,
@@ -565,7 +545,7 @@ const Catalogue = () => {
                           </Typography>
                           {p.category && (
                             <Typography
-                              variant="body2"
+                              variant='body2'
                               sx={{
                                 mb: 1.5,
                                 color: '#866422',
@@ -579,7 +559,7 @@ const Catalogue = () => {
                           )}
                           <Box sx={{ mb: 1 }}>
                             <Typography
-                              variant="body2"
+                              variant='body2'
                               sx={{
                                 mb: 0.5,
                                 color: '#866422',
@@ -590,7 +570,7 @@ const Catalogue = () => {
                               Stock: {p.stock} units
                             </Typography>
                             <LinearProgress
-                              variant="determinate"
+                              variant='determinate'
                               value={stockPercent}
                               sx={{
                                 height: 6,
@@ -608,8 +588,8 @@ const Catalogue = () => {
                         </Box>
                         <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
                           <Button
-                            variant="contained"
-                            size="small"
+                            variant='contained'
+                            size='small'
                             startIcon={
                               actionLoading[p._id] ? (
                                 <CircularProgress size={15} />
@@ -637,8 +617,8 @@ const Catalogue = () => {
                             Add to Cart
                           </Button>
                           <Button
-                            variant="outlined"
-                            size="small"
+                            variant='outlined'
+                            size='small'
                             startIcon={
                               buyNowLoading[p._id] ? (
                                 <CircularProgress size={15} />
@@ -709,8 +689,8 @@ const Catalogue = () => {
                 count={totalPages}
                 page={page}
                 onChange={handlePageChange}
-                color="primary"
-                size="large"
+                color='primary'
+                size='large'
                 showFirstButton
                 showLastButton
                 sx={{
@@ -734,7 +714,7 @@ const Catalogue = () => {
       ) : (
         <Box sx={{ textAlign: 'center', mt: 6, py: 4 }}>
           <Typography
-            variant="h6"
+            variant='h6'
             sx={{
               color: '#a3824c',
               fontWeight: 600,
@@ -744,7 +724,7 @@ const Catalogue = () => {
             No products found
           </Typography>
           <Typography
-            variant="body1"
+            variant='body1'
             sx={{
               color: '#866422',
               maxWidth: 400,
@@ -756,12 +736,6 @@ const Catalogue = () => {
           </Typography>
         </Box>
       )}
-      <ThemeSnackbar
-        open={snackbar.open}
-        onClose={handleCloseSnackbar}
-        message={snackbar.message}
-        severity={snackbar.severity}
-      />
     </Box>
   );
 };

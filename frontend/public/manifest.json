@@ -1,0 +1,126 @@
+{
+  "name": "Golden Basket Mart",
+  "short_name": "Golden Basket",
+  "description": "Your trusted online grocery store for fresh products and quality items",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7fbe8",
+  "theme_color": "#a3824c",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["shopping", "food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/golden-basket-rounded.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Golden Basket Mart - Wide View"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Golden Basket Mart - Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search Products",
+      "short_name": "Search",
+      "description": "Quick search for products",
+      "url": "/catalogue?action=search",
+      "icons": [
+        {
+          "src": "/golden-basket-rounded.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "View Cart",
+      "short_name": "Cart",
+      "description": "Check your shopping cart",
+      "url": "/cart",
+      "icons": [
+        {
+          "src": "/golden-basket-rounded.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "View your order history",
+      "url": "/orders",
+      "icons": [
+        {
+          "src": "/golden-basket-rounded.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+goldenbasket",
+      "url": "/?product=%s"
+    }
+  ]
+}

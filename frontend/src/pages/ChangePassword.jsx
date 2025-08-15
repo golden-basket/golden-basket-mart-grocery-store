@@ -7,7 +7,6 @@ import {
   Box,
   TextField,
   Button,
-  Alert,
   Paper,
   Stack,
   useTheme,
@@ -19,12 +18,14 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import ApiService from '../services/api';
+import { useToastNotifications } from '../hooks/useToast';
 
 const ChangePassword = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { showSuccess, showError } = useToastNotifications();
 
   // Check if user has temporary authentication
   useEffect(() => {
@@ -55,26 +56,24 @@ const ChangePassword = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState('');
 
-  const handleInputChange = (field) => (event) => {
-    setFormData((prev) => ({
+  const handleInputChange = field => event => {
+    setFormData(prev => ({
       ...prev,
       [field]: event.target.value,
     }));
 
     // Clear field-specific error when user starts typing
     if (errors[field]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [field]: '',
       }));
     }
   };
 
-  const togglePasswordVisibility = (field) => {
-    setShowPasswords((prev) => ({
+  const togglePasswordVisibility = field => {
+    setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field],
     }));
@@ -110,7 +109,7 @@ const ChangePassword = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
 
     if (!validateForm()) {
@@ -118,8 +117,6 @@ const ChangePassword = () => {
     }
 
     setIsSubmitting(true);
-    setSubmitError('');
-    setSubmitSuccess('');
 
     try {
       await ApiService.changePassword({
@@ -127,7 +124,7 @@ const ChangePassword = () => {
         newPassword: formData.newPassword,
       });
 
-      setSubmitSuccess(
+      showSuccess(
         'Password changed successfully! Completing authentication...'
       );
 
@@ -157,7 +154,7 @@ const ChangePassword = () => {
         navigate('/');
       }, 2000);
     } catch (error) {
-      setSubmitError(
+      showError(
         error.message || 'Failed to change password. Please try again.'
       );
     } finally {
@@ -242,9 +239,9 @@ const ChangePassword = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={containerStyles}>
+    <Container maxWidth='sm' sx={containerStyles}>
       <Paper sx={paperStyles}>
-        <Box textAlign="center" mb={4}>
+        <Box textAlign='center' mb={4}>
           <LockIcon
             sx={{
               fontSize: isMobile ? 48 : 64,
@@ -266,30 +263,18 @@ const ChangePassword = () => {
             Change Password
           </Typography>
           <Typography
-            variant="body1"
-            color="#b59961"
+            variant='body1'
+            color='#b59961'
             sx={{ maxWidth: 400, mx: 'auto' }}
           >
             Please change your default password to secure your account
           </Typography>
         </Box>
 
-        {submitError && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {submitError}
-          </Alert>
-        )}
-
-        {submitSuccess && (
-          <Alert severity="success" sx={{ mb: 3 }}>
-            {submitSuccess}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component='form' onSubmit={handleSubmit}>
           <Stack spacing={3}>
             <TextField
-              label="Current Password"
+              label='Current Password'
               type={showPasswords.current ? 'text' : 'password'}
               value={formData.currentPassword}
               onChange={handleInputChange('currentPassword')}
@@ -300,10 +285,10 @@ const ChangePassword = () => {
               sx={inputStyles}
               InputProps={{
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <IconButton
                       onClick={() => togglePasswordVisibility('current')}
-                      edge="end"
+                      edge='end'
                     >
                       {showPasswords.current ? (
                         <VisibilityOffIcon />
@@ -317,7 +302,7 @@ const ChangePassword = () => {
             />
 
             <TextField
-              label="New Password"
+              label='New Password'
               type={showPasswords.new ? 'text' : 'password'}
               value={formData.newPassword}
               onChange={handleInputChange('newPassword')}
@@ -331,10 +316,10 @@ const ChangePassword = () => {
               sx={inputStyles}
               InputProps={{
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <IconButton
                       onClick={() => togglePasswordVisibility('new')}
-                      edge="end"
+                      edge='end'
                     >
                       {showPasswords.new ? (
                         <VisibilityOffIcon />
@@ -348,7 +333,7 @@ const ChangePassword = () => {
             />
 
             <TextField
-              label="Confirm New Password"
+              label='Confirm New Password'
               type={showPasswords.confirm ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={handleInputChange('confirmPassword')}
@@ -359,10 +344,10 @@ const ChangePassword = () => {
               sx={inputStyles}
               InputProps={{
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <IconButton
                       onClick={() => togglePasswordVisibility('confirm')}
-                      edge="end"
+                      edge='end'
                     >
                       {showPasswords.confirm ? (
                         <VisibilityOffIcon />
@@ -376,8 +361,8 @@ const ChangePassword = () => {
             />
 
             <Button
-              type="submit"
-              variant="contained"
+              type='submit'
+              variant='contained'
               disabled={isSubmitting}
               sx={buttonStyles}
               fullWidth
@@ -387,8 +372,8 @@ const ChangePassword = () => {
           </Stack>
         </Box>
 
-        <Box textAlign="center" mt={3}>
-          <Typography variant="body2" color="#b59961">
+        <Box textAlign='center' mt={3}>
+          <Typography variant='body2' color='#b59961'>
             After changing your password, you'll be redirected to the dashboard
           </Typography>
         </Box>

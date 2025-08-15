@@ -23,7 +23,7 @@ try {
     }
   });
 
-  stream.on('error', (error) => {
+  stream.on('error', error => {
     logger.error('Stream error:', error);
   });
 } catch (error) {

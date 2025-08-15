@@ -38,12 +38,12 @@ import FilterStatusBar from '../FilterStatusBar';
 import ReusableFilterControls from '../ReusableFilterControls';
 import { useAllProducts } from '../../hooks/useProducts';
 import { createAdminStyles } from './adminStyles';
-
-
+import { useToastNotifications } from '../../hooks/useToast';
 
 const ProductManagement = ({ categories, onProductUpdate }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { showSuccess, showError } = useToastNotifications();
 
   // Product state
   const [prodDialogOpen, setProdDialogOpen] = useState(false);
@@ -68,16 +68,16 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
   const styles = useMemo(() => createAdminStyles(isMobile), [isMobile]);
 
   // Memoized filter handlers
-  const handleSearchChange = useCallback((e) => {
+  const handleSearchChange = useCallback(e => {
     setSearch(e.target.value);
   }, []);
 
-  const handleCategoryChange = useCallback((e) => {
+  const handleCategoryChange = useCallback(e => {
     setFilterCat(e.target.value);
   }, []);
 
   const handlePriceRangeChange = useCallback((index, value) => {
-    setPriceRange((prev) => {
+    setPriceRange(prev => {
       const newRange = [...prev];
       if (index === 0) {
         newRange[0] = Math.max(5, Math.min(value, newRange[1]));
@@ -88,7 +88,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
     });
   }, []);
 
-  const handleStockFilterChange = useCallback((e) => {
+  const handleStockFilterChange = useCallback(e => {
     setInStockOnly(e.target.checked);
   }, []);
 
@@ -98,24 +98,24 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
 
     let filtered = products;
     if (search) {
-      filtered = filtered.filter((product) =>
+      filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(search.toLowerCase())
       );
     }
     if (filterCat) {
       filtered = filtered.filter(
-        (product) =>
+        product =>
           product.category._id === filterCat || product.category === filterCat
       );
     }
     if (priceRange[0] > 5) {
-      filtered = filtered.filter((product) => product.price >= priceRange[0]);
+      filtered = filtered.filter(product => product.price >= priceRange[0]);
     }
     if (priceRange[1] < 1000) {
-      filtered = filtered.filter((product) => product.price <= priceRange[1]);
+      filtered = filtered.filter(product => product.price <= priceRange[1]);
     }
     if (inStockOnly) {
-      filtered = filtered.filter((product) => product.stock > 0);
+      filtered = filtered.filter(product => product.stock > 0);
     }
     return filtered;
   }, [products, search, priceRange, inStockOnly, filterCat]);
@@ -161,59 +161,86 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
       !prodForm.category ||
       !prodForm.stock
     ) {
+      showError('Please fill in all required fields.');
       return;
     }
 
     // Validate image URLs if provided
     if (prodForm.images && prodForm.images.length > 0) {
       const urlPattern = /^https?:\/\/.+/;
-      const invalidUrls = prodForm.images.filter(
-        (url) => !urlPattern.test(url)
-      );
+      const invalidUrls = prodForm.images.filter(url => !urlPattern.test(url));
       if (invalidUrls.length > 0) {
+        showError(
+          'Please provide valid image URLs starting with http:// or https://'
+        );
         return;
       }
     }
 
-    const payload = {
-      ...prodForm,
-      price: Number(prodForm.price),
-      stock: Number(prodForm.stock),
-    };
+    try {
+      const payload = {
+        ...prodForm,
+        price: Number(prodForm.price),
+        stock: Number(prodForm.stock),
+      };
 
-    onProductUpdate(prodDialogMode, payload, prodForm._id);
-    handleProdDialogClose();
-  }, [prodForm, prodDialogMode, handleProdDialogClose, onProductUpdate]);
+      onProductUpdate(prodDialogMode, payload, prodForm._id);
+      showSuccess(
+        prodDialogMode === 'add'
+          ? 'Product added successfully!'
+          : 'Product updated successfully!'
+      );
+      handleProdDialogClose();
+    } catch (error) {
+      showError(
+        prodDialogMode === 'add'
+          ? 'Failed to add product. Please try again.'
+          : 'Failed to update product. Please try again.'
+      );
+    }
+  }, [
+    prodForm,
+    prodDialogMode,
+    handleProdDialogClose,
+    onProductUpdate,
+    showSuccess,
+    showError,
+  ]);
 
   const handleProdDelete = useCallback(
-    (id) => {
-      onProductUpdate('delete', null, id);
+    id => {
+      try {
+        onProductUpdate('delete', null, id);
+        showSuccess('Product deleted successfully!');
+      } catch (error) {
+        showError('Failed to delete product. Please try again.');
+      }
     },
-    [onProductUpdate]
+    [onProductUpdate, showSuccess, showError]
   );
 
-  const parseImageUrls = useCallback((urlString) => {
+  const parseImageUrls = useCallback(urlString => {
     if (!urlString || typeof urlString !== 'string') return [];
-    return urlString.split(',').map((url) => url.trim());
+    return urlString.split(',').map(url => url.trim());
   }, []);
 
   const handleImageUrlsChange = useCallback(
-    (e) => {
+    e => {
       const urls = parseImageUrls(e.target.value);
-      setProdForm((f) => ({ ...f, images: urls }));
+      setProdForm(f => ({ ...f, images: urls }));
     },
     [parseImageUrls]
   );
   // Form change handlers
   const handleProdFormChange = useCallback((field, value) => {
-    setProdForm((f) => ({ ...f, [field]: value }));
+    setProdForm(f => ({ ...f, [field]: value }));
   }, []);
 
   return (
     <Box sx={styles.sectionStyles}>
       <Stack
         direction={isMobile ? 'column' : 'row'}
-        justifyContent="space-between"
+        justifyContent='space-between'
         alignItems={isMobile ? 'stretch' : 'center'}
         mb={3}
         spacing={2}
@@ -225,10 +252,10 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         <Stack
           direction={isMobile ? 'column' : 'row'}
           spacing={1}
-          alignItems="stretch"
+          alignItems='stretch'
         >
           <Button
-            variant="contained"
+            variant='contained'
             startIcon={<AddIcon />}
             onClick={() => handleProdDialogOpen('add')}
             size={isMobile ? 'medium' : 'small'}
@@ -258,7 +285,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
               type: 'select',
               options: [
                 { value: '', label: 'All Categories' },
-                ...categories.map((cat) => ({
+                ...categories.map(cat => ({
                   value: cat._id,
                   label: cat.name,
                 })),
@@ -305,7 +332,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
             }
           }}
           onClearFilters={handleResetFilters}
-          drawerTitle="Filter Products"
+          drawerTitle='Filter Products'
         />
       </Box>
 
@@ -314,7 +341,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         <FilterStatusBar
           showing={filteredProducts.length}
           total={products.length}
-          itemType="products"
+          itemType='products'
           filters={{
             searchQuery: search,
             category: filterCat,
@@ -332,11 +359,11 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
       )}
 
       {isLoading ? (
-        <Box display="flex" justifyContent="center" my={4}>
+        <Box display='flex' justifyContent='center' my={4}>
           <Loading />
         </Box>
       ) : error ? (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity='error' sx={{ mb: 2 }}>
           {error}
         </Alert>
       ) : (
@@ -355,7 +382,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                       'Stock',
                       'Images',
                       'Actions',
-                    ].map((header) => (
+                    ].map(header => (
                       <TableCell key={header} sx={styles.tableHeaderCellStyles}>
                         {header}
                       </TableCell>
@@ -364,7 +391,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                 </TableHead>
                 <TableBody>
                   {filteredProducts?.length > 0 ? (
-                    filteredProducts.map((prod) => (
+                    filteredProducts.map(prod => (
                       <TableRow key={prod._id} sx={styles.tableRowStyles}>
                         <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
                           {prod.name}
@@ -378,21 +405,20 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                           ₹{prod.price}
                         </TableCell>
                         <TableCell sx={{ color: '#b59961' }}>
-                          {categories.find(
-                            (cat) => cat._id === prod.category._id
-                          )?.name || 'N/A'}
+                          {categories.find(cat => cat._id === prod.category._id)
+                            ?.name || 'N/A'}
                         </TableCell>
                         <TableCell>
                           <Chip
                             label={prod.stock}
-                            size="small"
+                            size='small'
                             sx={{
                               backgroundColor:
                                 prod.stock > 10
                                   ? '#4caf50'
                                   : prod.stock > 0
-                                  ? '#ff9800'
-                                  : '#f44336',
+                                    ? '#ff9800'
+                                    : '#f44336',
                               color: '#fff',
                               fontWeight: 600,
                             }}
@@ -401,8 +427,8 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                         <TableCell sx={{ color: '#b59961' }}>
                           <Chip
                             label={`${prod.images?.length || 0} images`}
-                            size="small"
-                            variant="outlined"
+                            size='small'
+                            variant='outlined'
                             sx={{
                               borderColor: '#a3824c',
                               color: '#a3824c',
@@ -410,7 +436,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                           />
                         </TableCell>
                         <TableCell>
-                          <Stack direction="row" spacing={1}>
+                          <Stack direction='row' spacing={1}>
                             <IconButton
                               onClick={() => handleProdDialogOpen('edit', prod)}
                               sx={{
@@ -439,16 +465,16 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                      <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
                         <Typography
-                          variant="h6"
-                          color="#a3824c"
+                          variant='h6'
+                          color='#a3824c'
                           fontWeight={700}
                           mb={2}
                         >
                           No products found
                         </Typography>
-                        <Typography variant="body2" color="#b59961">
+                        <Typography variant='body2' color='#b59961'>
                           {search || filterCat
                             ? 'Try adjusting your search or filter criteria'
                             : 'Start by adding your first product'}
@@ -465,30 +491,30 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
           {isMobile && (
             <Grid container spacing={2}>
               {filteredProducts?.length > 0 ? (
-                filteredProducts.map((prod) => (
+                filteredProducts.map(prod => (
                   <Grid item span={12} key={prod._id} sx={{ width: '100%' }}>
                     <Card sx={styles.cardStyles}>
                       <CardContent>
                         <Stack spacing={2}>
                           <Typography
-                            variant="h6"
+                            variant='h6'
                             sx={{ color: '#a3824c', fontWeight: 700 }}
                           >
                             {prod.name}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#b59961' }}>
+                          <Typography variant='body2' sx={{ color: '#b59961' }}>
                             {prod.description}
                           </Typography>
                           <Grid
                             container
                             spacing={1}
-                            justifyContent="space-between"
+                            justifyContent='space-between'
                             sx={{ mt: 1 }}
                           >
                             <Grid item>
                               <Chip
                                 label={`₹${prod.price}`}
-                                size="small"
+                                size='small'
                                 sx={{
                                   backgroundColor: '#a3824c',
                                   color: '#fff',
@@ -502,11 +528,11 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                               <Chip
                                 label={
                                   categories.find(
-                                    (cat) => cat._id === prod.category._id
+                                    cat => cat._id === prod.category._id
                                   )?.name || 'N/A'
                                 }
-                                variant="outlined"
-                                size="small"
+                                variant='outlined'
+                                size='small'
                                 sx={{
                                   borderColor: '#a3824c',
                                   color: '#a3824c',
@@ -519,14 +545,14 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                             <Grid item>
                               <Chip
                                 label={`Stock: ${prod.stock}`}
-                                size="small"
+                                size='small'
                                 sx={{
                                   backgroundColor:
                                     prod.stock > 10
                                       ? '#4caf50'
                                       : prod.stock > 0
-                                      ? '#ff9800'
-                                      : '#f44336',
+                                        ? '#ff9800'
+                                        : '#f44336',
                                   color: '#fff',
                                   height: 24,
                                   fontSize: '0.75rem',
@@ -537,8 +563,8 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                             <Grid item>
                               <Chip
                                 label={`${prod.images?.length || 0} images`}
-                                variant="outlined"
-                                size="small"
+                                variant='outlined'
+                                size='small'
                                 sx={{
                                   borderColor: '#e6d897',
                                   color: '#b59961',
@@ -575,14 +601,14 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                   <Card sx={styles.cardStyles}>
                     <CardContent sx={{ textAlign: 'center', py: 4 }}>
                       <Typography
-                        variant="h6"
-                        color="#a3824c"
+                        variant='h6'
+                        color='#a3824c'
                         fontWeight={700}
                         mb={2}
                       >
                         No products found
                       </Typography>
-                      <Typography variant="body2" color="#b59961">
+                      <Typography variant='body2' color='#b59961'>
                         {search || filterCat
                           ? 'Try adjusting your search or filter criteria'
                           : 'Start by adding your first product'}
@@ -619,16 +645,16 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         <DialogContent dividers sx={styles.dialogContentStyles}>
           <Stack spacing={isMobile ? 2 : 3}>
             <TextField
-              label="Name"
+              label='Name'
               value={prodForm.name}
-              onChange={(e) => handleProdFormChange('name', e.target.value)}
+              onChange={e => handleProdFormChange('name', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
             <TextField
-              label="Description"
+              label='Description'
               value={prodForm.description}
-              onChange={(e) => {
+              onChange={e => {
                 if (e.target.value.length <= 500) {
                   handleProdFormChange('description', e.target.value);
                 }
@@ -640,19 +666,17 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
               sx={styles.inputStyles}
             />
             <TextField
-              label="Price"
-              type="number"
+              label='Price'
+              type='number'
               value={prodForm.price}
-              onChange={(e) => handleProdFormChange('price', e.target.value)}
+              onChange={e => handleProdFormChange('price', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
-            <FormControl variant="outlined" fullWidth>
+            <FormControl variant='outlined' fullWidth>
               <Select
                 value={prodForm.category}
-                onChange={(e) =>
-                  handleProdFormChange('category', e.target.value)
-                }
+                onChange={e => handleProdFormChange('category', e.target.value)}
                 displayEmpty
                 sx={{
                   ...styles.inputStyles['& .MuiOutlinedInput-root'],
@@ -660,10 +684,10 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                   fontWeight: 500,
                 }}
               >
-                <MenuItem value="" disabled>
+                <MenuItem value='' disabled>
                   Select Category
                 </MenuItem>
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <MenuItem key={cat._id} value={cat._id}>
                     {cat.name}
                   </MenuItem>
@@ -671,22 +695,22 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
               </Select>
             </FormControl>
             <TextField
-              label="Stock"
-              type="number"
+              label='Stock'
+              type='number'
               value={prodForm.stock}
-              onChange={(e) => handleProdFormChange('stock', e.target.value)}
+              onChange={e => handleProdFormChange('stock', e.target.value)}
               fullWidth
               sx={styles.inputStyles}
             />
             <TextField
               multiline
               rows={isMobile ? 2 : 3}
-              label="Image URLs (comma separated)"
+              label='Image URLs (comma separated)'
               value={
                 Array.isArray(prodForm.images) ? prodForm.images.join(', ') : ''
               }
               onChange={handleImageUrlsChange}
-              placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+              placeholder='https://example.com/image1.jpg, https://example.com/image2.jpg'
               helperText={`${
                 prodForm.images ? prodForm.images.length : 0
               } image${
@@ -716,7 +740,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
           </Button>
           <Button
             onClick={handleProdSave}
-            variant="contained"
+            variant='contained'
             sx={{
               ...styles.buttonStyles,
               px: 3,

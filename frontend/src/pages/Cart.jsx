@@ -29,10 +29,12 @@ import {
   useRemoveFromCart,
 } from '../hooks/useCart';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
+import { useToastNotifications } from '../hooks/useToast';
 
 const Cart = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const { showSuccess, showError } = useToastNotifications();
 
   // Enhanced responsive utilities from useFoldableDisplay
   const {
@@ -59,35 +61,37 @@ const Cart = () => {
   // Extract cart items from the cart data - fix the data structure access
   const cart = cartData?.items || [];
 
-  const increaseQuantity = (productId) => {
-    const item = cart.find((item) => item.product._id === productId);
+  const increaseQuantity = productId => {
+    const item = cart.find(item => item.product._id === productId);
     if (!item) return;
 
     updateCartItem.mutate(
       { productId, quantity: item.quantity + 1 },
       {
-        onError: (err) => {
+        onError: err => {
           console.error('Increase quantity error:', err);
-          setError(err.message || 'Failed to update cart.');
+          showError(err.message || 'Failed to update cart.');
         },
         onSuccess: () => {
+          showSuccess('Cart updated successfully!');
           setError(''); // Clear any previous errors
         },
       }
     );
   };
 
-  const decreaseQuantity = (productId) => {
-    const item = cart.find((item) => item.product._id === productId);
+  const decreaseQuantity = productId => {
+    const item = cart.find(item => item.product._id === productId);
     if (!item) return;
 
     if (item.quantity === 1) {
       removeFromCart.mutate(productId, {
-        onError: (err) => {
+        onError: err => {
           console.error('Remove from cart error:', err);
-          setError(err.message || 'Failed to remove from cart.');
+          showError(err.message || 'Failed to remove from cart.');
         },
         onSuccess: () => {
+          showSuccess('Item removed from cart!');
           setError(''); // Clear any previous errors
         },
       });
@@ -95,11 +99,12 @@ const Cart = () => {
       updateCartItem.mutate(
         { productId, quantity: item.quantity - 1 },
         {
-          onError: (err) => {
+          onError: err => {
             console.error('Decrease quantity error:', err);
-            setError(err.message || 'Failed to update cart.');
+            showError(err.message || 'Failed to update cart.');
           },
           onSuccess: () => {
+            showSuccess('Cart updated successfully!');
             setError(''); // Clear any previous errors
           },
         }
@@ -107,20 +112,21 @@ const Cart = () => {
     }
   };
 
-  const handleRemoveFromCart = (productId) => {
+  const handleRemoveFromCart = productId => {
     removeFromCart.mutate(productId, {
-      onError: (err) => {
+      onError: err => {
         console.error('Remove from cart error:', err);
-        setError(err.message || 'Failed to remove from cart.');
+        showError(err.message || 'Failed to remove from cart.');
       },
       onSuccess: () => {
+        showSuccess('Item removed from cart!');
         setError(''); // Clear any previous errors
       },
     });
   };
 
   const total = cart
-    .filter((item) => item && item.product && item.product.price)
+    .filter(item => item && item.product && item.product.price)
     .reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   // Show loading state
@@ -138,35 +144,35 @@ const Cart = () => {
             isExtraSmall || isSmall
               ? 1
               : isMedium
-              ? 1
-              : isLarge
-              ? 2
-              : isExtraLarge
-              ? 3
-              : 4,
+                ? 1
+                : isLarge
+                  ? 2
+                  : isExtraLarge
+                    ? 3
+                    : 4,
           px:
             isExtraSmall || isSmall
               ? 1
               : isMedium
-              ? 1
-              : isLarge
-              ? 2
-              : isExtraLarge
-              ? 3
-              : 4,
+                ? 1
+                : isLarge
+                  ? 2
+                  : isExtraLarge
+                    ? 3
+                    : 4,
           pb:
             isExtraSmall || isSmall
               ? 2
               : isMedium
-              ? 3
-              : isLarge
-              ? 4
-              : isExtraLarge
-              ? 5
-              : 6,
+                ? 3
+                : isLarge
+                  ? 4
+                  : isExtraLarge
+                    ? 5
+                    : 6,
         }}
       >
-        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+        <Alert severity='error' sx={{ mb: 2, borderRadius: 2 }}>
           Failed to load cart: {cartError.message}
         </Alert>
       </Box>
@@ -180,34 +186,34 @@ const Cart = () => {
           isExtraSmall || isSmall
             ? '95%'
             : isMedium
-            ? '90%'
-            : isLarge
-            ? '85%'
-            : isExtraLarge
-            ? '80%'
-            : '75%',
+              ? '90%'
+              : isLarge
+                ? '85%'
+                : isExtraLarge
+                  ? '80%'
+                  : '75%',
         mx: 'auto',
         mt:
           isExtraSmall || isSmall
             ? 1
             : isMedium
-            ? 1.5
-            : isLarge
-            ? 2
-            : isExtraLarge
-            ? 2.5
-            : 3,
+              ? 1.5
+              : isLarge
+                ? 2
+                : isExtraLarge
+                  ? 2.5
+                  : 3,
         px: getResponsiveValue(1, 1.5, 2, 2.5, 3, 3.5),
         pb:
           (isExtraSmall || isSmall
             ? 1
             : isMedium
-            ? 1.5
-            : isLarge
-            ? 2
-            : isExtraLarge
-            ? 2.5
-            : 3) * 2,
+              ? 1.5
+              : isLarge
+                ? 2
+                : isExtraLarge
+                  ? 2.5
+                  : 3) * 2,
         // Enhanced mobile responsiveness
         '@media (max-width: 600px)': {
           px: 1,
@@ -225,7 +231,7 @@ const Cart = () => {
       <Typography
         variant={getResponsiveTypography('h5', 'h4', 'h3', 'h3', 'h2', 'h2')}
         gutterBottom
-        align="center"
+        align='center'
         className={getResponsiveTextClasses()}
         sx={{
           fontWeight: 600,
@@ -233,22 +239,22 @@ const Cart = () => {
             isExtraSmall || isSmall
               ? 0.5
               : isMedium
-              ? 0.5
-              : isLarge
-              ? 0.75
-              : isExtraLarge
-              ? 1
-              : 1.25,
+                ? 0.5
+                : isLarge
+                  ? 0.75
+                  : isExtraLarge
+                    ? 1
+                    : 1.25,
           mb:
             isExtraSmall || isSmall
               ? 1.5
               : isMedium
-              ? 2
-              : isLarge
-              ? 2.5
-              : isExtraLarge
-              ? 3
-              : 3.5,
+                ? 2
+                : isLarge
+                  ? 2.5
+                  : isExtraLarge
+                    ? 3
+                    : 3.5,
           background:
             'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
           WebkitBackgroundClip: 'text',
@@ -262,22 +268,22 @@ const Cart = () => {
             isExtraSmall || isSmall
               ? '1.125rem'
               : isMedium
-              ? '1.375rem'
-              : isLarge
-              ? '1.625rem'
-              : isExtraLarge
-              ? '1.875rem'
-              : '2.125rem',
+                ? '1.375rem'
+                : isLarge
+                  ? '1.625rem'
+                  : isExtraLarge
+                    ? '1.875rem'
+                    : '2.125rem',
           lineHeight:
             isExtraSmall || isSmall
               ? 1.2
               : isMedium
-              ? 1.3
-              : isLarge
-              ? 1.4
-              : isExtraLarge
-              ? 1.5
-              : 1.6,
+                ? 1.3
+                : isLarge
+                  ? 1.4
+                  : isExtraLarge
+                    ? 1.5
+                    : 1.6,
         }}
       >
         <JumpingCartAvatar />
@@ -287,12 +293,12 @@ const Cart = () => {
               isExtraSmall || isSmall
                 ? 0.75
                 : isMedium
-                ? 1
-                : isLarge
-                ? 1.25
-                : isExtraLarge
-                ? 1.5
-                : 1.75,
+                  ? 1
+                  : isLarge
+                    ? 1.25
+                    : isExtraLarge
+                      ? 1.5
+                      : 1.75,
             fontWeight: 600,
             fontSize: getResponsiveTypography(
               '0.875rem',
@@ -306,12 +312,12 @@ const Cart = () => {
               isExtraSmall || isSmall
                 ? 0.5
                 : isMedium
-                ? 0.5
-                : isLarge
-                ? 0.75
-                : isExtraLarge
-                ? 1
-                : 1.25,
+                  ? 0.5
+                  : isLarge
+                    ? 0.75
+                    : isExtraLarge
+                      ? 1
+                      : 1.25,
           }}
         >
           Manage Your Cart
@@ -319,7 +325,7 @@ const Cart = () => {
       </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+        <Alert severity='error' sx={{ mb: 2, borderRadius: 2 }}>
           {error}
         </Alert>
       )}
@@ -332,7 +338,11 @@ const Cart = () => {
           justifyContent: {
             xs: 'center',
             sm: 'center',
-            md: isTablet ? 'center' : cart.length === 0 ? 'center' : 'flex-start',
+            md: isTablet
+              ? 'center'
+              : cart.length === 0
+                ? 'center'
+                : 'flex-start',
             lg: cart.length === 0 ? 'center' : 'flex-start',
           },
           maxWidth: '100%',
@@ -355,7 +365,11 @@ const Cart = () => {
             justifyContent: {
               xs: 'center',
               sm: isFoldable ? 'center' : 'center',
-              md: isTablet ? 'center' : cart.length === 0 ? 'center' : 'flex-start',
+              md: isTablet
+                ? 'center'
+                : cart.length === 0
+                  ? 'center'
+                  : 'flex-start',
               lg: cart.length === 0 ? 'center' : 'flex-start',
             },
           }}
@@ -377,55 +391,55 @@ const Cart = () => {
                     isExtraSmall || isSmall
                       ? 2
                       : isMedium
-                      ? 3
-                      : isLarge
-                      ? 4
-                      : isExtraLarge
-                      ? 5
-                      : 6,
+                        ? 3
+                        : isLarge
+                          ? 4
+                          : isExtraLarge
+                            ? 5
+                            : 6,
                   px:
                     isExtraSmall || isSmall
                       ? 1
                       : isMedium
-                      ? 1.5
-                      : isLarge
-                      ? 2
-                      : isExtraLarge
-                      ? 2.5
-                      : 3,
+                        ? 1.5
+                        : isLarge
+                          ? 2
+                          : isExtraLarge
+                            ? 2.5
+                            : 3,
                   py:
                     isExtraSmall || isSmall
                       ? 1.5
                       : isMedium
-                      ? 2
-                      : isLarge
-                      ? 2.5
-                      : isExtraLarge
-                      ? 3
-                      : 3.5,
+                        ? 2
+                        : isLarge
+                          ? 2.5
+                          : isExtraLarge
+                            ? 3
+                            : 3.5,
                   background:
                     'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
                   borderRadius:
                     isExtraSmall || isSmall
                       ? 2
                       : isMedium
-                      ? 2.5
-                      : isLarge
-                      ? 3
-                      : isExtraLarge
-                      ? 3.5
-                      : 4,
+                        ? 2.5
+                        : isLarge
+                          ? 3
+                          : isExtraLarge
+                            ? 3.5
+                            : 4,
                   boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
                   maxWidth:
                     isExtraSmall || isSmall
                       ? 320
                       : isMedium
-                      ? 360
-                      : isLarge
-                      ? 400
-                      : isExtraLarge
-                      ? 440
-                      : 480,
+                        ? 360
+                        : isLarge
+                          ? 400
+                          : isExtraLarge
+                            ? 440
+                            : 480,
                   mx: 'auto',
                   border: '1px solid #e6d897',
                   display: 'flex',
@@ -440,32 +454,32 @@ const Cart = () => {
                       isExtraSmall || isSmall
                         ? 40
                         : isMedium
-                        ? 48
-                        : isLarge
-                        ? 56
-                        : isExtraLarge
-                        ? 64
-                        : 72,
+                          ? 48
+                          : isLarge
+                            ? 56
+                            : isExtraLarge
+                              ? 64
+                              : 72,
                     height:
                       isExtraSmall || isSmall
                         ? 40
                         : isMedium
-                        ? 48
-                        : isLarge
-                        ? 56
-                        : isExtraLarge
-                        ? 64
-                        : 72,
+                          ? 48
+                          : isLarge
+                            ? 56
+                            : isExtraLarge
+                              ? 64
+                              : 72,
                     mb:
                       isExtraSmall || isSmall
                         ? 1
                         : isMedium
-                        ? 1.5
-                        : isLarge
-                        ? 2
-                        : isExtraLarge
-                        ? 2.5
-                        : 3,
+                          ? 1.5
+                          : isLarge
+                            ? 2
+                            : isExtraLarge
+                              ? 2.5
+                              : 3,
                     background:
                       'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
                     boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
@@ -480,12 +494,12 @@ const Cart = () => {
                         isExtraSmall || isSmall
                           ? 20
                           : isMedium
-                          ? 24
-                          : isLarge
-                          ? 28
-                          : isExtraLarge
-                          ? 32
-                          : 36,
+                            ? 24
+                            : isLarge
+                              ? 28
+                              : isExtraLarge
+                                ? 32
+                                : 36,
                       color: '#fffbe6',
                       textShadow: '0 2px 8px rgba(163,130,76,0.18)',
                     }}
@@ -507,32 +521,32 @@ const Cart = () => {
                       isExtraSmall || isSmall
                         ? 0.5
                         : isMedium
-                        ? 1
-                        : isLarge
-                        ? 1.5
-                        : isExtraLarge
-                        ? 2
-                        : 2.5,
+                          ? 1
+                          : isLarge
+                            ? 1.5
+                            : isExtraLarge
+                              ? 2
+                              : 2.5,
                     letterSpacing:
                       isExtraSmall || isSmall
                         ? 0.5
                         : isMedium
-                        ? 0.75
-                        : isLarge
-                        ? 1
-                        : isExtraLarge
-                        ? 1.25
-                        : 1.5,
+                          ? 0.75
+                          : isLarge
+                            ? 1
+                            : isExtraLarge
+                              ? 1.25
+                              : 1.5,
                     fontSize:
                       isExtraSmall || isSmall
                         ? '0.95rem'
                         : isMedium
-                        ? '1.1rem'
-                        : isLarge
-                        ? '1.25rem'
-                        : isExtraLarge
-                        ? '1.4rem'
-                        : '1.55rem',
+                          ? '1.1rem'
+                          : isLarge
+                            ? '1.25rem'
+                            : isExtraLarge
+                              ? '1.4rem'
+                              : '1.55rem',
                   }}
                 >
                   Your cart is empty
@@ -552,24 +566,24 @@ const Cart = () => {
                       isExtraSmall || isSmall
                         ? 280
                         : isMedium
-                        ? 320
-                        : isLarge
-                        ? 360
-                        : isExtraLarge
-                        ? 400
-                        : 440,
+                          ? 320
+                          : isLarge
+                            ? 360
+                            : isExtraLarge
+                              ? 400
+                              : 440,
                     mx: 'auto',
                     fontWeight: 500,
                     fontSize:
                       isExtraSmall || isSmall
                         ? '0.8rem'
                         : isMedium
-                        ? '0.9rem'
-                        : isLarge
-                        ? '1rem'
-                        : isExtraLarge
-                        ? '1.1rem'
-                        : '1.2rem',
+                          ? '0.9rem'
+                          : isLarge
+                            ? '1rem'
+                            : isExtraLarge
+                              ? '1.1rem'
+                              : '1.2rem',
                   }}
                 >
                   Looks like you haven&apos;t added any products yet.
@@ -577,17 +591,17 @@ const Cart = () => {
                   Browse our catalogue and start shopping!
                 </Typography>
                 <Button
-                  variant="contained"
+                  variant='contained'
                   className={getResponsiveButtonSize()}
                   sx={{
                     mt:
                       isExtraSmall || isSmall
                         ? 2
                         : isMedium
-                        ? 2.5
-                        : isLarge
-                        ? 3
-                        : 3.5,
+                          ? 2.5
+                          : isLarge
+                            ? 3
+                            : 3.5,
                     textTransform: 'none',
                     fontWeight: 700,
                     background:
@@ -597,12 +611,12 @@ const Cart = () => {
                       isExtraSmall || isSmall
                         ? 1.5
                         : isMedium
-                        ? 2
-                        : isLarge
-                        ? 2.5
-                        : isExtraLarge
-                        ? 3
-                        : 3.5,
+                          ? 2
+                          : isLarge
+                            ? 2.5
+                            : isExtraLarge
+                              ? 3
+                              : 3.5,
                     fontSize: getResponsiveTypography(
                       '0.875rem',
                       '0.9rem',
@@ -616,28 +630,28 @@ const Cart = () => {
                       isExtraSmall || isSmall
                         ? 2
                         : isMedium
-                        ? 2.5
-                        : isLarge
-                        ? 3
-                        : 3.5,
+                          ? 2.5
+                          : isLarge
+                            ? 3
+                            : 3.5,
                     py:
                       isExtraSmall || isSmall
                         ? 0.75
                         : isMedium
-                        ? 1
-                        : isLarge
-                        ? 1.25
-                        : 1.5,
+                          ? 1
+                          : isLarge
+                            ? 1.25
+                            : 1.5,
                     minHeight:
                       isExtraSmall || isSmall
                         ? 44
                         : isMedium
-                        ? 48
-                        : isLarge
-                        ? 52
-                        : isExtraLarge
-                        ? 56
-                        : 60,
+                          ? 48
+                          : isLarge
+                            ? 52
+                            : isExtraLarge
+                              ? 56
+                              : 60,
                     '&:hover': {
                       background:
                         'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
@@ -654,11 +668,11 @@ const Cart = () => {
           ) : (
             <List>
               {cart
-                .filter((item) => item && item.product && item.product._id)
-                .map((item) => (
+                .filter(item => item && item.product && item.product._id)
+                .map(item => (
                   <ListItem
                     key={item.product._id}
-                    alignItems="flex-start"
+                    alignItems='flex-start'
                     sx={{
                       bgcolor:
                         'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
@@ -666,64 +680,64 @@ const Cart = () => {
                         isExtraSmall || isSmall
                           ? 1.5
                           : isMedium
-                          ? 2
-                          : isLarge
-                          ? 2.5
-                          : isExtraLarge
-                          ? 3
-                          : 3.5,
+                            ? 2
+                            : isLarge
+                              ? 2.5
+                              : isExtraLarge
+                                ? 3
+                                : 3.5,
                       boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
                       mb:
                         isExtraSmall || isSmall
                           ? 0.75
                           : isMedium
-                          ? 1
-                          : isLarge
-                          ? 1.25
-                          : isExtraLarge
-                          ? 1.5
-                          : 1.75,
+                            ? 1
+                            : isLarge
+                              ? 1.25
+                              : isExtraLarge
+                                ? 1.5
+                                : 1.75,
                       px:
                         isExtraSmall || isSmall
                           ? 1
                           : isMedium
-                          ? 1.25
-                          : isLarge
-                          ? 1.5
-                          : isExtraLarge
-                          ? 1.75
-                          : 2,
+                            ? 1.25
+                            : isLarge
+                              ? 1.5
+                              : isExtraLarge
+                                ? 1.75
+                                : 2,
                       py:
                         isExtraSmall || isSmall
                           ? 0.75
                           : isMedium
-                          ? 1
-                          : isLarge
-                          ? 1.25
-                          : isExtraLarge
-                          ? 1.5
-                          : 1.75,
+                            ? 1
+                            : isLarge
+                              ? 1.25
+                              : isExtraLarge
+                                ? 1.5
+                                : 1.75,
                       pr: {
                         xs:
                           isExtraSmall || isSmall
                             ? 3.5
                             : isMedium
-                            ? 4
-                            : isLarge
-                            ? 4.5
-                            : isExtraLarge
-                            ? 5
-                            : 5.5,
+                              ? 4
+                              : isLarge
+                                ? 4.5
+                                : isExtraLarge
+                                  ? 5
+                                  : 5.5,
                         sm:
                           isExtraSmall || isSmall
                             ? 1.25
                             : isMedium
-                            ? 1.5
-                            : isLarge
-                            ? 1.75
-                            : isExtraLarge
-                            ? 2
-                            : 2.25,
+                              ? 1.5
+                              : isLarge
+                                ? 1.75
+                                : isExtraLarge
+                                  ? 2
+                                  : 2.25,
                       },
                       display: 'flex',
                       flexDirection: { xs: 'column', sm: 'row' },
@@ -736,10 +750,10 @@ const Cart = () => {
                     }}
                     secondaryAction={
                       <IconButton
-                        edge="end"
-                        size="small"
-                        aria-label="delete"
-                        color="error"
+                        edge='end'
+                        size='small'
+                        aria-label='delete'
+                        color='error'
                         onClick={() => handleRemoveFromCart(item.product._id)}
                         disabled={removeFromCart.isPending}
                         sx={{
@@ -748,12 +762,12 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.75
                               : isMedium
-                              ? 1
-                              : isLarge
-                              ? 1.25
-                              : isExtraLarge
-                              ? 1.5
-                              : 1.75,
+                                ? 1
+                                : isLarge
+                                  ? 1.25
+                                  : isExtraLarge
+                                    ? 1.5
+                                    : 1.75,
                           '&:hover': {
                             bgcolor: '#e6d897',
                             transform: 'scale(1.05)',
@@ -764,12 +778,12 @@ const Cart = () => {
                               isExtraSmall || isSmall
                                 ? 1
                                 : isMedium
-                                ? 1.25
-                                : isLarge
-                                ? 1.5
-                                : isExtraLarge
-                                ? 1.75
-                                : 2,
+                                  ? 1.25
+                                  : isLarge
+                                    ? 1.5
+                                    : isExtraLarge
+                                      ? 1.75
+                                      : 2,
                             sm: 'auto',
                           },
                           right: {
@@ -777,12 +791,12 @@ const Cart = () => {
                               isExtraSmall || isSmall
                                 ? 1
                                 : isMedium
-                                ? 1.25
-                                : isLarge
-                                ? 1.5
-                                : isExtraLarge
-                                ? 1.75
-                                : 2,
+                                  ? 1.25
+                                  : isLarge
+                                    ? 1.5
+                                    : isExtraLarge
+                                      ? 1.75
+                                      : 2,
                             sm: 'auto',
                           },
                           zIndex: 2,
@@ -790,44 +804,44 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 24
                               : isMedium
-                              ? 28
-                              : isLarge
-                              ? 32
-                              : isExtraLarge
-                              ? 36
-                              : 40,
+                                ? 28
+                                : isLarge
+                                  ? 32
+                                  : isExtraLarge
+                                    ? 36
+                                    : 40,
                           minHeight:
                             isExtraSmall || isSmall
                               ? 24
                               : isMedium
-                              ? 28
-                              : isLarge
-                              ? 32
-                              : isExtraLarge
-                              ? 36
-                              : 40,
+                                ? 28
+                                : isLarge
+                                  ? 32
+                                  : isExtraLarge
+                                    ? 36
+                                    : 40,
                           p:
                             isExtraSmall || isSmall
                               ? 0.25
                               : isMedium
-                              ? 0.5
-                              : isLarge
-                              ? 0.75
-                              : isExtraLarge
-                              ? 1
-                              : 1.25,
+                                ? 0.5
+                                : isLarge
+                                  ? 0.75
+                                  : isExtraLarge
+                                    ? 1
+                                    : 1.25,
                           transition: 'all 0.2s ease',
                           '& .MuiSvgIcon-root': {
                             fontSize:
                               isExtraSmall || isSmall
                                 ? '0.75rem'
                                 : isMedium
-                                ? '0.8rem'
-                                : isLarge
-                                ? '0.85rem'
-                                : isExtraLarge
-                                ? '0.9rem'
-                                : '0.95rem',
+                                  ? '0.8rem'
+                                  : isLarge
+                                    ? '0.85rem'
+                                    : isExtraLarge
+                                      ? '0.9rem'
+                                      : '0.95rem',
                             color: '#d32f2f',
                           },
                           '&:disabled': {
@@ -858,33 +872,33 @@ const Cart = () => {
                               isExtraSmall || isSmall
                                 ? 0.0625
                                 : isMedium
-                                ? 0.125
-                                : isLarge
-                                ? 0.25
-                                : isExtraLarge
-                                ? 0.375
-                                : 0.5,
+                                  ? 0.125
+                                  : isLarge
+                                    ? 0.25
+                                    : isExtraLarge
+                                      ? 0.375
+                                      : 0.5,
                             fontSize:
                               isExtraSmall || isSmall
                                 ? '0.7rem'
                                 : isMedium
-                                ? '0.8rem'
-                                : isLarge
-                                ? '0.9rem'
-                                : isExtraLarge
-                                ? '1rem'
-                                : '1.1rem',
+                                  ? '0.8rem'
+                                  : isLarge
+                                    ? '0.9rem'
+                                    : isExtraLarge
+                                      ? '1rem'
+                                      : '1.1rem',
                             pr: {
                               xs:
                                 isExtraSmall || isSmall
                                   ? 2
                                   : isMedium
-                                  ? 2.25
-                                  : isLarge
-                                  ? 2.5
-                                  : isExtraLarge
-                                  ? 2.75
-                                  : 3,
+                                    ? 2.25
+                                    : isLarge
+                                      ? 2.5
+                                      : isExtraLarge
+                                        ? 2.75
+                                        : 3,
                               sm: 0,
                             },
                           }}
@@ -909,23 +923,23 @@ const Cart = () => {
                               isExtraSmall || isSmall
                                 ? '0.6rem'
                                 : isMedium
-                                ? '0.7rem'
-                                : isLarge
-                                ? '0.8rem'
-                                : isExtraLarge
-                                ? '0.9rem'
-                                : '1rem',
+                                  ? '0.7rem'
+                                  : isLarge
+                                    ? '0.8rem'
+                                    : isExtraLarge
+                                      ? '0.9rem'
+                                      : '1rem',
                             pr: {
                               xs:
                                 isExtraSmall || isSmall
                                   ? 2
                                   : isMedium
-                                  ? 2.25
-                                  : isLarge
-                                  ? 2.5
-                                  : isExtraLarge
-                                  ? 2.75
-                                  : 3,
+                                    ? 2.25
+                                    : isLarge
+                                      ? 2.5
+                                      : isExtraLarge
+                                        ? 2.75
+                                        : 3,
                               sm: 0,
                             },
                           }}
@@ -938,12 +952,12 @@ const Cart = () => {
                           isExtraSmall || isSmall
                             ? 110
                             : isMedium
-                            ? 125
-                            : isLarge
-                            ? 140
-                            : isExtraLarge
-                            ? 155
-                            : 170,
+                              ? 125
+                              : isLarge
+                                ? 140
+                                : isExtraLarge
+                                  ? 155
+                                  : 170,
                         flex: { xs: '1 1 auto', sm: '1 1 auto' },
                         mr: {
                           xs: 0,
@@ -951,28 +965,28 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.25
                               : isMedium
-                              ? 0.375
-                              : isLarge
-                              ? 0.5
-                              : isExtraLarge
-                              ? 0.625
-                              : 0.75,
+                                ? 0.375
+                                : isLarge
+                                  ? 0.5
+                                  : isExtraLarge
+                                    ? 0.625
+                                    : 0.75,
                         },
                       }}
                     />
                     <Stack
-                      direction="row"
-                      alignItems="center"
+                      direction='row'
+                      alignItems='center'
                       spacing={
                         isExtraSmall || isSmall
                           ? 0.5
                           : isMedium
-                          ? 0.75
-                          : isLarge
-                          ? 1
-                          : isExtraLarge
-                          ? 1.25
-                          : 1.5
+                            ? 0.75
+                            : isLarge
+                              ? 1
+                              : isExtraLarge
+                                ? 1.25
+                                : 1.5
                       }
                       sx={{
                         ml: {
@@ -981,24 +995,24 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.75
                               : isMedium
-                              ? 1
-                              : isLarge
-                              ? 1.25
-                              : isExtraLarge
-                              ? 1.5
-                              : 1.75,
+                                ? 1
+                                : isLarge
+                                  ? 1.25
+                                  : isExtraLarge
+                                    ? 1.5
+                                    : 1.75,
                         },
                         mt: {
                           xs:
                             isExtraSmall || isSmall
                               ? 0.5
                               : isMedium
-                              ? 0.75
-                              : isLarge
-                              ? 1
-                              : isExtraLarge
-                              ? 1.25
-                              : 1.5,
+                                ? 0.75
+                                : isLarge
+                                  ? 1
+                                  : isExtraLarge
+                                    ? 1.25
+                                    : 1.5,
                           sm: 0,
                         },
                         mr: {
@@ -1006,12 +1020,12 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.5
                               : isMedium
-                              ? 0.75
-                              : isLarge
-                              ? 1
-                              : isExtraLarge
-                              ? 1.25
-                              : 1.5,
+                                ? 0.75
+                                : isLarge
+                                  ? 1
+                                  : isExtraLarge
+                                    ? 1.25
+                                    : 1.5,
                           sm: 0,
                         },
                         bgcolor: '#fffbe6',
@@ -1019,36 +1033,36 @@ const Cart = () => {
                           isExtraSmall || isSmall
                             ? 1
                             : isMedium
-                            ? 1.25
-                            : isLarge
-                            ? 1.5
-                            : isExtraLarge
-                            ? 1.75
-                            : 2,
+                              ? 1.25
+                              : isLarge
+                                ? 1.5
+                                : isExtraLarge
+                                  ? 1.75
+                                  : 2,
                         px:
                           isExtraSmall || isSmall
                             ? 1
                             : isMedium
-                            ? 1.25
-                            : isLarge
-                            ? 1.5
-                            : isExtraLarge
-                            ? 1.75
-                            : 2,
+                              ? 1.25
+                              : isLarge
+                                ? 1.5
+                                : isExtraLarge
+                                  ? 1.75
+                                  : 2,
                         py:
                           isExtraSmall || isSmall
                             ? 0.5
                             : isMedium
-                            ? 0.75
-                            : isLarge
-                            ? 1
-                            : isExtraLarge
-                            ? 1.25
-                            : 1.5,
+                              ? 0.75
+                              : isLarge
+                                ? 1
+                                : isExtraLarge
+                                  ? 1.25
+                                  : 1.5,
                       }}
                     >
                       <IconButton
-                        size="small"
+                        size='small'
                         disabled={
                           updateCartItem.isPending || removeFromCart.isPending
                         }
@@ -1059,33 +1073,33 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.75
                               : isMedium
-                              ? 1
-                              : isLarge
-                              ? 1.5
-                              : isExtraLarge
-                              ? 2
-                              : 2.5,
+                                ? 1
+                                : isLarge
+                                  ? 1.5
+                                  : isExtraLarge
+                                    ? 2
+                                    : 2.5,
                           '&:hover': { bgcolor: '#e6d897' },
                           minWidth:
                             isExtraSmall || isSmall
                               ? 28
                               : isMedium
-                              ? 32
-                              : isLarge
-                              ? 36
-                              : isExtraLarge
-                              ? 40
-                              : 44,
+                                ? 32
+                                : isLarge
+                                  ? 36
+                                  : isExtraLarge
+                                    ? 40
+                                    : 44,
                           minHeight:
                             isExtraSmall || isSmall
                               ? 28
                               : isMedium
-                              ? 32
-                              : isLarge
-                              ? 36
-                              : isExtraLarge
-                              ? 40
-                              : 44,
+                                ? 32
+                                : isLarge
+                                  ? 36
+                                  : isExtraLarge
+                                    ? 40
+                                    : 44,
                           '& .MuiSvgIcon-root': {
                             fontSize: getResponsiveTypography(
                               '0.75rem',
@@ -1119,22 +1133,22 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.5
                               : isMedium
-                              ? 0.75
-                              : isLarge
-                              ? 1
-                              : isExtraLarge
-                              ? 1.25
-                              : 1.5,
+                                ? 0.75
+                                : isLarge
+                                  ? 1
+                                  : isExtraLarge
+                                    ? 1.25
+                                    : 1.5,
                           minWidth:
                             isExtraSmall || isSmall
                               ? 20
                               : isMedium
-                              ? 24
-                              : isLarge
-                              ? 28
-                              : isExtraLarge
-                              ? 32
-                              : 36,
+                                ? 24
+                                : isLarge
+                                  ? 28
+                                  : isExtraLarge
+                                    ? 32
+                                    : 36,
                           textAlign: 'center',
                           fontWeight: 600,
                           color: '#a3824c',
@@ -1142,18 +1156,18 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? '0.8rem'
                               : isMedium
-                              ? '0.9rem'
-                              : isLarge
-                              ? '1rem'
-                              : isExtraLarge
-                              ? '1.1rem'
-                              : '1.2rem',
+                                ? '0.9rem'
+                                : isLarge
+                                  ? '1rem'
+                                  : isExtraLarge
+                                    ? '1.1rem'
+                                    : '1.2rem',
                         }}
                       >
                         {item.quantity}
                       </Typography>
                       <IconButton
-                        size="small"
+                        size='small'
                         disabled={
                           updateCartItem.isPending || removeFromCart.isPending
                         }
@@ -1164,33 +1178,33 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.75
                               : isMedium
-                              ? 1
-                              : isLarge
-                              ? 1.5
-                              : isExtraLarge
-                              ? 2
-                              : 2.5,
+                                ? 1
+                                : isLarge
+                                  ? 1.5
+                                  : isExtraLarge
+                                    ? 2
+                                    : 2.5,
                           '&:hover': { bgcolor: '#e6d897' },
                           minWidth:
                             isExtraSmall || isSmall
                               ? 28
                               : isMedium
-                              ? 32
-                              : isLarge
-                              ? 36
-                              : isExtraLarge
-                              ? 40
-                              : 44,
+                                ? 32
+                                : isLarge
+                                  ? 36
+                                  : isExtraLarge
+                                    ? 40
+                                    : 44,
                           minHeight:
                             isExtraSmall || isSmall
                               ? 28
                               : isMedium
-                              ? 32
-                              : isLarge
-                              ? 36
-                              : isExtraLarge
-                              ? 40
-                              : 44,
+                                ? 32
+                                : isLarge
+                                  ? 36
+                                  : isExtraLarge
+                                    ? 40
+                                    : 44,
                           '& .MuiSvgIcon-root': {
                             fontSize: getResponsiveTypography(
                               '0.75rem',
@@ -1222,12 +1236,12 @@ const Cart = () => {
                             isExtraSmall || isSmall
                               ? 0.25
                               : isMedium
-                              ? 0.5
-                              : isLarge
-                              ? 0.75
-                              : isExtraLarge
-                              ? 1
-                              : 1.25,
+                                ? 0.5
+                                : isLarge
+                                  ? 0.75
+                                  : isExtraLarge
+                                    ? 1
+                                    : 1.25,
                           sm: 0,
                         },
                         fontWeight: 500,
@@ -1236,44 +1250,44 @@ const Cart = () => {
                           isExtraSmall || isSmall
                             ? 0.5
                             : isMedium
-                            ? 0.75
-                            : isLarge
-                            ? 1
-                            : isExtraLarge
-                            ? 1.25
-                            : 1.5,
+                              ? 0.75
+                              : isLarge
+                                ? 1
+                                : isExtraLarge
+                                  ? 1.25
+                                  : 1.5,
                         mr: {
                           xs:
                             isExtraSmall || isSmall
                               ? 6.5
                               : isMedium
-                              ? 7
-                              : isLarge
-                              ? 7.5
-                              : isExtraLarge
-                              ? 8
-                              : 8.5,
+                                ? 7
+                                : isLarge
+                                  ? 7.5
+                                  : isExtraLarge
+                                    ? 8
+                                    : 8.5,
                           sm:
                             isExtraSmall || isSmall
                               ? 4
                               : isMedium
-                              ? 4.5
-                              : isLarge
-                              ? 5
-                              : isExtraLarge
-                              ? 5.5
-                              : 6,
+                                ? 4.5
+                                : isLarge
+                                  ? 5
+                                  : isExtraLarge
+                                    ? 5.5
+                                    : 6,
                         },
                         fontSize:
                           isExtraSmall || isSmall
                             ? '0.75rem'
                             : isMedium
-                            ? '0.85rem'
-                            : isLarge
-                            ? '0.95rem'
-                            : isExtraLarge
-                            ? '1.05rem'
-                            : '1.15rem',
+                              ? '0.85rem'
+                              : isLarge
+                                ? '0.95rem'
+                                : isExtraLarge
+                                  ? '1.05rem'
+                                  : '1.15rem',
                       }}
                     >
                       Subtotal: ₹{item.product.price * item.quantity}
@@ -1319,7 +1333,7 @@ const Cart = () => {
                 className={`card-golden ${getResponsiveCardSize()} responsive-card`}
               >
                 <Typography
-                  textAlign="center"
+                  textAlign='center'
                   fontWeight={600}
                   mb={0.5}
                   sx={{
@@ -1364,7 +1378,7 @@ const Cart = () => {
                   </Typography>
                 ) : (
                   <>
-                    {cart.map((item) => (
+                    {cart.map(item => (
                       <Box
                         key={item.product._id}
                         sx={{
@@ -1646,7 +1660,7 @@ const Cart = () => {
 
                     {/* Checkout Button */}
                     <Button
-                      variant="contained"
+                      variant='contained'
                       fullWidth
                       onClick={() => navigate('/checkout')}
                       disabled={cart.length === 0}

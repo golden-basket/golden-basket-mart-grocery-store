@@ -17,9 +17,11 @@ import {
 } from '@mui/icons-material';
 import Grid from '@mui/material/Grid';
 import { useAuth } from '../hooks/useAuth';
+import { useToastNotifications } from '../hooks/useToast';
 
 const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
   const { updateProfile } = useAuth();
+  const { showSuccess, showError } = useToastNotifications();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -75,23 +77,23 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: '',
       }));
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -102,9 +104,11 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
 
     try {
       await updateProfile(formData);
+      showSuccess('Profile updated successfully!');
       onSuccess();
     } catch (error) {
       console.error('Profile update error:', error);
+      showError('Failed to update profile. Please try again.');
       onError();
     } finally {
       setIsSubmitting(false);
@@ -125,7 +129,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
     onClose();
   };
 
-  const getTextFieldStyles = (fieldName) => ({
+  const getTextFieldStyles = fieldName => ({
     transition: 'all 0.3s ease',
     '& .MuiOutlinedInput-root': {
       '& fieldset': {
@@ -160,7 +164,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth='md'
       fullWidth
       PaperProps={{
         sx: {
@@ -200,8 +204,8 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
             >
               <TextField
                 fullWidth
-                label="First Name"
-                name="firstName"
+                label='First Name'
+                name='firstName'
                 value={formData.firstName}
                 onChange={handleInputChange}
                 error={!!errors.firstName}
@@ -219,7 +223,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                     />
                   ),
                 }}
-                size="medium"
+                size='medium'
               />
             </Grid>
 
@@ -232,8 +236,8 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
             >
               <TextField
                 fullWidth
-                label="Last Name"
-                name="lastName"
+                label='Last Name'
+                name='lastName'
                 value={formData.lastName}
                 onChange={handleInputChange}
                 error={!!errors.lastName}
@@ -251,16 +255,16 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                     />
                   ),
                 }}
-                size="medium"
+                size='medium'
               />
             </Grid>
 
             <Grid item span={12}>
               <TextField
                 fullWidth
-                label="Email"
-                name="email"
-                type="email"
+                label='Email'
+                name='email'
+                type='email'
                 value={formData.email}
                 onChange={handleInputChange}
                 error={!!errors.email}
@@ -278,20 +282,20 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                     />
                   ),
                 }}
-                size="medium"
+                size='medium'
               />
             </Grid>
 
             <Grid item span={12}>
               <TextField
                 fullWidth
-                label="Phone"
-                name="phone"
+                label='Phone'
+                name='phone'
                 value={formData.phone}
                 onChange={handleInputChange}
                 error={!!errors.phone}
                 helperText={errors.phone}
-                placeholder="+1 (555) 123-4567"
+                placeholder='+1 (555) 123-4567'
                 sx={getTextFieldStyles('phone')}
                 InputProps={{
                   startAdornment: (
@@ -304,7 +308,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                     />
                   ),
                 }}
-                size="medium"
+                size='medium'
               />
             </Grid>
           </Grid>
@@ -312,7 +316,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
 
         <DialogActions sx={{ p: 4, gap: 3, justifyContent: 'center' }}>
           <Button
-            variant="outlined"
+            variant='outlined'
             onClick={handleCancel}
             startIcon={<CancelIcon sx={{ fontSize: '1.25rem' }} />}
             disabled={isSubmitting}
@@ -339,8 +343,8 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
           </Button>
 
           <Button
-            type="submit"
-            variant="contained"
+            type='submit'
+            variant='contained'
             startIcon={
               isSubmitting ? (
                 <CircularProgress size={15} />

@@ -1,7 +1,8 @@
 // Shared styles for admin components
-export const createAdminStyles = (isMobile) => ({
+export const createAdminStyles = isMobile => ({
   sectionStyles: {
-    background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
+    background:
+      'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
     borderRadius: isMobile ? 2 : 3,
     p: isMobile ? 2 : 4,
     border: '2px solid #e6d897',
@@ -14,14 +15,16 @@ export const createAdminStyles = (isMobile) => ({
       left: 0,
       right: 0,
       height: '4px',
-      background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+      background:
+        'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
       borderRadius: isMobile ? '8px 8px 0 0' : '12px 12px 0 0',
     },
   },
 
   buttonStyles: {
     fontWeight: 700,
-    background: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+    background:
+      'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
     color: '#fff',
     textTransform: 'none',
     boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
@@ -90,7 +93,8 @@ export const createAdminStyles = (isMobile) => ({
     mb: isMobile ? 1 : 2,
     px: isMobile ? 1 : 3,
     py: isMobile ? 2 : 4,
-    background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 50%, #fffbe6 100%)',
+    background:
+      'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 50%, #fffbe6 100%)',
     borderRadius: isMobile ? 2 : 3,
     boxShadow: '0 4px 20px 0 rgba(163,130,76,0.15)',
     border: '1px solid #e6d897',
@@ -105,7 +109,8 @@ export const createAdminStyles = (isMobile) => ({
   },
 
   tableHeaderStyles: {
-    background: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+    background:
+      'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
   },
 
   tableHeaderCellStyles: {

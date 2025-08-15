@@ -31,7 +31,7 @@ import { useCart } from '../hooks/useCart';
 import { useAddresses, useOrderStats } from '../hooks/useProfile';
 import EditProfileDialog from '../components/EditProfileDialog';
 import ChangePasswordDialog from '../components/ChangePasswordDialog';
-import ThemeSnackbar from '../components/ThemeSnackbar';
+import { useToastNotifications } from '../hooks/useToast';
 import { Link } from 'react-router-dom';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import Loading from '../components/Loading';
@@ -39,6 +39,7 @@ import Loading from '../components/Loading';
 const Profile = () => {
   const { user, getProfile, loading } = useAuth();
   const { isMobile, isTablet, isFoldable } = useFoldableDisplay();
+  const { showError, showSuccess, showInfo } = useToastNotifications();
 
   // Use optimized hooks for data fetching with better error handling
   const { data: cart, isLoading: cartLoading, error: cartError } = useCart();
@@ -97,11 +98,7 @@ const Profile = () => {
       await getProfile();
     } catch (error) {
       console.error('Error refreshing profile data:', error);
-      setSnackbar({
-        open: true,
-        message: 'Failed to refresh profile data. Please try again.',
-        severity: 'error',
-      });
+      showError('Failed to refresh profile data. Please try again.');
     }
   }, [getProfile]);
 
@@ -137,63 +134,34 @@ const Profile = () => {
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
 
   const handleEditProfile = useCallback(() => {
     try {
       setIsEditDialogOpen(true);
     } catch (error) {
       console.error('Error opening edit profile dialog:', error);
-      setSnackbar({
-        open: true,
-        message: 'Error opening profile editor. Please try again.',
-        severity: 'error',
-      });
+      showError('Error opening profile editor. Please try again.');
     }
-  }, []);
+  }, [showError]);
 
   const handleProfileUpdateSuccess = useCallback(() => {
     try {
-      setSnackbar({
-        open: true,
-        message: 'Profile updated successfully!',
-        severity: 'success',
-      });
+      showSuccess('Profile updated successfully!');
       setIsEditDialogOpen(false);
       refreshProfileData();
     } catch (error) {
       console.error('Error handling profile update success:', error);
-      setSnackbar({
-        open: true,
-        message: 'Profile updated but there was an error refreshing data.',
-        severity: 'warning',
-      });
+      showError('Profile updated but there was an error refreshing data.');
     }
-  }, [refreshProfileData]);
+  }, [refreshProfileData, showSuccess, showError]);
 
   const handleProfileUpdateError = useCallback(() => {
     try {
-      setSnackbar({
-        open: true,
-        message: 'Failed to update profile. Please try again.',
-        severity: 'error',
-      });
+      showError('Failed to update profile. Please try again.');
     } catch (error) {
       console.error('Error handling profile update error:', error);
     }
-  }, []);
-
-  const handleCloseSnackbar = useCallback(() => {
-    try {
-      setSnackbar((prev) => ({ ...prev, open: false }));
-    } catch (error) {
-      console.error('Error closing snackbar:', error);
-    }
-  }, []);
+  }, [showError]);
 
   // TODO: Implement profile image change functionality
   // This is a placeholder function that can be implemented in the future
@@ -206,20 +174,12 @@ const Profile = () => {
       // 4. Update user profile with new image
       // 5. Show success/error feedback
 
-      setSnackbar({
-        open: true,
-        message: 'Profile image change feature coming soon! 🚀',
-        severity: 'info',
-      });
+      showInfo('Profile image change feature coming soon! 🚀');
     } catch (error) {
       console.error('Error in handleProfileChange:', error);
-      setSnackbar({
-        open: true,
-        message: 'Error processing profile image change request.',
-        severity: 'error',
-      });
+      showError('Error processing profile image change request.');
     }
-  }, []);
+  }, [showInfo, showError]);
 
   // Memoized last login date to avoid unnecessary recalculations
   const lastLoginDate = useMemo(() => {
@@ -242,9 +202,9 @@ const Profile = () => {
   // Show error state if any data fetching failed
   if (cartError || addressesError || orderStatsError) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+      <Container maxWidth='lg' sx={{ py: 4, mt: 8 }}>
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" color="error">
+          <Typography variant='h5' color='error'>
             Error loading profile data. Please try refreshing the page.
           </Typography>
         </Box>
@@ -254,9 +214,9 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+      <Container maxWidth='lg' sx={{ py: 4, mt: 8 }}>
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" color="primary">
+          <Typography variant='h5' color='primary'>
             Please log in to view your profile.
           </Typography>
         </Box>
@@ -267,9 +227,9 @@ const Profile = () => {
   // Show loading state while fetching profile data
   if (!user.firstName && !user.lastName && user.email) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+      <Container maxWidth='lg' sx={{ py: 4, mt: 8 }}>
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" color="primary">
+          <Typography variant='h5' color='primary'>
             Loading profile...
           </Typography>
         </Box>
@@ -278,7 +238,7 @@ const Profile = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4, mt: 8 }}>
+    <Container maxWidth='xl' sx={{ py: 4, mt: 8 }}>
       <Box
         sx={{
           position: 'relative',
@@ -387,7 +347,7 @@ const Profile = () => {
                         }}
                       >
                         <Badge
-                          overlap="circular"
+                          overlap='circular'
                           anchorOrigin={{
                             vertical: 'bottom',
                             horizontal: 'right',
@@ -500,8 +460,8 @@ const Profile = () => {
                         }}
                       >
                         <Typography
-                          variant="h4"
-                          component="h2"
+                          variant='h4'
+                          component='h2'
                           sx={{
                             fontWeight: 700,
                             color: 'primary.dark',
@@ -534,7 +494,7 @@ const Profile = () => {
                             }}
                           >
                             <EmailIcon
-                              color="primary"
+                              color='primary'
                               sx={{
                                 fontSize: {
                                   xs: isMobile ? '1rem' : '1.1rem',
@@ -543,8 +503,8 @@ const Profile = () => {
                               }}
                             />
                             <Typography
-                              variant="body1"
-                              color="text.secondary"
+                              variant='body1'
+                              color='text.secondary'
                               sx={{
                                 fontSize: {
                                   xs: isMobile ? '0.8rem' : '0.85rem',
@@ -572,7 +532,7 @@ const Profile = () => {
                             }}
                           >
                             <PhoneIcon
-                              color="primary"
+                              color='primary'
                               sx={{
                                 fontSize: {
                                   xs: isMobile ? '1rem' : '1.1rem',
@@ -581,8 +541,8 @@ const Profile = () => {
                               }}
                             />
                             <Typography
-                              variant="body1"
-                              color="text.secondary"
+                              variant='body1'
+                              color='text.secondary'
                               sx={{
                                 fontSize: {
                                   xs: isMobile ? '0.8rem' : '0.85rem',
@@ -598,8 +558,8 @@ const Profile = () => {
                         </Stack>
 
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant='body2'
+                          color='text.secondary'
                           sx={{
                             fontStyle: 'italic',
                             textAlign: {
@@ -645,7 +605,7 @@ const Profile = () => {
                           }}
                         >
                           <Button
-                            variant="contained"
+                            variant='contained'
                             onClick={handleEditProfile}
                             startIcon={<EditIcon />}
                             sx={{
@@ -675,7 +635,7 @@ const Profile = () => {
                           </Button>
 
                           <Button
-                            variant="outlined"
+                            variant='outlined'
                             onClick={() => setIsPasswordDialogOpen(true)}
                             startIcon={<LockIcon />}
                             sx={{
@@ -771,7 +731,7 @@ const Profile = () => {
                         md: isTablet ? 2.5 : 3,
                       }}
                     >
-                      <Grid item xs={6} sm={6} md={3}>
+                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
                         <Box
                           sx={{
                             p: {
@@ -833,7 +793,7 @@ const Profile = () => {
                         </Box>
                       </Grid>
 
-                      <Grid item xs={6} sm={6} md={3}>
+                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
                         <Box
                           sx={{
                             p: {
@@ -895,7 +855,7 @@ const Profile = () => {
                         </Box>
                       </Grid>
 
-                      <Grid item xs={6} sm={6} md={3}>
+                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
                         <Box
                           sx={{
                             p: {
@@ -957,7 +917,7 @@ const Profile = () => {
                         </Box>
                       </Grid>
 
-                      <Grid item xs={6} sm={6} md={3}>
+                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
                         <Box
                           sx={{
                             p: {
@@ -1043,8 +1003,8 @@ const Profile = () => {
                     }}
                   >
                     <Typography
-                      variant="h5"
-                      component="h3"
+                      variant='h5'
+                      component='h3'
                       sx={{
                         fontWeight: 700,
                         color: 'primary.dark',
@@ -1103,8 +1063,8 @@ const Profile = () => {
                             }}
                           />
                           <Typography
-                            variant="body2"
-                            color="text.secondary"
+                            variant='body2'
+                            color='text.secondary'
                             sx={{
                               fontSize: {
                                 xs: isMobile ? '0.7rem' : '0.75rem',
@@ -1172,8 +1132,8 @@ const Profile = () => {
                             }}
                           />
                           <Typography
-                            variant="body2"
-                            color="text.secondary"
+                            variant='body2'
+                            color='text.secondary'
                             sx={{
                               fontSize: {
                                 xs: isMobile ? '0.7rem' : '0.75rem',
@@ -1241,8 +1201,8 @@ const Profile = () => {
                             }}
                           />
                           <Typography
-                            variant="body2"
-                            color="text.secondary"
+                            variant='body2'
+                            color='text.secondary'
                             sx={{
                               fontSize: {
                                 xs: isMobile ? '0.7rem' : '0.75rem',
@@ -1341,7 +1301,7 @@ const Profile = () => {
                       />
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography
-                          variant="h5"
+                          variant='h5'
                           sx={{
                             fontWeight: 700,
                             color: 'primary.dark',
@@ -1356,8 +1316,8 @@ const Profile = () => {
                           🏠 Addresses
                         </Typography>
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant='body2'
+                          color='text.secondary'
                           sx={{
                             fontSize: {
                               xs: isMobile ? '0.7rem' : '0.75rem',
@@ -1374,7 +1334,7 @@ const Profile = () => {
 
                     {addresses && addresses.length > 0 ? (
                       <Stack spacing={2} sx={{ mb: 3 }}>
-                        {addresses.slice(0, 3).map((address) => {
+                        {addresses.slice(0, 3).map(address => {
                           if (!address || !address._id) return null;
                           return (
                             <Box
@@ -1397,7 +1357,7 @@ const Profile = () => {
                               }}
                             >
                               <Typography
-                                variant="body2"
+                                variant='body2'
                                 sx={{
                                   fontWeight: 600,
                                   color: 'text.primary',
@@ -1416,8 +1376,8 @@ const Profile = () => {
                                   `, ${address.addressLine2}`}
                               </Typography>
                               <Typography
-                                variant="caption"
-                                color="text.secondary"
+                                variant='caption'
+                                color='text.secondary'
                                 sx={{
                                   fontSize: {
                                     xs: isMobile ? '0.6rem' : '0.65rem',
@@ -1438,7 +1398,7 @@ const Profile = () => {
                         })}
                         {addresses.length > 3 && (
                           <Typography
-                            variant="body2"
+                            variant='body2'
                             sx={{
                               textAlign: 'center',
                               color: 'text.secondary',
@@ -1473,7 +1433,7 @@ const Profile = () => {
                           }}
                         />
                         <Typography
-                          variant="body2"
+                          variant='body2'
                           sx={{
                             mb: 2,
                             fontSize: {
@@ -1488,10 +1448,10 @@ const Profile = () => {
                     )}
 
                     <Button
-                      variant="contained"
+                      variant='contained'
                       fullWidth
                       component={Link}
-                      to="/addresses"
+                      to='/addresses'
                       startIcon={<AddIcon />}
                       sx={{
                         py: {
@@ -1559,7 +1519,7 @@ const Profile = () => {
                         }}
                       />
                       <Typography
-                        variant="h5"
+                        variant='h5'
                         sx={{
                           fontWeight: 700,
                           color: 'primary.dark',
@@ -1594,8 +1554,8 @@ const Profile = () => {
                         }}
                       >
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant='body2'
+                          color='text.secondary'
                           sx={{
                             fontSize: {
                               xs: isMobile ? '0.7rem' : '0.75rem',
@@ -1608,8 +1568,8 @@ const Profile = () => {
                           Member Status
                         </Typography>
                         <Chip
-                          label="Active"
-                          color="success"
+                          label='Active'
+                          color='success'
                           size={isMobile ? 'small' : 'small'}
                           sx={{ fontWeight: 600, flexShrink: 0 }}
                         />
@@ -1633,8 +1593,8 @@ const Profile = () => {
                         }}
                       >
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant='body2'
+                          color='text.secondary'
                           sx={{
                             fontSize: {
                               xs: isMobile ? '0.7rem' : '0.75rem',
@@ -1647,7 +1607,7 @@ const Profile = () => {
                           Last Login
                         </Typography>
                         <Typography
-                          variant="body2"
+                          variant='body2'
                           sx={{
                             fontWeight: 500,
                             fontSize: {
@@ -1687,8 +1647,8 @@ const Profile = () => {
                     }}
                   >
                     <Typography
-                      variant="h5"
-                      component="h3"
+                      variant='h5'
+                      component='h3'
                       sx={{
                         fontWeight: 700,
                         color: 'primary.dark',
@@ -1710,10 +1670,10 @@ const Profile = () => {
 
                     <Stack spacing={2} sx={{ width: '100%' }}>
                       <Button
-                        variant="outlined"
+                        variant='outlined'
                         fullWidth
                         component={Link}
-                        to="/cart"
+                        to='/cart'
                         startIcon={<CartIcon />}
                         sx={{
                           py: {
@@ -1735,10 +1695,10 @@ const Profile = () => {
                         View Cart
                       </Button>
                       <Button
-                        variant="outlined"
+                        variant='outlined'
                         fullWidth
                         component={Link}
-                        to="/orders"
+                        to='/orders'
                         startIcon={<OrderIcon />}
                         sx={{
                           py: {
@@ -1784,49 +1744,16 @@ const Profile = () => {
         <ChangePasswordDialog
           open={isPasswordDialogOpen}
           onClose={() => setIsPasswordDialogOpen(false)}
-          onSuccess={(message) => {
-            try {
-              setSnackbar({
-                open: true,
-                message: message || 'Password changed successfully!',
-                severity: 'success',
-              });
-            } catch (error) {
-              console.error('Error handling password change success:', error);
-              setSnackbar({
-                open: true,
-                message: 'Password changed successfully!',
-                severity: 'success',
-              });
-            }
+          onSuccess={message => {
+            showSuccess(message || 'Password changed successfully!');
           }}
-          onError={(message) => {
-            try {
-              setSnackbar({
-                open: true,
-                message:
-                  message || 'Failed to change password. Please try again.',
-                severity: 'error',
-              });
-            } catch (error) {
-              console.error('Error handling password change error:', error);
-              setSnackbar({
-                open: true,
-                message: 'Failed to change password. Please try again.',
-                severity: 'error',
-              });
-            }
+          onError={message => {
+            showError(
+              message || 'Failed to change password. Please try again.'
+            );
           }}
         />
       )}
-
-      {/* Theme Snackbar */}
-      <ThemeSnackbar
-        open={snackbar.open}
-        message={snackbar.message}
-        severity={snackbar.severity}
-        onClose={handleCloseSnackbar}
-      />
     </Container>
   );
 };

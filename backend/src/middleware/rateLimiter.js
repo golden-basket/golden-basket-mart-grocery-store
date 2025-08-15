@@ -9,7 +9,7 @@ try {
   redisClient = redis.createClient({
     url: process.env.REDIS_URL || 'redis://localhost:6379',
   });
-  redisClient.connect().catch((err) => {
+  redisClient.connect().catch(err => {
     logger.warn(
       'Redis connection failed, using memory store for rate limiting:',
       err.message
@@ -204,7 +204,7 @@ const dynamicLimiter = (defaultLimit = 100, adminLimit = 200) => {
   return rateLimit({
     store: createRedisStore(),
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: (req) => {
+    max: req => {
       // Higher limit for admin users
       if (req.user && req.user.role === 'admin') {
         return adminLimit;
@@ -243,7 +243,7 @@ const whitelistMiddleware = (req, res, next) => {
 };
 
 // Rate limiter that skips trusted IPs
-const createTrustedLimiter = (limiter) => {
+const createTrustedLimiter = limiter => {
   return (req, res, next) => {
     if (req.isTrustedIP) {
       return next();

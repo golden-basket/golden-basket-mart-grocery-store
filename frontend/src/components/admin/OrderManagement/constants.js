@@ -219,7 +219,8 @@ export const BOX_SHADOWS = {
 export const GRADIENTS = {
   primary: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
   primaryHover: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
-  cream: 'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+  cream:
+    'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
   creamLight: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
   creamMedium: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
   dialogHeader: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',

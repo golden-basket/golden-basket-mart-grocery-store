@@ -30,19 +30,19 @@ const orderSchema = new mongoose.Schema(
       enum: ['card', 'paypal', 'upi', 'cod', 'net_banking'],
       default: 'cod',
     },
-    invoice: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice'},
+    invoice: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
     tracking: {
       number: { type: String },
-      url: { type: String }
+      url: { type: String },
     },
     transactionId: { type: String },
     adminNotes: [
       {
         note: { type: String, required: true },
         timestamp: { type: Date, default: Date.now },
-        adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-      }
-    ]
+        adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      },
+    ],
   },
   { timestamps: true }
 );

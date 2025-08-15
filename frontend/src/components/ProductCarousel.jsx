@@ -1,14 +1,7 @@
 import PropTypes from 'prop-types';
 import { memo, useMemo, useCallback } from 'react';
 import Slider from 'react-slick';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Chip,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, Stack, Chip } from '@mui/material';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import ImageWithFallback from './ImageWithFallback';
 import 'slick-carousel/slick/slick.css';
@@ -159,7 +152,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
           fontWeight={700}
           mb={getResponsiveSpacing(1, 1.5, 2, 2.5, 3, 3.5)}
           className={getResponsiveTextClasses()}
-          align="center"
+          align='center'
           sx={{
             background:
               'linear-gradient(90deg, #a3824c 0%, #e6d897 60%, #b59961 100%)',
@@ -308,7 +301,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
         }}
       >
         <Slider {...settings}>
-          {products.map((product) => (
+          {products.map(product => (
             <Box
               key={product._id}
               sx={{
@@ -385,10 +378,10 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                     product.stock === 0
                       ? 'Out of Stock'
                       : product.stock <= 5
-                      ? `${product.stock} left`
-                      : `Stock`
+                        ? `${product.stock} left`
+                        : `Stock`
                   }
-                  size="small"
+                  size='small'
                   sx={{
                     p: getResponsiveSpacing(0.5, 0.75, 1, 1.25, 1.5, 1.75),
                     position: 'absolute',
@@ -420,8 +413,8 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                       product.stock === 0
                         ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)'
                         : product.stock <= 5
-                        ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
-                        : 'linear-gradient(135deg, #a3824c 0%, #e6d897 100%)',
+                          ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
+                          : 'linear-gradient(135deg, #a3824c 0%, #e6d897 100%)',
                     color: '#ffffff',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                     border: '1px solid rgba(255,255,255,0.2)',
@@ -472,8 +465,9 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                   }}
                 >
                   <ImageWithFallback
-                    src={product.images?.[0]}
+                    src={product.images?.[0] || product.image}
                     alt={product.name}
+                    fallbackSrc='/golden-basket-rounded.png'
                     fallbackText={product.name}
                     sx={{
                       objectFit: 'contain',
@@ -483,7 +477,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                       width: 'auto',
                       height: 'auto',
                     }}
-                    loading="lazy"
+                    loading='lazy'
                   />
                 </Box>
                 <CardContent
@@ -570,7 +564,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                       </Typography>
 
                       <Typography
-                        variant="body2"
+                        variant='body2'
                         className={getResponsiveTextClasses()}
                         sx={{
                           color: '#7d6033',
@@ -603,7 +597,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                       </Typography>
 
                       <Typography
-                        variant="body2"
+                        variant='body2'
                         className={getResponsiveTextClasses()}
                         sx={{
                           color: '#866422',

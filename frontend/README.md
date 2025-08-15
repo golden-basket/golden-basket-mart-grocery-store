@@ -5,6 +5,7 @@ A modern, responsive React frontend for the Golden Basket Mart grocery store app
 ## 🚀 Features
 
 ### Core Features
+
 - **Modern React 19.1.0** with hooks and functional components
 - **Material-UI 7.1.1** for beautiful, responsive design with custom theme
 - **Responsive Design** optimized for all device sizes including foldables and ultra-wide screens
@@ -17,6 +18,7 @@ A modern, responsive React frontend for the Golden Basket Mart grocery store app
 - **Performance Optimization** with code splitting and bundle optimization
 
 ### User Experience
+
 - **Responsive Navigation** with mobile-first design and foldable support
 - **Product Catalog** with search, filtering, and pagination
 - **Shopping Cart** with real-time updates and quantity management
@@ -27,6 +29,7 @@ A modern, responsive React frontend for the Golden Basket Mart grocery store app
 - **Responsive Design** for all screen sizes with adaptive layouts
 
 ### Performance Features
+
 - **Code Splitting** with React.lazy() and dynamic imports
 - **Bundle Optimization** with Vite and manual chunk configuration
 - **Image Optimization** and lazy loading with fallback support
@@ -111,6 +114,7 @@ frontend/
 ## 🛠️ Tech Stack
 
 ### Core Technologies
+
 - **React 19.1.0** - UI library with latest features and hooks
 - **Material-UI 7.1.1** - Component library and design system
 - **React Router 7.6.2** - Client-side routing with HashRouter
@@ -118,6 +122,7 @@ frontend/
 - **Vite 6.3.5** - Fast build tool and development server
 
 ### UI & Styling
+
 - **Material-UI Icons 7.1.1** - Icon library
 - **Emotion 11.14.0** - CSS-in-JS styling
 - **Responsive Design** - Mobile-first approach with foldable support
@@ -126,6 +131,7 @@ frontend/
 - **Slick Carousel 1.8.1** - Carousel styling
 
 ### Development Tools
+
 - **ESLint 9.25.0** - Code quality and consistency
 - **React Hooks** - Modern React patterns and custom hooks
 - **PropTypes** - Runtime type checking
@@ -135,6 +141,7 @@ frontend/
 - **React Intersection Observer 9.5.3** - Lazy loading utilities
 
 ### Additional Libraries
+
 - **Axios 1.9.0** - HTTP client for API calls
 - **Day.js 1.11.13** - Date manipulation
 - **Date-fns 4.1.0** - Date utility functions
@@ -150,18 +157,21 @@ frontend/
 ### Installation
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Environment Configuration**
    Create a `.env` file in the root directory:
+
    ```env
    VITE_API_BASE_URL=http://localhost:3000/api
    VITE_APP_NAME=Golden Basket Mart
    ```
 
 3. **Start development server**
+
    ```bash
    npm run dev
    ```
@@ -183,6 +193,7 @@ frontend/
 ### Core Components
 
 #### Navbar
+
 - **Responsive navigation** with mobile drawer and desktop menu
 - **User authentication status** with profile dropdown
 - **Shopping cart indicator** with badge count
@@ -191,6 +202,7 @@ frontend/
 - **Touch-friendly interactions** for mobile devices
 
 #### ProductCarousel
+
 - **Responsive product showcase** with React Slick
 - **Lazy loading** for performance optimization
 - **Touch-friendly interactions** for mobile devices
@@ -198,6 +210,7 @@ frontend/
 - **Image fallback handling** with error states
 
 #### ProtectedRoute
+
 - **Route protection** based on authentication status
 - **Role-based access control** for admin routes
 - **Redirect handling** for unauthorized access
@@ -206,24 +219,28 @@ frontend/
 ### Page Components
 
 #### Home
+
 - **Hero banner** with call-to-action and carousel
 - **Featured products** carousel with lazy loading
 - **Category-based filtering** with responsive design
 - **Responsive grid layout** for different screen sizes
 
 #### Catalogue
+
 - **Product grid** with pagination and infinite scroll
 - **Search and filtering** options with real-time updates
 - **Category navigation** with responsive design
 - **Add to cart functionality** with optimistic updates
 
 #### Cart
+
 - **Shopping cart management** with real-time updates
 - **Quantity updates** with validation
 - **Price calculations** with tax and shipping
 - **Checkout process** with multiple payment methods
 
 #### Admin
+
 - **Product management** interface with CRUD operations
 - **User management** with role-based access
 - **Order processing** with status updates
@@ -232,9 +249,11 @@ frontend/
 ## 🎯 Custom Hooks
 
 ### useAuth
+
 ```javascript
 const { user, login, logout, register, getProfile, updateProfile } = useAuth();
 ```
+
 - **Authentication state management** with localStorage persistence
 - **Login/logout functionality** with JWT token handling
 - **User registration** with form validation
@@ -242,9 +261,17 @@ const { user, login, logout, register, getProfile, updateProfile } = useAuth();
 - **Profile management** with real-time updates
 
 ### useCart
+
 ```javascript
-const { data: cart, addToCart, updateQuantity, removeFromCart, clearCart } = useCart();
+const {
+  data: cart,
+  addToCart,
+  updateQuantity,
+  removeFromCart,
+  clearCart,
+} = useCart();
 ```
+
 - **Shopping cart state** with React Query caching
 - **Cart operations** (add, update, remove, clear)
 - **Real-time cart updates** across components
@@ -252,9 +279,16 @@ const { data: cart, addToCart, updateQuantity, removeFromCart, clearCart } = use
 - **Stock validation** and error handling
 
 ### useProducts
+
 ```javascript
-const { data: products, isLoading, error, refetch } = useProducts(page, limit, filters);
+const {
+  data: products,
+  isLoading,
+  error,
+  refetch,
+} = useProducts(page, limit, filters);
 ```
+
 - **Product data fetching** with pagination support
 - **Search and filtering** with debounced queries
 - **Caching** with React Query for performance
@@ -262,19 +296,21 @@ const { data: products, isLoading, error, refetch } = useProducts(page, limit, f
 - **Infinite scroll** support for large catalogs
 
 ### useFoldableDisplay
+
 ```javascript
-const { 
-  isMobile, 
-  isTablet, 
-  isFoldable, 
-  isUltraWide, 
-  isExtraSmall, 
+const {
+  isMobile,
+  isTablet,
+  isFoldable,
+  isUltraWide,
+  isExtraSmall,
   isSmall,
   getFoldableClasses,
   getResponsiveButtonSize,
-  getResponsiveTextClasses
+  getResponsiveTextClasses,
 } = useFoldableDisplay();
 ```
+
 - **Responsive breakpoint detection** for all device types
 - **Device-specific utilities** for adaptive layouts
 - **Responsive class generation** for CSS-in-JS
@@ -282,15 +318,12 @@ const {
 - **Foldable device support** with multi-pane layouts
 
 ### useAdmin
+
 ```javascript
-const { 
-  isAdmin, 
-  adminStats, 
-  manageProducts, 
-  manageUsers, 
-  manageOrders 
-} = useAdmin();
+const { isAdmin, adminStats, manageProducts, manageUsers, manageOrders } =
+  useAdmin();
 ```
+
 - **Admin permission checking** with role-based access
 - **Admin dashboard statistics** with real-time data
 - **Product management** with CRUD operations
@@ -300,6 +333,7 @@ const {
 ## 🌐 API Integration
 
 ### API Service
+
 ```javascript
 import ApiService from '../services/api';
 
@@ -319,17 +353,19 @@ const orders = await ApiService.getOrders();
 ```
 
 ### Authentication
+
 - **JWT token management** with automatic refresh
 - **Protected API calls** with authorization headers
 - **Error handling** for unauthorized requests
 - **Token expiration** handling with automatic logout
 
 ### Error Handling
+
 ```javascript
 // Global error handling with Axios interceptors
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401) {
       // Handle token expiration
       localStorage.removeItem('token');
@@ -343,18 +379,19 @@ apiClient.interceptors.response.use(
 ## 🎨 Theming & Styling
 
 ### Material-UI Theme
+
 ```javascript
 const theme = createTheme({
   palette: {
     primary: { main: '#a3824c', light: '#e6d897', dark: '#866422' },
     secondary: { main: '#388e3c', light: '#4caf50', dark: '#1b5e20' },
     background: { default: '#f7fbe8', paper: '#fffbe6' },
-    text: { primary: '#2e3a1b', secondary: '#7d6033' }
+    text: { primary: '#2e3a1b', secondary: '#7d6033' },
   },
   typography: {
     fontFamily: 'Poppins, Roboto, sans-serif',
     h1: { fontWeight: 700, color: '#2e3a1b' },
-    h2: { fontWeight: 600, color: '#2e3a1b' }
+    h2: { fontWeight: 600, color: '#2e3a1b' },
   },
   components: {
     MuiPaper: {
@@ -362,9 +399,9 @@ const theme = createTheme({
         root: {
           backgroundColor: '#fffbe6',
           boxShadow: '0 6px 24px rgba(163, 130, 76, 0.12)',
-          borderRadius: 12
-        }
-      }
+          borderRadius: 12,
+        },
+      },
     },
     MuiButton: {
       styleOverrides: {
@@ -376,16 +413,17 @@ const theme = createTheme({
           transition: 'all 0.3s ease',
           '&:hover': {
             transform: 'translateY(-2px)',
-            boxShadow: '0 4px 16px rgba(163, 130, 76, 0.3)'
-          }
-        }
-      }
-    }
-  }
+            boxShadow: '0 4px 16px rgba(163, 130, 76, 0.3)',
+          },
+        },
+      },
+    },
+  },
 });
 ```
 
 ### CSS Variables
+
 ```css
 :root {
   --color-primary: #a3824c;
@@ -401,6 +439,7 @@ const theme = createTheme({
 ```
 
 ### Responsive Design
+
 - **Mobile-first approach** with progressive enhancement
 - **Breakpoint-based layouts** using Material-UI breakpoints
 - **Flexible grid systems** with responsive containers
@@ -410,6 +449,7 @@ const theme = createTheme({
 ## 📱 Responsive Features
 
 ### Device Optimization
+
 - **Mobile (320px+)**: Touch-optimized interface with mobile drawer
 - **Tablet (768px+)**: Adaptive layouts with enhanced navigation
 - **Desktop (1024px+)**: Full-featured experience with desktop menu
@@ -418,24 +458,26 @@ const theme = createTheme({
 - **Extra small (320px-480px)**: Compact layouts with essential features
 
 ### Breakpoint System
+
 ```javascript
 const breakpoints = {
-  xs: 0,      // Extra small devices (phones)
-  sm: 600,    // Small devices (tablets)
-  md: 960,    // Medium devices (small laptops)
-  lg: 1280,   // Large devices (desktops)
-  xl: 1920    // Extra large devices (ultra-wide screens)
+  xs: 0, // Extra small devices (phones)
+  sm: 600, // Small devices (tablets)
+  md: 960, // Medium devices (small laptops)
+  lg: 1280, // Large devices (desktops)
+  xl: 1920, // Extra large devices (ultra-wide screens)
 };
 ```
 
 ### Responsive Utilities
+
 ```javascript
 // Responsive text classes
 const getResponsiveTextClasses = () => {
   return {
     xs: 'text-xs sm:text-sm md:text-base lg:text-lg',
     sm: 'text-sm sm:text-base md:text-lg lg:text-xl',
-    md: 'text-base sm:text-lg md:text-xl lg:text-2xl'
+    md: 'text-base sm:text-lg md:text-xl lg:text-2xl',
   };
 };
 
@@ -448,6 +490,7 @@ const getResponsiveButtonSize = () => {
 ## 🚀 Performance Optimization
 
 ### Code Splitting
+
 ```javascript
 // Lazy load components for better performance
 const Catalogue = lazy(() => import('./pages/Catalogue'));
@@ -457,6 +500,7 @@ const OrderCheckout = lazy(() => import('./pages/OrderCheckout'));
 ```
 
 ### Bundle Optimization
+
 ```javascript
 // Vite configuration with manual chunk splitting
 export default defineConfig({
@@ -468,15 +512,16 @@ export default defineConfig({
           mui: ['@mui/material', '@mui/icons-material'],
           router: ['react-router-dom'],
           query: ['@tanstack/react-query'],
-          carousel: ['react-slick', 'slick-carousel']
-        }
-      }
-    }
-  }
+          carousel: ['react-slick', 'slick-carousel'],
+        },
+      },
+    },
+  },
 });
 ```
 
 ### Image Optimization
+
 - **Lazy loading** with Intersection Observer
 - **Responsive images** for different screen densities
 - **WebP format support** with fallbacks
@@ -484,6 +529,7 @@ export default defineConfig({
 - **Error fallback handling** with placeholder images
 
 ### Caching Strategy
+
 ```javascript
 // React Query configuration for optimal caching
 const queryClient = new QueryClient({
@@ -492,15 +538,16 @@ const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000, // 5 minutes
       cacheTime: 10 * 60 * 1000, // 10 minutes
       retry: 3,
-      refetchOnWindowFocus: false
-    }
-  }
+      refetchOnWindowFocus: false,
+    },
+  },
 });
 ```
 
 ## 🔐 Authentication Flow
 
 ### Login Process
+
 1. **User enters credentials** with form validation
 2. **API authentication call** with error handling
 3. **JWT token storage** in localStorage
@@ -509,9 +556,10 @@ const queryClient = new QueryClient({
 6. **Token refresh handling** for expired tokens
 
 ### Protected Routes
+
 ```javascript
 <Route
-  path="/admin"
+  path='/admin'
   element={
     <ProtectedRoute adminOnly={true}>
       <Admin />
@@ -521,6 +569,7 @@ const queryClient = new QueryClient({
 ```
 
 ### Authentication Context
+
 ```javascript
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -565,6 +614,7 @@ const AuthProvider = ({ children }) => {
 ## 🧪 Error Handling
 
 ### Error Boundaries
+
 ```javascript
 <ErrorBoundary fallback={<ErrorFallback />}>
   <Component />
@@ -572,28 +622,41 @@ const AuthProvider = ({ children }) => {
 ```
 
 ### API Error Handling
+
 - **Network error handling** with retry mechanisms
 - **Validation error display** with user-friendly messages
 - **Authentication error handling** with automatic logout
 - **Server error handling** with fallback UI
 
 ### Form Validation
+
 ```javascript
 // React Hook Form with validation
-const { register, handleSubmit, formState: { errors } } = useForm({
-  resolver: yupResolver(validationSchema)
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm({
+  resolver: yupResolver(validationSchema),
 });
 
 // Custom validation messages
 const validationSchema = yup.object({
-  email: yup.string().email('Invalid email format').required('Email is required'),
-  password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required')
+  email: yup
+    .string()
+    .email('Invalid email format')
+    .required('Email is required'),
+  password: yup
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('Password is required'),
 });
 ```
 
 ## 📦 Build & Deployment
 
 ### Vite Configuration
+
 ```javascript
 export default defineConfig({
   plugins: [react()],
@@ -607,20 +670,21 @@ export default defineConfig({
           mui: ['@mui/material', '@mui/icons-material'],
           router: ['react-router-dom'],
           query: ['@tanstack/react-query'],
-          carousel: ['react-slick', 'slick-carousel']
-        }
-      }
+          carousel: ['react-slick', 'slick-carousel'],
+        },
+      },
     },
     chunkSizeWarningLimit: 1000,
-    sourcemap: false
+    sourcemap: false,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@mui/material', '@mui/icons-material']
-  }
+    include: ['react', 'react-dom', '@mui/material', '@mui/icons-material'],
+  },
 });
 ```
 
 ### Production Build
+
 1. **Run build command**: `npm run build`
 2. **Deploy dist folder** to hosting service
 3. **Configure environment variables** for production API endpoints
@@ -628,6 +692,7 @@ export default defineConfig({
 5. **Configure HTTPS** and security headers
 
 ### Environment Variables
+
 ```env
 # Development
 VITE_API_BASE_URL=http://localhost:3000/api
@@ -641,6 +706,7 @@ VITE_APP_NAME=Golden Basket Mart
 ## 🔧 Configuration
 
 ### Build Configuration
+
 - **ES2015 target** for broad browser compatibility
 - **Terser minification** for optimized bundle size
 - **Manual chunk splitting** for better caching
@@ -648,6 +714,7 @@ VITE_APP_NAME=Golden Basket Mart
 - **Dependency optimization** with Vite
 
 ### Development Configuration
+
 - **Hot module replacement** for fast development
 - **ESLint integration** for code quality
 - **Error overlay** for debugging
@@ -656,12 +723,14 @@ VITE_APP_NAME=Golden Basket Mart
 ## 📊 Monitoring & Analytics
 
 ### Performance Monitoring
+
 - **Component render times** with React DevTools
 - **Bundle size analysis** with Vite build output
 - **Loading performance** with network tab
 - **User interaction metrics** with custom tracking
 
 ### Error Tracking
+
 - **JavaScript error logging** with error boundaries
 - **API error monitoring** with Axios interceptors
 - **User experience metrics** with performance API
@@ -670,6 +739,7 @@ VITE_APP_NAME=Golden Basket Mart
 ## 🚀 Future Enhancements
 
 ### Planned Features
+
 - **PWA Support** - Offline functionality and app-like experience
 - **Real-time Updates** - WebSocket integration for live updates
 - **Advanced Search** - Elasticsearch integration with autocomplete
@@ -682,6 +752,7 @@ VITE_APP_NAME=Golden Basket Mart
 - **Product Reviews** - User ratings and comments system
 
 ### Performance Improvements
+
 - **Service Workers** - Advanced caching strategies for offline support
 - **Image Optimization** - WebP and AVIF support with responsive images
 - **Bundle Analysis** - Performance monitoring with webpack-bundle-analyzer
@@ -690,6 +761,7 @@ VITE_APP_NAME=Golden Basket Mart
 - **Database Optimization** - Advanced indexing strategies for search
 
 ### User Experience Enhancements
+
 - **Voice Search** - Speech recognition for hands-free shopping
 - **AR Product Preview** - Augmented reality for product visualization
 - **Smart Recommendations** - AI-powered product suggestions
@@ -700,6 +772,7 @@ VITE_APP_NAME=Golden Basket Mart
 ## 📞 Support
 
 For frontend-specific issues and questions:
+
 1. Check the browser console for JavaScript errors
 2. Review the component documentation and props
 3. Check Material-UI documentation for component usage
@@ -708,6 +781,7 @@ For frontend-specific issues and questions:
 6. Open an issue in the GitHub repository
 
 ### Common Issues
+
 - **Build errors**: Check Node.js version and dependencies
 - **Styling issues**: Verify Material-UI theme configuration
 - **Responsive problems**: Test on different screen sizes
@@ -717,6 +791,7 @@ For frontend-specific issues and questions:
 ## 🤝 Contributing
 
 ### Development Guidelines
+
 1. Follow React best practices and hooks patterns
 2. Use functional components with hooks instead of class components
 3. Implement proper error boundaries for error handling
@@ -727,6 +802,7 @@ For frontend-specific issues and questions:
 8. Test components on multiple devices and screen sizes
 
 ### Code Quality
+
 - **ESLint configuration** for consistent code style
 - **PropTypes validation** for runtime type checking
 - **Error boundary implementation** for graceful error handling
@@ -735,6 +811,7 @@ For frontend-specific issues and questions:
 - **Accessibility compliance** with ARIA standards
 
 ### Testing Strategy
+
 - **Component testing** with React Testing Library
 - **Integration testing** for user workflows
 - **Responsive testing** on different screen sizes
@@ -746,4 +823,4 @@ For frontend-specific issues and questions:
 
 **Golden Basket Mart Frontend** - Delivering exceptional user experiences! 🎨✨
 
-*Built with modern React patterns, responsive design, and performance optimization for the best user experience across all devices.*
+_Built with modern React patterns, responsive design, and performance optimization for the best user experience across all devices._

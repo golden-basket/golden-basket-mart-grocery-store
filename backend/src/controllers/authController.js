@@ -77,7 +77,7 @@ const changePasswordSchema = Joi.object({
 });
 
 // Helper function to get client IP
-const getClientIP = (req) => {
+const getClientIP = req => {
   return (
     req.ip ||
     req.connection.remoteAddress ||
@@ -88,7 +88,7 @@ const getClientIP = (req) => {
 };
 
 // Helper function to get user agent
-const getUserAgent = (req) => {
+const getUserAgent = req => {
   return req.get('User-Agent') || 'unknown';
 };
 
@@ -480,11 +480,9 @@ exports.changePassword = async (req, res) => {
     // Check if new password is different from current
     const isNewPasswordSame = await user.comparePassword(newPassword);
     if (isNewPasswordSame) {
-      return res
-        .status(400)
-        .json({
-          error: 'New password must be different from current password.',
-        });
+      return res.status(400).json({
+        error: 'New password must be different from current password.',
+      });
     }
 
     // Update password
@@ -666,7 +664,7 @@ exports.listUsers = async (req, res) => {
 
     const fetchedUsers = await User.find({}, '-password');
     const users = fetchedUsers.filter(
-      (user) => user._id.toString() !== req.user.userId
+      user => user._id.toString() !== req.user.userId
     );
 
     res.json(users);

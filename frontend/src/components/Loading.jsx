@@ -1,6 +1,11 @@
-import { Box, Typography, keyframes } from '@mui/material';
+import {
+  Box,
+  keyframes,
+  LinearProgress,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import { COLORS, GRADIENTS, SHADOWS } from '../styles/theme';
 import './Loading.css';
 
@@ -15,11 +20,12 @@ const bounce = keyframes`
   50% { transform: translateY(-6px); }
 `;
 
-const wave = keyframes`
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
-  100% { transform: translateX(100%); }
-`;
+// Not in use
+// const wave = keyframes`
+//   0% { transform: translateX(-100%); }
+//   50% { transform: translateX(100%); }
+//   100% { transform: translateX(100%); }
+// `;
 
 const pulse = keyframes`
   0%, 40%, 100% {
@@ -37,38 +43,43 @@ const fadeIn = keyframes`
   100% { opacity: 1; transform: translateY(0); }
 `;
 
-const Loading = ({ 
-  message = "Loading your golden basket...", 
-  size = "medium",
-  variant = "default",
+const Loading = ({
+  // eslint-disable-next-line
+  message = '', // Not in use
+  size = 'medium',
+  variant = 'default',
   showDots = true,
-  showIcon = true 
+  showIcon = true,
 }) => {
-  const { isFoldable, getFoldableClasses, getResponsiveValue } = useFoldableDisplay();
-
-  // Size configurations
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  // Simplified size configurations
   const sizeConfigs = {
     small: {
-      containerHeight: '30vh',
-      iconSize: { xs: 16, sm: 20, md: 24, lg: 28 },
-      iconPadding: { xs: 1, sm: 1.5, md: 2, lg: 2.5 },
-      gap: { xs: 1.5, sm: 2, md: 2.5, lg: 3 },
-      fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem', lg: '1.25rem' }
+      containerHeight: '15vh',
+      iconSize: 16,
+      iconPadding: 1,
+      gap: 1,
+      fontSize: '0.75rem',
+      dotSize: 8,
     },
     medium: {
-      containerHeight: '50vh',
-      iconSize: { xs: 20, sm: 26, md: 32, lg: 38 },
-      iconPadding: { xs: 1.5, sm: 2, md: 2.5, lg: 3 },
-      gap: { xs: 2, sm: 2.5, md: 3, lg: 3.5 },
-      fontSize: { xs: '1rem', sm: '1.125rem', md: '1.25rem', lg: '1.5rem' }
+      containerHeight: '40vh',
+      iconSize: 28,
+      iconPadding: 2,
+      gap: 2,
+      fontSize: '1.125rem',
+      dotSize: 12,
     },
     large: {
-      containerHeight: '70vh',
-      iconSize: { xs: 24, sm: 32, md: 40, lg: 48 },
-      iconPadding: { xs: 2, sm: 2.5, md: 3, lg: 3.5 },
-      gap: { xs: 2.5, sm: 3, md: 3.5, lg: 4 },
-      fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.5rem', lg: '1.75rem' }
-    }
+      containerHeight: '60vh',
+      iconSize: 40,
+      iconPadding: 3,
+      gap: 3,
+      fontSize: '1.5rem',
+      dotSize: 16,
+    },
   };
 
   const config = sizeConfigs[size];
@@ -83,8 +94,8 @@ const Loading = ({
         COLORS.primary.main,
         COLORS.primary.dark,
         COLORS.secondary.main,
-        COLORS.secondary.dark
-      ]
+        COLORS.secondary.dark,
+      ],
     },
     subtle: {
       background: 'rgba(163, 130, 76, 0.02)',
@@ -94,29 +105,29 @@ const Loading = ({
         COLORS.primary.main,
         COLORS.primary.dark,
         COLORS.primary.light,
-        COLORS.primary.main
-      ]
+        COLORS.primary.main,
+      ],
     },
     vibrant: {
       background: 'rgba(163, 130, 76, 0.1)',
-      iconGradient: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #866422 100%)',
+      iconGradient:
+        'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #866422 100%)',
       dotColors: [
         COLORS.warning.light,
         COLORS.primary.main,
         COLORS.success.main,
         COLORS.info.main,
-        COLORS.secondary.main
-      ]
-    }
+        COLORS.secondary.main,
+      ],
+    },
   };
 
   const variantConfig = variantConfigs[variant];
 
   return (
     <Box
-      className={getFoldableClasses()}
-      role="status"
-      aria-live="polite"
+      role='status'
+      aria-live='polite'
       tabIndex={0}
       sx={{
         height: config.containerHeight,
@@ -127,31 +138,23 @@ const Loading = ({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 9999,
-        gap: getResponsiveValue(
-          config.gap.xs,
-          config.gap.sm,
-          config.gap.md,
-          config.gap.lg,
-          config.gap.lg,
-          config.gap.lg,
-          isFoldable ? config.gap.sm : undefined
-        ),
+        gap: config.gap,
         background: variantConfig.background,
         transition: 'all 0.3s ease',
         animation: `${fadeIn} 0.6s ease-out`,
         position: 'relative',
         overflow: 'hidden',
-        
-        // Enhanced responsive design
-        px: { xs: 2, sm: 3, md: 4, lg: 5 },
-        py: { xs: 3, sm: 4, md: 5, lg: 6 },
-        
+
+        // Simplified responsive design
+        px: { xs: 1, sm: 1.5, md: 2 },
+        py: { xs: 1, sm: 1.5, md: 2 },
+
         // Improved accessibility
         '&:focus': {
           outline: '2px solid var(--color-primary)',
           outlineOffset: '4px',
         },
-        
+
         // Performance optimizations
         willChange: 'transform, opacity',
         backfaceVisibility: 'hidden',
@@ -177,23 +180,8 @@ const Loading = ({
       {showIcon && (
         <Box
           sx={{
-            mb: getResponsiveValue(
-              config.gap.xs,
-              config.gap.sm,
-              config.gap.md,
-              config.gap.lg,
-              config.gap.lg,
-              config.gap.lg,
-              isFoldable ? config.gap.sm : undefined
-            ),
-            p: isFoldable
-              ? config.iconPadding.sm
-              : {
-                  xs: config.iconPadding.xs,
-                  sm: config.iconPadding.sm,
-                  md: config.iconPadding.md,
-                  lg: config.iconPadding.lg,
-                },
+            mb: config.gap * 2.5,
+            p: config.iconPadding,
             background: variantConfig.iconGradient,
             borderRadius: '50%',
             position: 'relative',
@@ -235,14 +223,7 @@ const Loading = ({
         >
           <ShoppingCartIcon
             sx={{
-              fontSize: isFoldable
-                ? config.iconSize.sm
-                : {
-                    xs: config.iconSize.xs,
-                    sm: config.iconSize.sm,
-                    md: config.iconSize.md,
-                    lg: config.iconSize.lg,
-                  },
+              fontSize: config.iconSize,
               color: COLORS.primary.contrastText,
               filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
               animation: `${bounce} 2s ease-in-out infinite`,
@@ -253,9 +234,9 @@ const Loading = ({
       )}
 
       {/* Enhanced Loading Message */}
-      <Typography 
-        variant="h6" 
-        sx={{ 
+      {/* <Typography
+        variant="h6"
+        sx={{
           color: COLORS.text.primary,
           fontSize: config.fontSize,
           fontWeight: 600,
@@ -263,7 +244,7 @@ const Loading = ({
           animation: `${fadeIn} 0.8s ease-out 0.4s both`,
           position: 'relative',
           overflow: 'hidden',
-          
+
           '&::after': {
             content: '""',
             position: 'absolute',
@@ -277,8 +258,8 @@ const Loading = ({
           },
         }}
       >
-        {message}
-      </Typography>
+        {message || 'Loading...'}
+      </Typography> */}
 
       {/* Enhanced Animated Dots */}
       {showDots && (
@@ -287,28 +268,32 @@ const Loading = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: { xs: 1, sm: 1.5, md: 2 },
-            mb: 2,
+            gap: 0.5,
+            mb: 0,
             animation: `${fadeIn} 0.8s ease-out 0.6s both`,
           }}
         >
-                     {[0, 1, 2, 3, 4].map((index) => (
-             <Box
-               key={index}
-               role="presentation"
-               aria-hidden="true"
-               sx={{
-                width: { xs: 10, sm: 12, md: 14, lg: 16 },
-                height: { xs: 10, sm: 12, md: 14, lg: 16 },
+          {[0, 1, 2, 3, 4].map(index => (
+            <Box
+              key={index}
+              role='presentation'
+              aria-hidden='true'
+              sx={{
+                width: config.dotSize,
+                height: config.dotSize,
                 borderRadius: '50%',
                 background: `linear-gradient(135deg, 
-                  ${variantConfig.dotColors[index]} 0%, 
-                  ${variantConfig.dotColors[(index + 1) % variantConfig.dotColors.length]} 100%)`,
+                    ${variantConfig.dotColors[index]} 0%, 
+                    ${
+                      variantConfig.dotColors[
+                        (index + 1) % variantConfig.dotColors.length
+                      ]
+                    } 100%)`,
                 animation: `${pulse} 1.5s ease-in-out infinite`,
-                animationDelay: `${index * 0.15}s`,
+                animationDelay: `${index * 0.1}s`,
                 boxShadow: SHADOWS.button,
                 transition: 'all 0.3s ease',
-                
+
                 '&:hover': {
                   transform: 'scale(1.2)',
                   boxShadow: SHADOWS.buttonHover,
@@ -320,30 +305,17 @@ const Loading = ({
       )}
 
       {/* Optional Progress Indicator */}
-      <Box
-        role="progressbar"
-        aria-label="Loading progress"
+      <LinearProgress
         sx={{
           width: '100%',
-          maxWidth: 200,
-          height: 4,
-          background: 'rgba(163, 130, 76, 0.1)',
-          borderRadius: 2,
+          maxWidth: isMobile ? '20%' : isTablet ? '13%' : '8%',
+          height: 3,
+          borderRadius: 1,
           overflow: 'hidden',
           animation: `${fadeIn} 0.8s ease-out 0.8s both`,
+          mt: 0.5,
         }}
-      >
-        <Box
-          sx={{
-            width: '30%',
-            height: '100%',
-            background: GRADIENTS.primary,
-            borderRadius: 2,
-            animation: `${wave} 2s ease-in-out infinite`,
-            boxShadow: '0 0 8px rgba(163, 130, 76, 0.3)',
-          }}
-        />
-      </Box>
+      />
     </Box>
   );
 };

@@ -28,14 +28,13 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SecurityIcon from '@mui/icons-material/Security';
 import JumpingCartAvatar from './JumpingCartAvatar';
-import ThemeSnackbar from '../components/ThemeSnackbar';
 import ApiService from '../services/api';
 import { validateEmail, validatePassword } from '../utils/common';
-import { createSnackbarConfig, createSuccessConfig } from '../utils/errorHandler';
+import { useToastNotifications } from '../hooks/useToast';
 
 // Password strength indicator component
 const PasswordStrengthIndicator = ({ password }) => {
-  const getPasswordStrength = (password) => {
+  const getPasswordStrength = password => {
     if (!password) return { score: 0, label: '', color: '#e0e0e0' };
 
     let score = 0;
@@ -79,14 +78,14 @@ const PasswordStrengthIndicator = ({ password }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <SecurityIcon sx={{ fontSize: 16, color: strength.color }} />
         <Typography
-          variant="caption"
+          variant='caption'
           sx={{ color: strength.color, fontWeight: 600 }}
         >
           Password Strength: {strength.label}
         </Typography>
       </Box>
       <LinearProgress
-        variant="determinate"
+        variant='determinate'
         value={progress}
         sx={{
           height: 4,
@@ -100,7 +99,7 @@ const PasswordStrengthIndicator = ({ password }) => {
       />
       {strength.feedback && (
         <Typography
-          variant="caption"
+          variant='caption'
           sx={{ color: '#666', mt: 0.5, display: 'block' }}
         >
           Missing: {strength.feedback.join(', ')}
@@ -114,6 +113,7 @@ const Register = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { showSuccess, showError } = useToastNotifications();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -128,11 +128,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'info',
-  });
 
   // Real-time validation
   useEffect(() => {
@@ -174,16 +169,16 @@ const Register = () => {
     setErrors(newErrors);
   }, [formData, touched]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
 
     // Mark field as touched
-    setTouched((prev) => ({ ...prev, [name]: true }));
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
 
-  const handleBlur = (fieldName) => {
-    setTouched((prev) => ({ ...prev, [fieldName]: true }));
+  const handleBlur = fieldName => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
   };
 
   const validateForm = () => {
@@ -223,7 +218,7 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -242,20 +237,19 @@ const Register = () => {
         password: formData.password,
       });
 
-      // Show success message in snackbar
-      const successConfig = createSuccessConfig(
-        res.data.message || 'Registration successful! Please check your email to verify your account.'
+      // Show success message
+      showSuccess(
+        res.data.message ||
+          'Registration successful! Please check your email to verify your account.'
       );
-      setSnackbar(successConfig);
 
       // Auto-redirect after 3 seconds
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       console.error('Registration error:', err);
-      
-      // Use the error handling utility
-      const snackbarConfig = createSnackbarConfig(err, 'register');
-      setSnackbar(snackbarConfig);
+
+      // Show error toast
+      showError(err.message || 'Registration failed. Please try again.');
 
       // Clear any previous inline errors
       setErrors({});
@@ -264,14 +258,10 @@ const Register = () => {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = e => {
     if (e.key === 'Enter') {
       handleSubmit(e);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -286,7 +276,7 @@ const Register = () => {
           'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
       }}
     >
-      <Slide direction="right" in={true} timeout={400}>
+      <Slide direction='right' in={true} timeout={400}>
         <Paper
           elevation={24}
           sx={{
@@ -333,7 +323,7 @@ const Register = () => {
             </Typography>
             <Typography
               variant={isMobile ? 'body2' : 'body1'}
-              color="text.secondary"
+              color='text.secondary'
               sx={{ fontWeight: 500 }}
             >
               Create your account and start shopping fresh groceries
@@ -344,7 +334,7 @@ const Register = () => {
           {errors.submit && (
             <Fade in={true}>
               <Alert
-                severity="error"
+                severity='error'
                 sx={{
                   mb: 3,
                   borderRadius: 2,
@@ -363,7 +353,7 @@ const Register = () => {
           {success && (
             <Fade in={true}>
               <Alert
-                severity="success"
+                severity='success'
                 sx={{
                   mb: 3,
                   borderRadius: 2,
@@ -380,12 +370,12 @@ const Register = () => {
           )}
 
           {/* Registration Form */}
-          <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Box component='form' onSubmit={handleSubmit} noValidate>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item size={{ xs: 12, sm: 6 }}>
                 <TextField
-                  label="First Name"
-                  name="firstName"
+                  label='First Name'
+                  name='firstName'
                   value={formData.firstName}
                   onChange={handleChange}
                   onBlur={() => handleBlur('firstName')}
@@ -397,7 +387,7 @@ const Register = () => {
                   disabled={loading}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
+                      <InputAdornment position='start'>
                         <PersonIcon sx={{ color: '#a3824c' }} />
                       </InputAdornment>
                     ),
@@ -419,10 +409,10 @@ const Register = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item size={{ xs: 12, sm: 6 }}>
                 <TextField
-                  label="Last Name"
-                  name="lastName"
+                  label='Last Name'
+                  name='lastName'
                   value={formData.lastName}
                   onChange={handleChange}
                   onBlur={() => handleBlur('lastName')}
@@ -434,7 +424,7 @@ const Register = () => {
                   disabled={loading}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
+                      <InputAdornment position='start'>
                         <PersonIcon sx={{ color: '#a3824c' }} />
                       </InputAdornment>
                     ),
@@ -459,22 +449,22 @@ const Register = () => {
             </Grid>
 
             <TextField
-              label="Email Address"
-              name="email"
-              type="email"
+              label='Email Address'
+              name='email'
+              type='email'
               value={formData.email}
               onChange={handleChange}
               onBlur={() => handleBlur('email')}
               onKeyPress={handleKeyPress}
               fullWidth
               required
-              margin="normal"
+              margin='normal'
               error={!!errors.email}
               helperText={errors.email}
               disabled={loading}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position='start'>
                     <EmailIcon sx={{ color: '#a3824c' }} />
                   </InputAdornment>
                 ),
@@ -497,8 +487,8 @@ const Register = () => {
             />
 
             <TextField
-              label="Password"
-              name="password"
+              label='Password'
+              name='password'
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={handleChange}
@@ -506,7 +496,7 @@ const Register = () => {
               onKeyPress={handleKeyPress}
               fullWidth
               required
-              margin="normal"
+              margin='normal'
               error={!!errors.password}
               helperText={
                 errors.password ||
@@ -515,19 +505,19 @@ const Register = () => {
               disabled={loading}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position='start'>
                     <LockIcon sx={{ color: '#a3824c' }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <Tooltip
                       title={showPassword ? 'Hide password' : 'Show password'}
                       TransitionComponent={Zoom}
                     >
                       <IconButton
                         onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
+                        edge='end'
                         disabled={loading}
                         sx={{ color: '#a3824c' }}
                         aria-label={
@@ -568,8 +558,8 @@ const Register = () => {
             )}
 
             <TextField
-              label="Confirm Password"
-              name="confirmPassword"
+              label='Confirm Password'
+              name='confirmPassword'
               type={showConfirmPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={handleChange}
@@ -577,18 +567,18 @@ const Register = () => {
               onKeyPress={handleKeyPress}
               fullWidth
               required
-              margin="normal"
+              margin='normal'
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
               disabled={loading}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position='start'>
                     <LockIcon sx={{ color: '#a3824c' }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
-                  <InputAdornment position="end">
+                  <InputAdornment position='end'>
                     <Tooltip
                       title={
                         showConfirmPassword ? 'Hide password' : 'Show password'
@@ -599,7 +589,7 @@ const Register = () => {
                         onClick={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
-                        edge="end"
+                        edge='end'
                         disabled={loading}
                         sx={{ color: '#a3824c' }}
                         aria-label={
@@ -636,12 +626,12 @@ const Register = () => {
             />
 
             <Button
-              type="submit"
+              type='submit'
               fullWidth
               disabled={loading}
               startIcon={
                 loading ? (
-                  <CircularProgress size={20} color="inherit" />
+                  <CircularProgress size={20} color='inherit' />
                 ) : (
                   <PersonAddIcon />
                 )
@@ -682,16 +672,16 @@ const Register = () => {
             <Divider
               sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}
             >
-              <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
+              <Typography variant='body2' color='text.secondary' sx={{ px: 2 }}>
                 Already have an account?
               </Typography>
             </Divider>
 
             <Button
               component={Link}
-              to="/login"
+              to='/login'
               fullWidth
-              variant="outlined"
+              variant='outlined'
               disabled={loading}
               sx={{
                 py: { xs: 1.5, sm: 2 },
@@ -722,14 +712,6 @@ const Register = () => {
           </Box>
         </Paper>
       </Slide>
-
-      {/* Theme Snackbar for notifications */}
-      <ThemeSnackbar
-        open={snackbar.open}
-        message={snackbar.message}
-        severity={snackbar.severity}
-        onClose={handleCloseSnackbar}
-      />
     </Box>
   );
 };

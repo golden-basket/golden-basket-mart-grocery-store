@@ -37,7 +37,7 @@ exports.addToCart = async (req, res) => {
     let cart = await Cart.findOne({ user: req.user.userId });
     if (!cart) cart = await Cart.create({ user: req.user.userId, items: [] });
     const existing = cart.items.find(
-      (item) => item.product.toString() === productId
+      item => item.product.toString() === productId
     );
     if (existing) {
       if (product.stock < existing.quantity + quantity)
@@ -69,9 +69,7 @@ exports.updateCartItem = async (req, res) => {
       return res.status(400).json({ error: 'Not enough stock available.' });
     let cart = await Cart.findOne({ user: req.user.userId });
     if (!cart) return res.status(404).json({ error: 'Cart not found.' });
-    const item = cart.items.find(
-      (item) => item.product.toString() === productId
-    );
+    const item = cart.items.find(item => item.product.toString() === productId);
     if (!item)
       return res.status(404).json({ error: 'Item not found in cart.' });
     item.quantity = quantity;
@@ -103,7 +101,7 @@ exports.removeFromCart = async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-      (item) => item.product.toString() !== productId
+      item => item.product.toString() !== productId
     );
     await cart.save();
     // Populate product data before sending response

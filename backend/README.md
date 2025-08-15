@@ -130,7 +130,6 @@ The application uses a flexible CORS configuration:
 ### Environment-Specific Behavior
 
 - **Development (`NODE_ENV=development`)**:
-
   - Allows multiple localhost origins for development convenience
   - Includes fallback URLs for different localhost variants
   - Swagger documentation points to localhost

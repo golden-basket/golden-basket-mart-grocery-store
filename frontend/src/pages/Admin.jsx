@@ -52,87 +52,87 @@ const Admin = () => {
       fontSize: isSmallMobile
         ? '0.65rem'
         : isMobile
-        ? '0.75rem'
-        : isLargeScreen
-        ? '0.9rem'
-        : isExtraLargeScreen
-        ? '1rem'
-        : '0.85rem',
+          ? '0.75rem'
+          : isLargeScreen
+            ? '0.9rem'
+            : isExtraLargeScreen
+              ? '1rem'
+              : '0.85rem',
 
       // Padding - reduced
       px: isSmallMobile
         ? 0.5
         : isMobile
-        ? 1
-        : isLargeScreen
-        ? 2
-        : isExtraLargeScreen
-        ? 3
-        : 1.5,
+          ? 1
+          : isLargeScreen
+            ? 2
+            : isExtraLargeScreen
+              ? 3
+              : 1.5,
       py: isSmallMobile
         ? 0.25
         : isMobile
-        ? 0.5
-        : isLargeScreen
-        ? 1
-        : isExtraLargeScreen
-        ? 1.5
-        : 0.75,
+          ? 0.5
+          : isLargeScreen
+            ? 1
+            : isExtraLargeScreen
+              ? 1.5
+              : 0.75,
 
       // Min width - reduced
       minWidth: isSmallMobile
         ? '60px'
         : isMobile
-        ? '70px'
-        : isLargeScreen
-        ? '90px'
-        : isExtraLargeScreen
-        ? '100px'
-        : '80px',
+          ? '70px'
+          : isLargeScreen
+            ? '90px'
+            : isExtraLargeScreen
+              ? '100px'
+              : '80px',
 
       // Height - reduced
       height: isSmallMobile
         ? '32px'
         : isMobile
-        ? '36px'
-        : isLargeScreen
-        ? '40px'
-        : isExtraLargeScreen
-        ? '44px'
-        : '38px',
+          ? '36px'
+          : isLargeScreen
+            ? '40px'
+            : isExtraLargeScreen
+              ? '44px'
+              : '38px',
 
       // Border radius - reduced
       borderRadius: isSmallMobile
         ? '3px'
         : isMobile
-        ? '4px'
-        : isLargeScreen
-        ? '6px'
-        : isExtraLargeScreen
-        ? '8px'
-        : '5px',
+          ? '4px'
+          : isLargeScreen
+            ? '6px'
+            : isExtraLargeScreen
+              ? '8px'
+              : '5px',
 
       // Font weight - reduced
       fontWeight: isSmallMobile
         ? 500
         : isMobile
-        ? 600
-        : isLargeScreen
-        ? 600
-        : isExtraLargeScreen
-        ? 700
-        : 600,
+          ? 600
+          : isLargeScreen
+            ? 600
+            : isExtraLargeScreen
+              ? 700
+              : 600,
 
       // Letter spacing - reduced
       letterSpacing: isSmallMobile
         ? '0.3px'
         : isMobile
-        ? '0.4px'
-        : isLargeScreen
-        ? '0.5px'
-        : isExtraLargeScreen
-        ? '0.6px'
-        : '0.4px',
+          ? '0.4px'
+          : isLargeScreen
+            ? '0.5px'
+            : isExtraLargeScreen
+              ? '0.6px'
+              : '0.4px',
     }),
     [isSmallMobile, isMobile, isLargeScreen, isExtraLargeScreen]
   );
@@ -143,45 +143,45 @@ const Admin = () => {
       mb: isSmallMobile
         ? 0.5
         : isMobile
-        ? 1
-        : isLargeScreen
-        ? 2
-        : isExtraLargeScreen
-        ? 3
-        : 1.5,
+          ? 1
+          : isLargeScreen
+            ? 2
+            : isExtraLargeScreen
+              ? 3
+              : 1.5,
       '& .MuiTabs-indicator': {
         background:
           'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
         height: isSmallMobile
           ? 1.5
           : isMobile
-          ? 2
-          : isLargeScreen
-          ? 3
-          : isExtraLargeScreen
-          ? 4
-          : 2.5,
+            ? 2
+            : isLargeScreen
+              ? 3
+              : isExtraLargeScreen
+                ? 4
+                : 2.5,
         borderRadius: isSmallMobile
           ? 0.5
           : isMobile
-          ? 1
-          : isLargeScreen
-          ? 1.5
-          : isExtraLargeScreen
-          ? 2
-          : 1,
+            ? 1
+            : isLargeScreen
+              ? 1.5
+              : isExtraLargeScreen
+                ? 2
+                : 1,
         boxShadow: '0 2px 8px rgba(163,130,76,0.3)',
       },
       '& .MuiTabs-flexContainer': {
         gap: isSmallMobile
           ? 0.25
           : isMobile
-          ? 0.5
-          : isLargeScreen
-          ? 1.5
-          : isExtraLargeScreen
-          ? 2
-          : 1,
+            ? 0.5
+            : isLargeScreen
+              ? 1.5
+              : isExtraLargeScreen
+                ? 2
+                : 1,
       },
       // Responsive scroll buttons for mobile
       '& .MuiTabs-scrollButtons': {
@@ -193,41 +193,41 @@ const Admin = () => {
   );
 
   return (
-    <Container maxWidth="xl" sx={styles.containerStyles}>
+    <Container maxWidth='xl' sx={styles.containerStyles}>
       <Typography
         variant={
           isSmallMobile
             ? 'h6'
             : isMobile
-            ? 'h5'
-            : isLargeScreen
-            ? 'h4'
-            : isExtraLargeScreen
-            ? 'h3'
-            : 'h5'
+              ? 'h5'
+              : isLargeScreen
+                ? 'h4'
+                : isExtraLargeScreen
+                  ? 'h3'
+                  : 'h5'
         }
-        align="center"
+        align='center'
         gutterBottom
         sx={{
           ...styles.titleStyles,
           fontSize: isSmallMobile
             ? '1.25rem'
             : isMobile
-            ? '1.5rem'
-            : isLargeScreen
-            ? '2rem'
-            : isExtraLargeScreen
-            ? '2.5rem'
-            : '1.75rem',
+              ? '1.5rem'
+              : isLargeScreen
+                ? '2rem'
+                : isExtraLargeScreen
+                  ? '2.5rem'
+                  : '1.75rem',
           mb: isSmallMobile
             ? 1
             : isMobile
-            ? 2
-            : isLargeScreen
-            ? 4
-            : isExtraLargeScreen
-            ? 5
-            : 3,
+              ? 2
+              : isLargeScreen
+                ? 4
+                : isExtraLargeScreen
+                  ? 5
+                  : 3,
         }}
       >
         Admin Dashboard
@@ -242,7 +242,7 @@ const Admin = () => {
         sx={responsiveTabsStyles}
       >
         <Tab
-          label="Products"
+          label='Products'
           sx={{
             ...styles.tabStyles,
             ...responsiveTabStyles,
@@ -250,7 +250,7 @@ const Admin = () => {
           }}
         />
         <Tab
-          label="Categories"
+          label='Categories'
           sx={{
             ...styles.tabStyles,
             ...responsiveTabStyles,
@@ -258,7 +258,7 @@ const Admin = () => {
           }}
         />
         <Tab
-          label="Users"
+          label='Users'
           sx={{
             ...styles.tabStyles,
             ...responsiveTabStyles,
@@ -266,7 +266,7 @@ const Admin = () => {
           }}
         />
         <Tab
-          label="Orders"
+          label='Orders'
           sx={{
             ...styles.tabStyles,
             ...responsiveTabStyles,

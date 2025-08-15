@@ -26,14 +26,24 @@ export const useFoldableDisplay = () => {
   const isSmall = useMediaQuery('(min-width: 481px) and (max-width: 640px)');
   const isMedium = useMediaQuery('(min-width: 641px) and (max-width: 768px)');
   const isLarge = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
-  const isExtraLarge = useMediaQuery('(min-width: 1025px) and (max-width: 1440px)');
+  const isExtraLarge = useMediaQuery(
+    '(min-width: 1025px) and (max-width: 1440px)'
+  );
   const isUltraWideScreen = useMediaQuery('(min-width: 1441px)');
 
   // Foldable-specific media queries
-  const isFoldableDevice = useMediaQuery('(max-width: 768px) and (min-width: 280px)');
-  const isUltraWideDevice = useMediaQuery('(min-width: 769px) and (max-width: 1200px) and (min-aspect-ratio: 1.8/1)');
-  const isCompactDevice = useMediaQuery('(max-width: 768px) and (min-height: 400px) and (max-height: 800px)');
-  const isHighDPIDevice = useMediaQuery('(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)');
+  const isFoldableDevice = useMediaQuery(
+    '(max-width: 768px) and (min-width: 280px)'
+  );
+  const isUltraWideDevice = useMediaQuery(
+    '(min-width: 769px) and (max-width: 1200px) and (min-aspect-ratio: 1.8/1)'
+  );
+  const isCompactDevice = useMediaQuery(
+    '(max-width: 768px) and (min-height: 400px) and (max-height: 800px)'
+  );
+  const isHighDPIDevice = useMediaQuery(
+    '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)'
+  );
 
   useEffect(() => {
     // Detect orientation changes
@@ -58,12 +68,14 @@ export const useFoldableDisplay = () => {
       setIsUltraWide(isUltraWideDevice);
       setIsCompact(isCompactDevice);
       setIsHighDPI(isHighDPIDevice);
-      
+
       // Set initial orientation
       if (window.orientation !== undefined) {
         setOrientation(window.orientation === 0 ? 'portrait' : 'landscape');
       } else {
-        setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+        setOrientation(
+          window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
+        );
       }
 
       // Detect initial screen size
@@ -87,13 +99,13 @@ export const useFoldableDisplay = () => {
   // Get appropriate CSS classes for the current device state
   const getFoldableClasses = () => {
     const classes = [];
-    
+
     if (isFoldable) {
       classes.push('foldable-base');
-      
+
       if (orientation === 'landscape') {
         classes.push('foldable-landscape-mode');
-        
+
         // Check for ultra-wide landscape
         if (window.innerWidth / window.innerHeight > 1.5) {
           classes.push('foldable-landscape-wide');
@@ -102,47 +114,62 @@ export const useFoldableDisplay = () => {
         classes.push('foldable-portrait-mode');
       }
     }
-    
+
     if (isUltraWide) {
       classes.push('foldable-ultra-wide');
     }
-    
+
     if (isTablet) {
       classes.push('foldable-tablet');
     }
-    
+
     if (isCompact) {
       classes.push('foldable-compact');
     }
-    
+
     if (isHighDPI) {
       classes.push('foldable-high-dpi-enhanced');
     }
 
     // Add screen size classes
     classes.push(`screen-${screenSize}`);
-    
+
     return classes.join(' ');
   };
 
   // Enhanced responsive value getter with more granular control
-  const getResponsiveValue = (extraSmall, small, medium, large, extraLarge, ultraWide, foldable) => {
+  const getResponsiveValue = (
+    extraSmall,
+    small,
+    medium,
+    large,
+    extraLarge,
+    ultraWide,
+    foldable
+  ) => {
     if (isFoldable && foldable !== undefined) {
       return foldable;
     }
-    
+
     if (isExtraSmall) return extraSmall;
     if (isSmall) return small;
     if (isMedium) return medium;
     if (isLarge) return large;
     if (isExtraLarge) return extraLarge;
     if (isUltraWideScreen) return ultraWide;
-    
+
     return large; // Default fallback
   };
 
   // Get spacing values optimized for different screen sizes
-  const getResponsiveSpacing = (extraSmall, small, medium, large, extraLarge, ultraWide) => {
+  const getResponsiveSpacing = (
+    extraSmall,
+    small,
+    medium,
+    large,
+    extraLarge,
+    ultraWide
+  ) => {
     if (isExtraSmall) return extraSmall;
     if (isSmall) return small;
     if (isMedium) return medium;
@@ -153,7 +180,14 @@ export const useFoldableDisplay = () => {
   };
 
   // Get typography values optimized for different screen sizes
-  const getResponsiveTypography = (extraSmall, small, medium, large, extraLarge, ultraWide) => {
+  const getResponsiveTypography = (
+    extraSmall,
+    small,
+    medium,
+    large,
+    extraLarge,
+    ultraWide
+  ) => {
     if (isExtraSmall) return extraSmall;
     if (isSmall) return small;
     if (isMedium) return medium;
@@ -199,7 +233,8 @@ export const useFoldableDisplay = () => {
 
   // Get responsive spacing classes
   const getResponsiveSpacingClasses = () => {
-    if (isExtraSmall || isSmall) return 'responsive-padding-sm responsive-margin-sm';
+    if (isExtraSmall || isSmall)
+      return 'responsive-padding-sm responsive-margin-sm';
     if (isMedium) return 'responsive-padding-md responsive-margin-md';
     if (isLarge) return 'responsive-padding-lg responsive-margin-lg';
     return 'responsive-padding-xl responsive-margin-xl';
@@ -207,7 +242,8 @@ export const useFoldableDisplay = () => {
 
   // Get responsive text classes
   const getResponsiveTextClasses = () => {
-    if (isExtraSmall || isSmall) return 'text-responsive-lg line-height-responsive-lg';
+    if (isExtraSmall || isSmall)
+      return 'text-responsive-lg line-height-responsive-lg';
     if (isMedium) return 'text-responsive-md line-height-responsive-md';
     if (isLarge) return 'text-responsive-sm line-height-responsive-sm';
     return 'text-responsive-xs line-height-responsive-xs';
@@ -297,7 +333,7 @@ export const useFoldableDisplay = () => {
     isHighDPI,
     orientation,
     screenSize,
-    
+
     // Enhanced breakpoint detection
     isExtraSmall,
     isSmall,
@@ -305,13 +341,13 @@ export const useFoldableDisplay = () => {
     isLarge,
     isExtraLarge,
     isUltraWideScreen,
-    
+
     // Utility functions
     getFoldableClasses,
     getResponsiveValue,
     getResponsiveSpacing,
     getResponsiveTypography,
-    
+
     // Enhanced responsive utilities
     getResponsiveContainer,
     getResponsiveGrid,
@@ -328,11 +364,11 @@ export const useFoldableDisplay = () => {
     getResponsiveImageSize,
     getResponsiveShadow,
     getResponsiveAnimation,
-    
+
     // Legacy functions for backward compatibility
     getFoldableSpacing: getResponsiveSpacing,
     getFoldableTypography: getResponsiveTypography,
-    
+
     // Breakpoint helpers
     breakpoints: {
       xs: isExtraSmall,
@@ -341,6 +377,6 @@ export const useFoldableDisplay = () => {
       lg: isLarge,
       xl: isExtraLarge,
       ultraWide: isUltraWideScreen,
-    }
+    },
   };
 };

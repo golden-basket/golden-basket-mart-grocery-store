@@ -5,15 +5,15 @@ import ApiService from '../services/api';
 export const productKeys = {
   all: ['products'],
   lists: () => [...productKeys.all, 'list'],
-  list: (filters) => [...productKeys.lists(), filters],
+  list: filters => [...productKeys.lists(), filters],
   details: () => [...productKeys.all, 'detail'],
-  detail: (id) => [...productKeys.details(), id],
+  detail: id => [...productKeys.details(), id],
 };
 
 // Get all products with pagination
 export const useProducts = (page = 1, limit = 20, filters = {}) => {
   const queryParams = { page, limit, ...filters };
-  
+
   return useQuery({
     queryKey: productKeys.list(queryParams),
     queryFn: async () => {
@@ -39,7 +39,7 @@ export const useAllProducts = () => {
 };
 
 // Get single product
-export const useProduct = (id) => {
+export const useProduct = id => {
   return useQuery({
     queryKey: productKeys.detail(id),
     queryFn: async () => {
@@ -54,7 +54,7 @@ export const useProduct = (id) => {
 };
 
 // Search products
-export const useSearchProducts = (params) => {
+export const useSearchProducts = params => {
   return useQuery({
     queryKey: productKeys.list(params),
     queryFn: async () => {
@@ -73,7 +73,7 @@ export const useCreateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (productData) => ApiService.createProduct(productData),
+    mutationFn: productData => ApiService.createProduct(productData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
@@ -86,7 +86,7 @@ export const useUpdateProduct = () => {
 
   return useMutation({
     mutationFn: ({ id, data }) => ApiService.updateProduct(id, data),
-    onSuccess: (updatedProduct) => {
+    onSuccess: updatedProduct => {
       queryClient.setQueryData(
         productKeys.detail(updatedProduct._id),
         updatedProduct
@@ -101,7 +101,7 @@ export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id) => ApiService.deleteProduct(id),
+    mutationFn: id => ApiService.deleteProduct(id),
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: productKeys.detail(deletedId) });
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });

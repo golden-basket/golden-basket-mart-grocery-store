@@ -29,8 +29,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import EnergySavingsLeafIcon from '@mui/icons-material/EnergySavingsLeaf';
 import SupportIcon from '@mui/icons-material/Support';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
-import ImageWithFallback from './ImageWithFallback';
-import logo from '../assets/golden-basket-rounded.png';
+import Logo from './Logo';
 import HomeIcon from '@mui/icons-material/Home';
 import CelebrationIcon from '@mui/icons-material/Celebration';
 import SpaIcon from '@mui/icons-material/Spa';
@@ -51,7 +50,6 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 const Footer = () => {
   const {
     isMobile,
-    isTablet,
     isFoldable,
     getFoldableClasses,
     getResponsiveValue,
@@ -61,7 +59,7 @@ const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);
 
-  const handleNewsletterSubmit = async (e) => {
+  const handleNewsletterSubmit = async e => {
     e.preventDefault();
     if (!newsletterEmail.trim()) return;
 
@@ -133,7 +131,7 @@ const Footer = () => {
 
   return (
     <Box
-      component="footer"
+      component='footer'
       className={`${getFoldableClasses()} ${getResponsiveSpacingClasses()}`}
       sx={{
         background:
@@ -163,7 +161,7 @@ const Footer = () => {
       }}
     >
       {/* Company Info */}
-      <Container maxWidth="xl">
+      <Container maxWidth='xl'>
         <Grid
           container
           spacing={getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined)}
@@ -174,7 +172,7 @@ const Footer = () => {
             py: { xs: 2, sm: 3, md: 4 },
           }}
         >
-          <Grid item xs={12} sm={12} md={12}>
+          <Grid size={{ xs: 12 }}>
             <Box
               sx={{
                 textAlign: 'center',
@@ -211,31 +209,8 @@ const Footer = () => {
                     justifyContent: 'center',
                   }}
                 >
-                  <Stack direction="column" spacing={1} alignItems="center">
-                    <ImageWithFallback
-                      src={logo}
-                      alt="Golden Basket Mart"
-                      fallbackText="Golden Basket"
-                      sx={{
-                        height: isFoldable
-                          ? 50
-                          : isMobile
-                          ? 40
-                          : isTablet
-                          ? 44
-                          : 48,
-                        width: isFoldable
-                          ? 50
-                          : isMobile
-                          ? 40
-                          : isTablet
-                          ? 44
-                          : 48,
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        transition: 'all 0.2s ease',
-                      }}
-                    />
+                  <Stack direction='column' spacing={1} alignItems='center'>
+                    <Logo size='large' variant='footer' showText={false} />
                     <Typography
                       variant={getResponsiveValue(
                         'h6',
@@ -266,7 +241,7 @@ const Footer = () => {
                 </Box>
               </Box>
               <Typography
-                variant="body2"
+                variant='body2'
                 sx={{
                   color: 'var(--color-text-secondary)',
                   lineHeight: 1.6,
@@ -295,7 +270,7 @@ const Footer = () => {
           </Grid>
         </Grid>
       </Container>
-      <Container maxWidth="xl">
+      <Container maxWidth='xl'>
         {/* Features Section - Top */}
         <Box
           sx={{
@@ -323,7 +298,7 @@ const Footer = () => {
             }}
           >
             {features.map((feature, index) => (
-              <Grid item xs={6} sm={4} md={2.4} key={index}>
+              <Grid size={{ xs: 6, sm: 4, md: 2.4 }} key={index}>
                 <Box
                   sx={{
                     textAlign: 'center',
@@ -361,7 +336,7 @@ const Footer = () => {
                     },
                   })}
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       fontWeight: 600,
                       color: 'var(--color-text-primary)',
@@ -384,7 +359,7 @@ const Footer = () => {
                     {feature.text}
                   </Typography>
                   <Typography
-                    variant="caption"
+                    variant='caption'
                     sx={{
                       color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
@@ -422,7 +397,7 @@ const Footer = () => {
           }}
         >
           {/* Quick Links */}
-          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -463,7 +438,7 @@ const Footer = () => {
                 Quick Links
               </Typography>
               <Box
-                component="ul"
+                component='ul'
                 sx={{
                   listStyle: 'none',
                   p: 0,
@@ -474,7 +449,7 @@ const Footer = () => {
                   justifyContent: 'flex-start',
                 }}
               >
-                {quickLinks.map((link) => (
+                {quickLinks.map(link => (
                   <Box
                     key={link.text}
                     sx={{
@@ -546,7 +521,7 @@ const Footer = () => {
           </Grid>
 
           {/* Customer Service */}
-          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -587,7 +562,7 @@ const Footer = () => {
                 Customer Service
               </Typography>
               <Box
-                component="ul"
+                component='ul'
                 sx={{
                   listStyle: 'none',
                   p: 0,
@@ -598,7 +573,7 @@ const Footer = () => {
                   justifyContent: 'flex-start',
                 }}
               >
-                {customerService.map((link) => (
+                {customerService.map(link => (
                   <Box
                     key={link.text}
                     sx={{
@@ -670,7 +645,7 @@ const Footer = () => {
           </Grid>
 
           {/* Company Info */}
-          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -711,7 +686,7 @@ const Footer = () => {
                 Company
               </Typography>
               <Box
-                component="ul"
+                component='ul'
                 sx={{
                   listStyle: 'none',
                   p: 0,
@@ -722,7 +697,7 @@ const Footer = () => {
                   justifyContent: 'flex-start',
                 }}
               >
-                {companyInfo.map((link) => (
+                {companyInfo.map(link => (
                   <Box
                     key={link.text}
                     sx={{
@@ -794,7 +769,7 @@ const Footer = () => {
           </Grid>
 
           {/* Contact */}
-          <Grid item xs={12} sm={6} md={3} sx={{ mb: { xs: 2, sm: 0 } }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 textAlign: { xs: 'center', sm: 'left' },
@@ -849,20 +824,41 @@ const Footer = () => {
                 {[
                   {
                     icon: PhoneIcon,
-                    text: '+91 98765 43210',
+                    text: '+91-1800-123-4567',
+                    href: 'tel:+9118001234567',
+                    label: 'Toll Free',
+                  },
+                  {
+                    icon: PhoneIcon,
+                    text: '+91-98765-43210',
                     href: 'tel:+919876543210',
+                    label: 'Mobile',
                   },
                   {
                     icon: EmailIcon,
-                    text: 'info@goldenbasket.com',
-                    href: 'mailto:info@goldenbasket.com',
+                    text: 'support@goldenbasketmart.com',
+                    href: 'mailto:support@goldenbasketmart.com',
+                    label: 'Support Email',
+                  },
+                  {
+                    icon: EmailIcon,
+                    text: 'info@goldenbasketmart.com',
+                    href: 'mailto:info@goldenbasketmart.com',
+                    label: 'General Inquiries',
                   },
                   {
                     icon: LocationOnIcon,
-                    text: 'Jaipur, Rajasthan',
+                    text: 'Jaipur, Rajasthan, India',
                     href: 'https://maps.app.goo.gl/1234567890',
+                    label: 'Head Office',
                   },
-                ].map((item) => (
+                  {
+                    icon: AccessTimeIcon,
+                    text: 'Mon-Sat: 9:00 AM - 8:00 PM IST',
+                    href: '#',
+                    label: 'Business Hours',
+                  },
+                ].map(item => (
                   <Box
                     key={item.text}
                     sx={{
@@ -996,7 +992,7 @@ const Footer = () => {
           </Grid>
 
           {/* Newsletter */}
-          <Grid item xs={12} sm={6} md={2} sx={{ mb: { xs: 2, sm: 0 } }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }} sx={{ mb: { xs: 2, sm: 0 } }}>
             <Box
               sx={{
                 p: { xs: 3, sm: 1.5, md: 2 },
@@ -1032,7 +1028,7 @@ const Footer = () => {
                 Newsletter
               </Typography>
               <Box
-                component="form"
+                component='form'
                 onSubmit={handleNewsletterSubmit}
                 sx={{
                   mb: getResponsiveValue(
@@ -1052,11 +1048,11 @@ const Footer = () => {
                   )}
                 >
                   <TextField
-                    type="email"
-                    placeholder="Enter your email"
+                    type='email'
+                    placeholder='Enter your email'
                     value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    size="small"
+                    onChange={e => setNewsletterEmail(e.target.value)}
+                    size='small'
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         color: 'var(--color-primary-light)',
@@ -1076,8 +1072,8 @@ const Footer = () => {
                     }}
                   />
                   <Button
-                    type="submit"
-                    variant="contained"
+                    type='submit'
+                    variant='contained'
                     disabled={newsletterLoading || !newsletterEmail.trim()}
                     sx={{
                       background:
@@ -1176,7 +1172,7 @@ const Footer = () => {
                 />
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-text-primary)',
                       fontWeight: 600,
@@ -1193,7 +1189,7 @@ const Footer = () => {
                     Mon - Sat: 7:00 AM - 10:00 PM
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
@@ -1253,7 +1249,7 @@ const Footer = () => {
                 />
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-text-primary)',
                       fontWeight: 600,
@@ -1270,7 +1266,7 @@ const Footer = () => {
                     24/7 Online Ordering
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
@@ -1330,7 +1326,7 @@ const Footer = () => {
                 />
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-text-primary)',
                       fontWeight: 600,
@@ -1347,7 +1343,7 @@ const Footer = () => {
                     Customer Support
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{
                       color: 'var(--color-text-secondary)',
                       fontSize: isFoldable
@@ -1367,6 +1363,119 @@ const Footer = () => {
           </Grid>
         </Box>
 
+        {/* Support & Contact Section */}
+        <Box
+          sx={{
+            borderTop: '1px solid rgba(163, 130, 76, 0.2)',
+            mt: { xs: 4, sm: 3, md: 4 },
+            pt: { xs: 3, sm: 2, md: 3 },
+            px: { xs: 2, sm: 3, md: 4 },
+            textAlign: 'center',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <Typography
+            variant='h6'
+            sx={{
+              color: 'var(--color-primary)',
+              fontWeight: 600,
+              mb: 2,
+              fontSize: getResponsiveValue(
+                'clamp(1.125rem, 3vw, 1.25rem)',
+                'clamp(1.25rem, 2.8vw, 1.375rem)',
+                'clamp(1.375rem, 2.5vw, 1.5rem)',
+                isFoldable ? 'clamp(1rem, 2.8vw, 1.125rem)' : undefined
+              ),
+            }}
+          >
+            📞 Need Help? We're Here for You!
+          </Typography>
+
+          <Grid container spacing={2} justifyContent='center'>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant='subtitle2' color='primary' gutterBottom>
+                  🆘 Emergency Support
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  Available 24/7 for critical issues
+                </Typography>
+                <Button
+                  variant='outlined'
+                  size='small'
+                  sx={{ mt: 1 }}
+                  onClick={() => window.open('tel:+919876543210', '_blank')}
+                >
+                  Call Now
+                </Button>
+              </Box>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant='subtitle2' color='primary' gutterBottom>
+                  💬 WhatsApp Support
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  Quick responses via WhatsApp
+                </Typography>
+                <Button
+                  variant='outlined'
+                  size='small'
+                  sx={{ mt: 1 }}
+                  onClick={() =>
+                    window.open('https://wa.me/919876543210', '_blank')
+                  }
+                >
+                  Chat Now
+                </Button>
+              </Box>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant='subtitle2' color='primary' gutterBottom>
+                  📧 Email Support
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  Detailed support via email
+                </Typography>
+                <Button
+                  variant='outlined'
+                  size='small'
+                  sx={{ mt: 1 }}
+                  onClick={() =>
+                    window.open('mailto:support@goldenbasketmart.com', '_blank')
+                  }
+                >
+                  Send Email
+                </Button>
+              </Box>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant='subtitle2' color='primary' gutterBottom>
+                  📍 Visit Us
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  Drop by our store anytime
+                </Typography>
+                <Button
+                  variant='outlined'
+                  size='small'
+                  sx={{ mt: 1 }}
+                  onClick={() =>
+                    window.open('https://maps.app.goo.gl/1234567890', '_blank')
+                  }
+                >
+                  Get Directions
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+
         {/* Bottom Section */}
         <Box
           sx={{
@@ -1379,7 +1488,7 @@ const Footer = () => {
           }}
         >
           <Typography
-            variant="body2"
+            variant='body2'
             sx={{
               p: { xs: 3, sm: 1.5, md: 2 },
               color: 'var(--color-text-secondary)',

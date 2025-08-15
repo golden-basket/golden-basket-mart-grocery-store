@@ -2,12 +2,104 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/golden-basket-rounded.png" />
+    <link rel="icon" type="image/png" href="/golden-basket-rounded.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Golden Basket Mart</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#a3824c" />
+    <meta name="description" content="Golden Basket Mart - Your trusted online grocery store for fresh products and quality items" />
+    <meta name="keywords" content="grocery, online shopping, fresh food, vegetables, fruits, dairy, meat, household items" />
+    <meta name="author" content="Golden Basket Mart" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/golden-basket-rounded.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/golden-basket-rounded.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/golden-basket-rounded.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/golden-basket-rounded.png" />
+    
+    <!-- Apple Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Golden Basket" />
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#a3824c" />
+    <meta name="msapplication-TileImage" content="/golden-basket-rounded.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Golden Basket Mart" />
+    <meta property="og:description" content="Your trusted online grocery store for fresh products and quality items" />
+    <meta property="og:image" content="/golden-basket-rounded.png" />
+    <meta property="og:url" content="https://goldenbasketmart.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Golden Basket Mart" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Golden Basket Mart" />
+    <meta name="twitter:description" content="Your trusted online grocery store for fresh products and quality items" />
+    <meta name="twitter:image" content="/golden-basket-rounded.png" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/golden-basket-rounded.png" as="image" />
+    
+    <title>Golden Basket Mart - Fresh Groceries Delivered</title>
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('SW registered: ', registration);
+            })
+            .catch(function(registrationError) {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button or notification
+        if (window.showInstallPrompt) {
+          window.showInstallPrompt();
+        }
+      });
+      
+      // Handle PWA install
+      window.installPWA = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          deferredPrompt = null;
+        }
+      };
+    </script>
+    
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

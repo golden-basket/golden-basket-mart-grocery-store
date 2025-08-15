@@ -32,7 +32,7 @@ export const useCart = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: true, // Always refetch on mount when enabled
     refetchOnReconnect: true,
-    onError: (error) => {
+    onError: error => {
       console.error('Cart fetch error:', error);
     },
   });
@@ -45,7 +45,7 @@ export const useAddToCart = () => {
   return useMutation({
     mutationFn: ({ productId, quantity }) =>
       ApiService.addToCart(productId, quantity),
-    onSuccess: (updatedCart) => {
+    onSuccess: updatedCart => {
       // Update cart in cache
       queryClient.setQueryData(cartKeys.user(), updatedCart);
     },
@@ -59,7 +59,7 @@ export const useUpdateCartItem = () => {
   return useMutation({
     mutationFn: ({ productId, quantity }) =>
       ApiService.updateCartItem(productId, quantity),
-    onSuccess: (updatedCart) => {
+    onSuccess: updatedCart => {
       // Update cart in cache
       queryClient.setQueryData(cartKeys.user(), updatedCart);
     },
@@ -71,8 +71,8 @@ export const useRemoveFromCart = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (productId) => ApiService.removeFromCart(productId),
-    onSuccess: (updatedCart) => {
+    mutationFn: productId => ApiService.removeFromCart(productId),
+    onSuccess: updatedCart => {
       // Update cart in cache
       queryClient.setQueryData(cartKeys.user(), updatedCart);
     },

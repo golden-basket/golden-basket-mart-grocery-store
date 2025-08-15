@@ -8,4 +8,4 @@ describe('Auth Endpoints', () => {
     expect(res.statusCode).toBe(400);
     expect(res.body.error).toBeDefined();
   });
-}); 
+});

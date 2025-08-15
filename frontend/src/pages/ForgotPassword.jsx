@@ -19,25 +19,20 @@ import EmailIcon from '@mui/icons-material/Email';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SendIcon from '@mui/icons-material/Send';
 import JumpingCartAvatar from './JumpingCartAvatar';
-import ThemeSnackbar from '../components/ThemeSnackbar';
 import ApiService from '../services/api';
 import { validateEmail } from '../utils/common';
-import { createSnackbarConfig, createSuccessConfig } from '../utils/errorHandler';
+import { useToastNotifications } from '../hooks/useToast';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+  const { showSuccess, showError } = useToastNotifications();
+
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'info',
-  });
   const [touched, setTouched] = useState(false);
 
   // Real-time validation
@@ -51,53 +46,49 @@ const ForgotPassword = () => {
     }
   }, [email, touched]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
-      setSnackbar(createSnackbarConfig({ message: 'Email is required' }, 'validation'));
+      showError('Email is required');
       return;
     }
-    
+
     if (!validateEmail(email)) {
-      setSnackbar(createSnackbarConfig({ message: 'Please enter a valid email address' }, 'validation'));
+      showError('Please enter a valid email address');
       return;
     }
 
     setLoading(true);
     setError('');
     setSuccess('');
-    
+
     try {
       // Call the actual API endpoint for password reset
-      const response = await ApiService.forgotPassword({ email: email.trim() });
-      
-      const successConfig = createSuccessConfig(
-        response.data?.message || 'Password reset instructions have been sent to your email address. Please check your inbox and follow the instructions to reset your password.'
+      const response = await ApiService.forgotPassword(email.trim());
+
+      showSuccess(
+        response.data?.message ||
+          'Password reset instructions have been sent to your email address. Please check your inbox and follow the instructions to reset your password.'
       );
-      setSnackbar(successConfig);
-      
+
       // Auto-redirect after 5 seconds
       setTimeout(() => navigate('/login'), 5000);
     } catch (err) {
       console.error('Forgot password error:', err);
-      
-      // Use the error handling utility
-      const snackbarConfig = createSnackbarConfig(err, 'forgot-password');
-      setSnackbar(snackbarConfig);
+
+      showError(
+        err.message || 'Failed to send password reset email. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = e => {
     if (e.key === 'Enter') {
       handleSubmit(e);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -108,10 +99,11 @@ const ForgotPassword = () => {
         alignItems: 'center',
         minHeight: '100vh',
         p: { xs: 1, sm: 2, md: 3 },
-        background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        background:
+          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
       }}
     >
-      <Slide direction="right" in={true} timeout={400}>
+      <Slide direction='right' in={true} timeout={400}>
         <Paper
           elevation={24}
           sx={{
@@ -119,7 +111,8 @@ const ForgotPassword = () => {
             width: { xs: '100%', sm: '90%', md: '70%', lg: '50%', xl: '40%' },
             maxWidth: 500,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background: 'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
+            background:
+              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
             border: '2px solid #e6d897',
             boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
             position: 'relative',
@@ -131,7 +124,8 @@ const ForgotPassword = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background:
+                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
             },
           }}
         >
@@ -144,7 +138,8 @@ const ForgotPassword = () => {
               variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
-                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background:
+                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 1,
@@ -155,10 +150,11 @@ const ForgotPassword = () => {
             </Typography>
             <Typography
               variant={isMobile ? 'body2' : 'body1'}
-              color="text.secondary"
+              color='text.secondary'
               sx={{ fontWeight: 500 }}
             >
-              Enter your email address and we'll send you instructions to reset your password
+              Enter your email address and we'll send you instructions to reset
+              your password
             </Typography>
           </Box>
 
@@ -166,11 +162,12 @@ const ForgotPassword = () => {
           {error && (
             <Fade in={true}>
               <Alert
-                severity="error"
+                severity='error'
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background: 'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
+                  background:
+                    'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
                   color: '#c53030',
                   border: '1px solid #feb2b2',
                   '& .MuiAlert-icon': { color: '#c53030' },
@@ -184,11 +181,12 @@ const ForgotPassword = () => {
           {success && (
             <Fade in={true}>
               <Alert
-                severity="success"
+                severity='success'
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background: 'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
+                  background:
+                    'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
                   color: '#22543d',
                   border: '1px solid #9ae6b4',
                   '& .MuiAlert-icon': { color: '#22543d' },
@@ -200,23 +198,23 @@ const ForgotPassword = () => {
           )}
 
           {/* Form */}
-          <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Box component='form' onSubmit={handleSubmit} noValidate>
             <TextField
-              label="Email Address"
-              type="email"
+              label='Email Address'
+              type='email'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               onBlur={() => setTouched(true)}
               onKeyPress={handleKeyPress}
               fullWidth
               required
-              margin="normal"
+              margin='normal'
               error={!!error}
               helperText={error}
               disabled={loading}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position='start'>
                     <EmailIcon sx={{ color: '#a3824c' }} />
                   </InputAdornment>
                 ),
@@ -239,10 +237,16 @@ const ForgotPassword = () => {
             />
 
             <Button
-              type="submit"
+              type='submit'
               fullWidth
               disabled={loading || !!error}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+              startIcon={
+                loading ? (
+                  <CircularProgress size={20} color='inherit' />
+                ) : (
+                  <SendIcon />
+                )
+              }
               sx={{
                 mt: 3,
                 mb: 2,
@@ -250,12 +254,14 @@ const ForgotPassword = () => {
                 fontWeight: 700,
                 fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
-                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background:
+                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 color: '#fff',
                 textTransform: 'none',
                 boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
                 '&:hover': {
-                  background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                  background:
+                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
                   color: '#000',
                   transform: 'translateY(-2px)',
                   boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
@@ -272,17 +278,19 @@ const ForgotPassword = () => {
               {loading ? 'Sending...' : 'Send Reset Instructions'}
             </Button>
 
-            <Divider sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}>
-              <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
+            <Divider
+              sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}
+            >
+              <Typography variant='body2' color='text.secondary' sx={{ px: 2 }}>
                 Remember your password?
               </Typography>
             </Divider>
 
             <Button
               component={Link}
-              to="/login"
+              to='/login'
               fullWidth
-              variant="outlined"
+              variant='outlined'
               disabled={loading}
               startIcon={<ArrowBackIcon />}
               sx={{
@@ -314,14 +322,6 @@ const ForgotPassword = () => {
           </Box>
         </Paper>
       </Slide>
-
-      {/* Theme Snackbar for notifications */}
-      <ThemeSnackbar
-        open={snackbar.open}
-        message={snackbar.message}
-        severity={snackbar.severity}
-        onClose={handleCloseSnackbar}
-      />
     </Box>
   );
 };

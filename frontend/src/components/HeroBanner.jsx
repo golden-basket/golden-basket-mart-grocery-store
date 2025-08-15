@@ -13,7 +13,7 @@ const HeroBanner = () => {
 
   return (
     <Container
-      maxWidth="xl"
+      maxWidth='xl'
       className={getFoldableClasses()}
       sx={{
         px: getResponsiveValue(2, 3, 4, isFoldable ? 2.5 : undefined),
@@ -199,7 +199,7 @@ const HeroBanner = () => {
           >
             Welcome to <br />
             <Box
-              component="span"
+              component='span'
               sx={{
                 background:
                   'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',

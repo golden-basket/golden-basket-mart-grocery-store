@@ -13,7 +13,10 @@ exports.listProjects = async (req, res) => {
 // Get single project
 exports.getProject = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id).populate('members', '-password');
+    const project = await Project.findById(req.params.id).populate(
+      'members',
+      '-password'
+    );
     if (!project) return res.status(404).json({ error: 'Project not found.' });
     res.json(project);
   } catch (err) {
@@ -26,8 +29,18 @@ exports.createProject = async (req, res) => {
   try {
     const { name, description, status, startDate, endDate, members } = req.body;
     const exists = await Project.findOne({ name });
-    if (exists) return res.status(409).json({ error: 'Project with this name already exists.' });
-    const project = new Project({ name, description, status, startDate, endDate, members });
+    if (exists)
+      return res
+        .status(409)
+        .json({ error: 'Project with this name already exists.' });
+    const project = new Project({
+      name,
+      description,
+      status,
+      startDate,
+      endDate,
+      members,
+    });
     await project.save();
     res.status(201).json(project);
   } catch (err) {
@@ -40,7 +53,9 @@ exports.updateProject = async (req, res) => {
   try {
     const { id } = req.params;
     const update = req.body;
-    const project = await Project.findByIdAndUpdate(id, update, { new: true }).populate('members', '-password');
+    const project = await Project.findByIdAndUpdate(id, update, {
+      new: true,
+    }).populate('members', '-password');
     if (!project) return res.status(404).json({ error: 'Project not found.' });
     res.json(project);
   } catch (err) {
@@ -58,4 +73,4 @@ exports.deleteProject = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}; 
+};

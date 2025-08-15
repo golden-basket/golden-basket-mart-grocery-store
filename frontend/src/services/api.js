@@ -16,24 +16,24 @@ const apiClient = axios.create({
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
-  (response) => {
+  response => {
     return response;
   },
-  (error) => {
+  error => {
     console.error(
       'API error:',
       error.config?.url,
@@ -90,6 +90,13 @@ class ApiService {
     return this.request('/auth/change-password', {
       method: 'POST',
       data: passwordData,
+    });
+  }
+
+  static async forgotPassword(email) {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      data: { email },
     });
   }
 

@@ -3,23 +3,19 @@ import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
 import OrderStats from './OrderManagement/OrderStats';
 import OrderTable from './OrderManagement/OrderTable';
 import OrderDialogs from './OrderManagement/OrderDialogs';
-import ThemeSnackbar from '../ThemeSnackbar';
 import FilterStatusBar from '../FilterStatusBar';
 import ReusableFilterControls from '../ReusableFilterControls';
 import ApiService from '../../services/api';
 import { useFoldableDisplay } from '../../hooks/useFoldableDisplay';
 import Loading from '../Loading';
+import { useToastNotifications } from '../../hooks/useToast';
 
 const OrderManagement = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { getResponsiveSpacingClasses, getResponsiveTypography } =
     useFoldableDisplay();
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
+  const { showSuccess, showError } = useToastNotifications();
 
   // Main state
   const [orders, setOrders] = useState([]);
@@ -50,20 +46,6 @@ const OrderManagement = () => {
   // Search typing state to show custom Loading component
   const [isSearching, setIsSearching] = useState(false);
 
-  // Snackbar helper function
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
-  // Close snackbar
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
   // Load orders with filters
   const loadOrders = useCallback(async () => {
     try {
@@ -71,7 +53,10 @@ const OrderManagement = () => {
       const params = {
         page: page + 1,
         limit: rowsPerPage,
-        ...filters,
+        status: filters.status,
+        paymentStatus: filters.paymentStatus,
+        paymentMethod: filters.paymentMethod,
+        search: filters.searchQuery, // Map searchQuery to search
         startDate: filters.startDate
           ? filters.startDate.toISOString()
           : undefined,
@@ -79,18 +64,19 @@ const OrderManagement = () => {
       };
 
       // Remove undefined values
-      Object.keys(params).forEach((key) => {
+      Object.keys(params).forEach(key => {
         if (params[key] === undefined || params[key] === '') {
           delete params[key];
         }
       });
 
       const response = await ApiService.getFilteredOrders(params);
+
       setOrders(response.orders || []);
-      setTotalOrders(response.total || 0);
+      setTotalOrders(response.pagination?.totalOrders || 0);
     } catch (error) {
       console.error('Failed to load orders:', error);
-      showSnackbar('Failed to load orders', 'error');
+      showError('Failed to load orders. Please try again.');
     } finally {
       setLoading(false);
       // Clear searching state when API call completes
@@ -121,13 +107,12 @@ const OrderManagement = () => {
     // Validate date range
     if (field === 'startDate') {
       if (filters.endDate && value && value > filters.endDate) {
-        showSnackbar('Start date cannot be after end date', 'error');
+        showError('Start date cannot be after end date');
         return;
       }
     } else if (field === 'endDate') {
       if (filters.startDate && value && value < filters.startDate) {
-        showSnackbar('End date cannot be before start date', 'error');
-        return;
+        showError('End date cannot be before start date');
       }
     }
 
@@ -136,7 +121,7 @@ const OrderManagement = () => {
       setIsSearching(true);
     }
 
-    setFilters((prev) => ({ ...prev, [field]: value }));
+    setFilters(prev => ({ ...prev, [field]: value }));
     setPage(0); // Reset to first page when filters change
   };
 
@@ -159,26 +144,26 @@ const OrderManagement = () => {
   };
 
   // Handle rows per page change
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = event => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   // Open status update dialog
-  const openStatusDialog = (order) => {
+  const openStatusDialog = order => {
     setSelectedOrder(order);
     setStatusDialogOpen(true);
   };
 
   // Open payment update dialog
-  const openPaymentDialog = (order) => {
+  const openPaymentDialog = order => {
     setSelectedOrder(order);
     setPaymentDialogOpen(true);
   };
 
   // Handle successful updates
-  const handleUpdateSuccess = (message) => {
-    showSnackbar(message, 'success');
+  const handleUpdateSuccess = message => {
+    showSuccess(message);
     loadOrders();
     loadStats();
   };
@@ -275,7 +260,7 @@ const OrderManagement = () => {
         }}
         filterDrawerOpen={filterDrawerOpen}
         setFilterDrawerOpen={setFilterDrawerOpen}
-        drawerTitle="Filter Orders"
+        drawerTitle='Filter Orders'
       />
 
       {/* Order Count and Filter Status */}
@@ -283,7 +268,7 @@ const OrderManagement = () => {
         <FilterStatusBar
           showing={orders.length}
           total={totalOrders}
-          itemType="orders"
+          itemType='orders'
           filters={filters}
           loading={loading}
         />
@@ -306,7 +291,7 @@ const OrderManagement = () => {
           <Loading
             message={`Searching orders for "${filters.searchQuery}"...`}
             size={isMobile ? 'small' : 'medium'}
-            variant="default"
+            variant='default'
           />
         </Box>
       ) : (
@@ -334,14 +319,6 @@ const OrderManagement = () => {
         onStatusDialogClose={() => setStatusDialogOpen(false)}
         onPaymentDialogClose={() => setPaymentDialogOpen(false)}
         onUpdateSuccess={handleUpdateSuccess}
-      />
-
-      {/* Snackbar */}
-      <ThemeSnackbar
-        open={snackbar.open}
-        message={snackbar.message}
-        severity={snackbar.severity}
-        onClose={handleCloseSnackbar}
       />
     </Box>
   );

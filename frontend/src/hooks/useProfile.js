@@ -15,7 +15,7 @@ export const profileKeys = {
 // Get user addresses
 export const useAddresses = () => {
   const { user, token } = useAuth();
-  
+
   return useQuery({
     queryKey: profileKeys.addresses(),
     queryFn: async () => {
@@ -37,7 +37,7 @@ export const useAddresses = () => {
 // Get user orders
 export const useUserOrders = () => {
   const { user, token } = useAuth();
-  
+
   return useQuery({
     queryKey: profileKeys.orders(),
     queryFn: async () => {
@@ -78,7 +78,7 @@ export const useCategories = () => {
 // Get order statistics (computed from orders and categories)
 export const useOrderStats = () => {
   const { user, token } = useAuth();
-  
+
   return useQuery({
     queryKey: profileKeys.orderStats(),
     queryFn: async () => {
@@ -101,16 +101,16 @@ export const useOrderStats = () => {
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
   const { getProfile } = useAuth();
-  
+
   return useMutation({
-    mutationFn: async (profileData) => {
+    mutationFn: async profileData => {
       const updatedProfile = await ApiService.updateProfile(profileData);
       return updatedProfile;
     },
     onSuccess: async () => {
       // Update user in auth context
       await getProfile();
-      
+
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: profileKeys.user() });
     },
@@ -120,9 +120,9 @@ export const useUpdateProfile = () => {
 // Add address mutation
 export const useAddAddress = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (addressData) => ApiService.addAddress(addressData),
+    mutationFn: addressData => ApiService.addAddress(addressData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: profileKeys.addresses() });
     },
@@ -132,7 +132,7 @@ export const useAddAddress = () => {
 // Update address mutation
 export const useUpdateAddress = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, data }) => ApiService.updateAddress(id, data),
     onSuccess: () => {
@@ -144,9 +144,9 @@ export const useUpdateAddress = () => {
 // Delete address mutation
 export const useDeleteAddress = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (id) => ApiService.deleteAddress(id),
+    mutationFn: id => ApiService.deleteAddress(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: profileKeys.addresses() });
     },
