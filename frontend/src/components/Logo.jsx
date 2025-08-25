@@ -26,12 +26,12 @@ const Logo = ({
   const getTextSizes = () => {
     switch (size) {
       case 'small':
-        return { xs: '0.875rem', sm: '1rem', md: '1.125rem' };
+        return { xs: '0.75rem', sm: '0.875rem', md: '1rem' };
       case 'large':
-        return { xs: '1.5rem', sm: '1.75rem', md: '2rem' };
+        return { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' };
       case 'default':
       default:
-        return { xs: '1.125rem', sm: '1.5rem', md: '1.75rem' };
+        return { xs: '1rem', sm: '1.25rem', md: '1.5rem' };
     }
   };
 
@@ -39,13 +39,14 @@ const Logo = ({
   const textSizes = getTextSizes();
 
   const logoContainerSx = {
+    mr: variant === 'navbar' ? { xs: 0.75, sm: 1, md: 1.25 } : 0.5,
     display: 'flex',
     alignItems: 'center',
     cursor: onClick ? 'pointer' : 'default',
     transition: 'all 0.3s ease',
     ...(onClick && {
       '&:hover': {
-        transform: 'scale(1.05)',
+        transform: 'scale(1.02)',
         '& img': {
           boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
           border: '2px solid rgba(255, 255, 255, 0.4)',
@@ -66,8 +67,8 @@ const Logo = ({
   };
 
   const textSx = {
-    ml: variant === 'navbar' ? { xs: 1.5, sm: 2, md: 2.5 } : 1,
-    fontWeight: 700,
+    ml: 0.25,
+    fontWeight: 600,
     color: variant === 'navbar' ? '#ffffff' : theme.palette.primary.main,
     textShadow: variant === 'navbar' ? '2px 2px 4px rgba(0,0,0,0.3)' : 'none',
     display: { xs: 'none', sm: 'block' },

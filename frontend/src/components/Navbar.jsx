@@ -27,7 +27,6 @@ import EmojiNatureIcon from '@mui/icons-material/EmojiNature';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import ReportIcon from '@mui/icons-material/Report';
 import { useAuth } from '../hooks/useAuth';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import PersonIcon from '@mui/icons-material/Person';
@@ -60,7 +59,6 @@ const Navbar = () => {
   const navLinks = [
     { to: '/', label: 'Home', icon: <HomeIcon /> },
     { to: '/catalogue', label: 'Catalogue', icon: <InventoryIcon /> },
-    { to: '/test', label: 'Test', icon: <ReportIcon /> },
   ];
 
   // Admin-only navigation links
