@@ -22,6 +22,7 @@ import JumpingCartAvatar from './JumpingCartAvatar';
 import ApiService from '../services/api';
 import { validateEmail } from '../utils/common';
 import { useToastNotifications } from '../hooks/useToast';
+import { ROUTES } from '../utils/routeConstants';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -64,16 +65,20 @@ const ForgotPassword = () => {
     setSuccess('');
 
     try {
+      console.log('ForgotPassword: Starting password reset request');
       // Call the actual API endpoint for password reset
       const response = await ApiService.forgotPassword(email.trim());
+      
+      console.log('ForgotPassword: Password reset request successful, response:', response);
 
-      showSuccess(
-        response.data?.message ||
-          'Password reset instructions have been sent to your email address. Please check your inbox and follow the instructions to reset your password.'
-      );
+      const successMessage = response.message ||
+        'Password reset instructions have been sent to your email address. Please check your inbox and follow the instructions to reset your password.';
+      
+      console.log('ForgotPassword: Showing success message:', successMessage);
+      showSuccess(successMessage);
 
       // Auto-redirect after 5 seconds
-      setTimeout(() => navigate('/login'), 5000);
+      setTimeout(() => navigate(ROUTES.LOGIN), 5000);
     } catch (err) {
       console.error('Forgot password error:', err);
 

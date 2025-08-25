@@ -53,13 +53,16 @@ apiClient.interceptors.response.use(
 class ApiService {
   // Generic request method
   static async request(endpoint, options = {}) {
+    console.log('ApiService.request: Making request to:', endpoint, 'with options:', options);
     try {
       const response = await apiClient({
         url: endpoint,
         ...options,
       });
+      console.log('ApiService.request: Response received:', response.data);
       return response.data;
     } catch (error) {
+      console.error('ApiService.request: Error occurred:', error);
       const message = error.response?.data?.error || 'Network error occurred';
       throw new Error(message);
     }
@@ -81,8 +84,23 @@ class ApiService {
   }
 
   static async verifyEmail(token) {
-    return this.request(`/auth/verify/${token}`, {
-      method: 'GET',
+    console.log('ApiService.verifyEmail: Starting verification with token:', token);
+    try {
+      const result = await this.request(`/auth/verify/${token}`, {
+        method: 'GET',
+      });
+      console.log('ApiService.verifyEmail: Success response:', result);
+      return result;
+    } catch (error) {
+      console.error('ApiService.verifyEmail: Error:', error);
+      throw error;
+    }
+  }
+
+  static async resendVerification(email) {
+    return this.request('/auth/resend-verification', {
+      method: 'POST',
+      data: { email },
     });
   }
 
@@ -97,6 +115,13 @@ class ApiService {
     return this.request('/auth/forgot-password', {
       method: 'POST',
       data: { email },
+    });
+  }
+
+  static async resetPassword(token, password) {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      data: { token, password },
     });
   }
 

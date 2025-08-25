@@ -136,7 +136,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     // Send verification email
-    const verifyUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const verifyUrl = `${FRONTEND_URL}/#/auth/verify/${verificationToken}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -185,7 +185,15 @@ exports.verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
 
+    if (!token) {
+      logger.warn('Email verification attempt without token');
+      return res
+        .status(400)
+        .json({ error: 'Verification token is required.' });
+    }
+
     // Hash the token to compare with stored hash
+    const crypto = require('crypto');
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await User.findOne({
@@ -194,29 +202,35 @@ exports.verifyEmail = async (req, res) => {
     });
 
     if (!user) {
-      logger.warn(`Email verification attempt with invalid/expired token`);
+      logger.warn(`Email verification attempt with invalid/expired token: ${token.substring(0, 10)}...`);
       return res
         .status(400)
         .json({ error: 'Invalid or expired verification token.' });
     }
 
     if (user.isVerified) {
-      return res.status(400).json({ error: 'Email already verified.' });
+      logger.info(`Email verification attempt for already verified user: ${user.email}`);
+      return res.status(200).json({ 
+        message: 'Email is already verified. You can log in.',
+        alreadyVerified: true 
+      });
     }
 
     // Verify email and clear token
     user.isVerified = true;
-    user.clearEmailVerificationToken();
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
     await user.save();
 
-    logger.info(`Email verified for user: ${user.email}`);
-    res.json({
+    logger.info(`Email verified successfully for user: ${user.email}`);
+    res.status(200).json({
       message: 'Email verified successfully. You can now log in.',
-      redirectUrl: `${FRONTEND_URL}/login`,
+      success: true,
+      redirectUrl: `${FRONTEND_URL}/#/login`,
     });
   } catch (err) {
     logger.error('Email verification error:', err);
-    res.status(400).json({ error: 'Invalid or expired token.' });
+    res.status(500).json({ error: 'Email verification failed. Please try again.' });
   }
 };
 
@@ -365,7 +379,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // Send password reset email
-    const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${FRONTEND_URL}/#/reset-password?token=${resetToken}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -527,7 +541,7 @@ exports.resendVerification = async (req, res) => {
     await user.save();
 
     // Send verification email
-    const verifyUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const verifyUrl = `${FRONTEND_URL}/auth/verify/${verificationToken}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
         <div style="text-align: center; margin-bottom: 30px;">

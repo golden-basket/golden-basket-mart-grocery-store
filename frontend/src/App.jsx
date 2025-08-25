@@ -11,6 +11,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ToastProvider from './components/ToastNotifications';
 import TestComponent from './components/TestComponent';
+import { ROUTES } from './utils/routeConstants';
 
 // Lazy load components for better performance
 const Catalogue = lazy(() => import('./pages/Catalogue'));
@@ -25,6 +26,9 @@ const OrderCheckout = lazy(() => import('./pages/OrderCheckout'));
 const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const EmailVerification = lazy(() => import('./pages/EmailVerification'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const App = () => {
   return (
@@ -50,33 +54,24 @@ const App = () => {
               >
                 <Suspense fallback={<Loading />}>
                   <Routes>
-                    <Route path='/' element={<HomeComponent />} />
-                    <Route path='/test' element={<TestComponent />} />
-                    <Route path='/catalogue' element={<Catalogue />} />
+                    {/* Public Routes */}
+                    <Route path={ROUTES.HOME} element={<HomeComponent />} />
+                    <Route path={ROUTES.TEST} element={<TestComponent />} />
+                    <Route path={ROUTES.CATALOGUE} element={<Catalogue />} />
+                    
+                    {/* Authentication Routes */}
+                    <Route path={ROUTES.LOGIN} element={<Login />} />
+                    <Route path={ROUTES.REGISTER} element={<Register />} />
+                    <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
+                    <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
+                    
+                    {/* Email Verification Routes */}
+                    <Route path={ROUTES.VERIFY_EMAIL} element={<EmailVerification />} />
+                    <Route path={ROUTES.VERIFY_EMAIL_WITH_TOKEN} element={<EmailVerification />} />
+                    
+                    {/* Protected User Routes */}
                     <Route
-                      path='/admin'
-                      element={
-                        <ProtectedRoute adminOnly={true}>
-                          <Admin />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path='/cart'
-                      element={
-                        <ProtectedRoute>
-                          <Cart />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path='/login' element={<Login />} />
-                    <Route path='/register' element={<Register />} />
-                    <Route
-                      path='/forgot-password'
-                      element={<ForgotPassword />}
-                    />
-                    <Route
-                      path='/profile'
+                      path={ROUTES.PROFILE}
                       element={
                         <ProtectedRoute>
                           <Profile />
@@ -84,7 +79,7 @@ const App = () => {
                       }
                     />
                     <Route
-                      path='/change-password'
+                      path={ROUTES.CHANGE_PASSWORD}
                       element={
                         <ProtectedRoute>
                           <ChangePassword />
@@ -92,15 +87,25 @@ const App = () => {
                       }
                     />
                     <Route
-                      path='/addresses'
+                      path={ROUTES.ADDRESSES}
                       element={
                         <ProtectedRoute>
                           <AddressBook />
                         </ProtectedRoute>
                       }
                     />
+                    
+                    {/* Shopping Routes */}
                     <Route
-                      path='/checkout'
+                      path={ROUTES.CART}
+                      element={
+                        <ProtectedRoute>
+                          <Cart />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path={ROUTES.CHECKOUT}
                       element={
                         <ProtectedRoute>
                           <OrderCheckout />
@@ -108,13 +113,26 @@ const App = () => {
                       }
                     />
                     <Route
-                      path='/orders'
+                      path={ROUTES.ORDERS}
                       element={
                         <ProtectedRoute>
                           <OrderHistory />
                         </ProtectedRoute>
                       }
                     />
+                    
+                    {/* Admin Routes */}
+                    <Route
+                      path={ROUTES.ADMIN}
+                      element={
+                        <ProtectedRoute adminOnly={true}>
+                          <Admin />
+                        </ProtectedRoute>
+                      }
+                    />
+                    
+                    {/* 404 - Catch All Route */}
+                    <Route path='*' element={<NotFound />} />
                   </Routes>
                 </Suspense>
               </Box>

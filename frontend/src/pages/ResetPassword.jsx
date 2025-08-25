@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Box,
   TextField,
@@ -12,28 +12,29 @@ import {
   Divider,
   Fade,
   Slide,
-  Grid,
-  LinearProgress,
+  CircularProgress,
   useTheme,
   useMediaQuery,
   Tooltip,
   Zoom,
-  CircularProgress,
+  Grid,
+  LinearProgress,
 } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
-import LockIcon from '@mui/icons-material/Lock';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SecurityIcon from '@mui/icons-material/Security';
+import {
+  Lock,
+  Visibility,
+  VisibilityOff,
+  Security,
+  ArrowBack,
+  CheckCircle,
+} from '@mui/icons-material';
 import JumpingCartAvatar from './JumpingCartAvatar';
 import ApiService from '../services/api';
-import { validateEmail, validatePassword } from '../utils/common';
+import { validatePassword } from '../utils/common';
 import { useToastNotifications } from '../hooks/useToast';
 import { ROUTES } from '../utils/routeConstants';
 
-// Password strength indicator component
+// Password strength indicator component (reused from Register)
 const PasswordStrengthIndicator = ({ password }) => {
   const getPasswordStrength = password => {
     if (!password) return { score: 0, label: '', color: '#e0e0e0' };
@@ -77,7 +78,7 @@ const PasswordStrengthIndicator = ({ password }) => {
   return (
     <Box sx={{ mt: 1 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <SecurityIcon sx={{ fontSize: 16, color: strength.color }} />
+        <Security sx={{ fontSize: 16, color: strength.color }} />
         <Typography
           variant='caption'
           sx={{ color: strength.color, fontWeight: 600 }}
@@ -110,16 +111,14 @@ const PasswordStrengthIndicator = ({ password }) => {
   );
 };
 
-const Register = () => {
+const ResetPassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { showSuccess, showError } = useToastNotifications();
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
     password: '',
     confirmPassword: '',
   });
@@ -129,28 +128,22 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [token, setToken] = useState('');
+
+  // Get token from URL params
+  useEffect(() => {
+    const tokenFromUrl = searchParams.get('token');
+    if (!tokenFromUrl) {
+      showError('Invalid or missing reset token. Please request a new password reset.');
+      setTimeout(() => navigate(ROUTES.FORGOT_PASSWORD), 3000);
+      return;
+    }
+    setToken(tokenFromUrl);
+  }, [searchParams, navigate, showError]);
 
   // Real-time validation
   useEffect(() => {
     const newErrors = {};
-
-    if (touched.firstName && !formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    } else if (touched.firstName && formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
-    }
-
-    if (touched.lastName && !formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    } else if (touched.lastName && formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
-    }
-
-    if (touched.email && !formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (touched.email && !validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
 
     if (touched.password && !formData.password.trim()) {
       newErrors.password = 'Password is required';
@@ -173,8 +166,6 @@ const Register = () => {
   const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-
-    // Mark field as touched
     setTouched(prev => ({ ...prev, [name]: true }));
   };
 
@@ -184,24 +175,6 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
-    }
-
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
 
     if (!formData.password.trim()) {
       newErrors.password = 'Password is required';
@@ -222,6 +195,11 @@ const Register = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
+    if (!token) {
+      showError('Invalid reset token. Please request a new password reset.');
+      return;
+    }
+
     if (!validateForm()) {
       return;
     }
@@ -231,43 +209,32 @@ const Register = () => {
     setSuccess('');
 
     try {
-      console.log('Register: Starting registration process');
-      const res = await ApiService.register({
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
-      });
-
-      console.log('Register: Registration successful, response:', res);
-
-      // Show success message
-      const successMessage = res.message || 'Registration successful! Please check your email to verify your account.';
-      console.log('Register: Showing success message:', successMessage);
-      showSuccess(successMessage);
+      console.log('ResetPassword: Starting password reset process');
+      const response = await ApiService.resetPassword(token, formData.password);
       
-      // Set success state for UI
+      console.log('ResetPassword: Password reset successful, response:', response);
+
+      const successMessage = response.message || 'Password reset successful! You can now log in with your new password.';
+      console.log('ResetPassword: Showing success message:', successMessage);
+      
+      showSuccess(successMessage);
       setSuccess(successMessage);
 
-      // Auto-redirect after 3 seconds
+      // Auto-redirect to login after 3 seconds
       setTimeout(() => navigate(ROUTES.LOGIN), 3000);
     } catch (err) {
-      console.error('Register: Registration error:', err);
-      console.error('Register: Error details:', {
+      console.error('ResetPassword: Password reset error:', err);
+      console.error('ResetPassword: Error details:', {
         message: err.message,
         response: err.response,
         status: err.response?.status,
         data: err.response?.data
       });
 
-      // Show error toast
-      const errorMessage = err.message || 'Registration failed. Please try again.';
-      console.log('Register: Showing error message:', errorMessage);
+      const errorMessage = err.message || 'Password reset failed. Please try again.';
+      console.log('ResetPassword: Showing error message:', errorMessage);
       showError(errorMessage);
-
-      // Clear any previous inline errors and success state
-      setErrors({});
-      setSuccess('');
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -279,6 +246,40 @@ const Register = () => {
     }
   };
 
+  if (!token) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          p: { xs: 1, sm: 2, md: 3 },
+          background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        }}
+      >
+        <Paper
+          elevation={24}
+          sx={{
+            p: { xs: 2, sm: 3, md: 4 },
+            width: { xs: '100%', sm: '95%', md: '80%', lg: '60%', xl: '50%' },
+            maxWidth: 600,
+            borderRadius: { xs: 2, sm: 3, md: 4 },
+            background: 'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
+            border: '2px solid #e6d897',
+            boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
+            textAlign: 'center',
+          }}
+        >
+          <CircularProgress size={60} sx={{ color: '#a3824c', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary">
+            Validating reset token...
+          </Typography>
+        </Paper>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -287,11 +288,10 @@ const Register = () => {
         alignItems: 'center',
         minHeight: '100vh',
         p: { xs: 1, sm: 2, md: 3 },
-        background:
-          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
       }}
     >
-      <Slide direction='right' in={true} timeout={400}>
+      <Slide direction='up' in={true} timeout={400}>
         <Paper
           elevation={24}
           sx={{
@@ -299,8 +299,7 @@ const Register = () => {
             width: { xs: '100%', sm: '95%', md: '80%', lg: '60%', xl: '50%' },
             maxWidth: 600,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background:
-              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
+            background: 'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
             border: '2px solid #e6d897',
             boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
             position: 'relative',
@@ -312,8 +311,7 @@ const Register = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
             },
           }}
         >
@@ -326,22 +324,21 @@ const Register = () => {
               variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 1,
                 letterSpacing: 1,
               }}
             >
-              Join Golden Basket Mart
+              Reset Your Password
             </Typography>
             <Typography
               variant={isMobile ? 'body2' : 'body1'}
               color='text.secondary'
               sx={{ fontWeight: 500 }}
             >
-              Create your account and start shopping fresh groceries
+              Enter your new password to complete the reset process
             </Typography>
           </Box>
 
@@ -353,8 +350,7 @@ const Register = () => {
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
+                  background: 'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
                   color: '#c53030',
                   border: '1px solid #feb2b2',
                   '& .MuiAlert-icon': { color: '#c53030' },
@@ -369,11 +365,11 @@ const Register = () => {
             <Fade in={true}>
               <Alert
                 severity='success'
+                icon={<CheckCircle />}
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
+                  background: 'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
                   color: '#22543d',
                   border: '1px solid #9ae6b4',
                   '& .MuiAlert-icon': { color: '#22543d' },
@@ -384,125 +380,10 @@ const Register = () => {
             </Fade>
           )}
 
-          {/* Registration Form */}
+          {/* Reset Password Form */}
           <Box component='form' onSubmit={handleSubmit} noValidate>
-            <Grid container spacing={2}>
-              <Grid item size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label='First Name'
-                  name='firstName'
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur('firstName')}
-                  onKeyPress={handleKeyPress}
-                  fullWidth
-                  required
-                  error={!!errors.firstName}
-                  helperText={errors.firstName}
-                  disabled={loading}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <PersonIcon sx={{ color: '#a3824c' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': { borderColor: '#a3824c' },
-                      '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                      '&.Mui-error fieldset': { borderColor: '#d32f2f' },
-                    },
-                    '& .MuiInputLabel-root': {
-                      '&.Mui-focused': { color: '#a3824c' },
-                      '&.Mui-error': { color: '#d32f2f' },
-                    },
-                    '& .MuiFormHelperText-root': {
-                      '&.Mui-error': { color: '#d32f2f' },
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label='Last Name'
-                  name='lastName'
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur('lastName')}
-                  onKeyPress={handleKeyPress}
-                  fullWidth
-                  required
-                  error={!!errors.lastName}
-                  helperText={errors.lastName}
-                  disabled={loading}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <PersonIcon sx={{ color: '#a3824c' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': { borderColor: '#a3824c' },
-                      '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                      '&.Mui-error fieldset': { borderColor: '#d32f2f' },
-                    },
-                    '& .MuiInputLabel-root': {
-                      '&.Mui-focused': { color: '#a3824c' },
-                      '&.Mui-error': { color: '#d32f2f' },
-                    },
-                    '& .MuiFormHelperText-root': {
-                      '&.Mui-error': { color: '#d32f2f' },
-                    },
-                  }}
-                />
-              </Grid>
-            </Grid>
-
             <TextField
-              label='Email Address'
-              name='email'
-              type='email'
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={() => handleBlur('email')}
-              onKeyPress={handleKeyPress}
-              fullWidth
-              required
-              margin='normal'
-              error={!!errors.email}
-              helperText={errors.email}
-              disabled={loading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <EmailIcon sx={{ color: '#a3824c' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
-                },
-                '& .MuiInputLabel-root': {
-                  '&.Mui-focused': { color: '#a3824c' },
-                  '&.Mui-error': { color: '#d32f2f' },
-                },
-                '& .MuiFormHelperText-root': {
-                  '&.Mui-error': { color: '#d32f2f' },
-                },
-              }}
-            />
-
-            <TextField
-              label='Password'
+              label='New Password'
               name='password'
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
@@ -521,7 +402,7 @@ const Register = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <LockIcon sx={{ color: '#a3824c' }} />
+                    <Lock sx={{ color: '#a3824c' }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -535,15 +416,9 @@ const Register = () => {
                         edge='end'
                         disabled={loading}
                         sx={{ color: '#a3824c' }}
-                        aria-label={
-                          showPassword ? 'Hide password' : 'Show password'
-                        }
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
-                        {showPassword ? (
-                          <VisibilityOffIcon />
-                        ) : (
-                          <VisibilityIcon />
-                        )}
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </Tooltip>
                   </InputAdornment>
@@ -573,7 +448,7 @@ const Register = () => {
             )}
 
             <TextField
-              label='Confirm Password'
+              label='Confirm New Password'
               name='confirmPassword'
               type={showConfirmPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
@@ -589,35 +464,23 @@ const Register = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <LockIcon sx={{ color: '#a3824c' }} />
+                    <Lock sx={{ color: '#a3824c' }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
                   <InputAdornment position='end'>
                     <Tooltip
-                      title={
-                        showConfirmPassword ? 'Hide password' : 'Show password'
-                      }
+                      title={showConfirmPassword ? 'Hide password' : 'Show password'}
                       TransitionComponent={Zoom}
                     >
                       <IconButton
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         edge='end'
                         disabled={loading}
                         sx={{ color: '#a3824c' }}
-                        aria-label={
-                          showConfirmPassword
-                            ? 'Hide password'
-                            : 'Show password'
-                        }
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                       >
-                        {showConfirmPassword ? (
-                          <VisibilityOffIcon />
-                        ) : (
-                          <VisibilityIcon />
-                        )}
+                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </Tooltip>
                   </InputAdornment>
@@ -648,7 +511,7 @@ const Register = () => {
                 loading ? (
                   <CircularProgress size={20} color='inherit' />
                 ) : (
-                  <PersonAddIcon />
+                  <Security />
                 )
               }
               sx={{
@@ -658,21 +521,18 @@ const Register = () => {
                 fontWeight: 700,
                 fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 color: '#fff',
                 textTransform: 'none',
                 boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
                 '&:hover': {
-                  background:
-                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                  background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
                   color: '#000',
                   transform: 'translateY(-2px)',
                   boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
                 },
                 '&:disabled': {
-                  background:
-                    'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
+                  background: 'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
                   color: '#999',
                   borderColor: '#ccc',
                   transform: 'none',
@@ -681,14 +541,14 @@ const Register = () => {
                 transition: 'all 0.3s ease',
               }}
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Resetting Password...' : 'Reset Password'}
             </Button>
 
             <Divider
               sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}
             >
               <Typography variant='body2' color='text.secondary' sx={{ px: 2 }}>
-                Already have an account?
+                Remember your password?
               </Typography>
             </Divider>
 
@@ -698,6 +558,7 @@ const Register = () => {
               fullWidth
               variant='outlined'
               disabled={loading}
+              startIcon={<ArrowBack />}
               sx={{
                 py: { xs: 1.5, sm: 2 },
                 fontWeight: 600,
@@ -722,7 +583,7 @@ const Register = () => {
                 transition: 'all 0.3s ease',
               }}
             >
-              Sign In Instead
+              Back to Login
             </Button>
           </Box>
         </Paper>
@@ -731,4 +592,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default ResetPassword;

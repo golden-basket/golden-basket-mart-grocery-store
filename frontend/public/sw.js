@@ -1,6 +1,6 @@
-const CACHE_NAME = 'golden-basket-v1';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
+const CACHE_NAME = 'golden-basket-v2';
+const STATIC_CACHE = 'static-v2';
+const DYNAMIC_CACHE = 'dynamic-v2';
 
 // Files to cache immediately
 const STATIC_FILES = [
@@ -139,24 +139,105 @@ async function handleStaticAsset(request) {
   }
 }
 
-// Handle navigation requests with network-first strategy
+// Handle navigation requests for SPA (Single Page Application)
 async function handleNavigation(request) {
+  const url = new URL(request.url);
+  
+  // For SPA with HashRouter, all routes should serve index.html
+  // Only handle the root path and let React Router handle the rest
+  if (url.pathname === '/' || url.pathname === '/index.html') {
+    try {
+      const response = await fetch(request);
+      if (response.ok) {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        cache.put(request, response.clone());
+      }
+      return response;
+    } catch (error) {
+      console.error('Navigation request failed:', error);
+      // Try to serve from cache
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      // Return offline page
+      return caches.match('/offline.html') || new Response(
+        `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Offline - Golden Basket Mart</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                text-align: center; 
+                padding: 50px; 
+                background: #f7fbe8;
+              }
+              .offline-container {
+                max-width: 500px;
+                margin: 0 auto;
+                background: white;
+                padding: 40px;
+                border-radius: 16px;
+                box-shadow: 0 6px 24px rgba(163, 130, 76, 0.12);
+              }
+              .offline-icon {
+                font-size: 64px;
+                color: #a3824c;
+                margin-bottom: 20px;
+              }
+              h1 { color: #2e3a1b; margin-bottom: 20px; }
+              p { color: #7d6033; line-height: 1.6; }
+              .retry-btn {
+                background: #a3824c;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 20px;
+              }
+              .retry-btn:hover { background: #866422; }
+            </style>
+          </head>
+          <body>
+            <div class="offline-container">
+              <div class="offline-icon">📱</div>
+              <h1>You're Offline</h1>
+              <p>It looks like you've lost your internet connection. Please check your network and try again.</p>
+              <button class="retry-btn" onclick="window.location.reload()">Try Again</button>
+            </div>
+          </body>
+        </html>
+        `,
+        { headers: { 'Content-Type': 'text/html' } }
+      );
+    }
+  }
+  
+  // For all other paths (like /reset-password), serve index.html
+  // This allows React Router to handle the routing
   try {
-    const response = await fetch(request);
+    const indexRequest = new Request('/', { method: 'GET' });
+    const response = await fetch(indexRequest);
     if (response.ok) {
       const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, response.clone());
+      cache.put(indexRequest, response.clone());
     }
     return response;
   } catch (error) {
-    console.error('Navigation request failed:', error);
-    // Try to serve from cache
-    const cachedResponse = await caches.match(request);
+    console.error('SPA route request failed:', error);
+    // Try to serve index.html from cache
+    const cachedResponse = await caches.match('/');
     if (cachedResponse) {
       return cachedResponse;
     }
     
-    // Return offline page
+    // Return offline page as fallback
     return caches.match('/offline.html') || new Response(
       `
       <!DOCTYPE html>

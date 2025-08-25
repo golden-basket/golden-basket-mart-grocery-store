@@ -17,6 +17,8 @@ import { usePermissions } from '../hooks/usePermissions';
 import RoleBasedAccess from './RoleBasedAccess';
 import PermissionGuard from './PermissionGuard';
 import RoleBasedUI from './RoleBasedUI';
+import TestVerification from './TestVerification';
+import TestResetPassword from './TestResetPassword';
 
 const TestComponent = () => {
   const { isDarkMode, toggleTheme } = useThemeContext();
@@ -299,6 +301,9 @@ const TestComponent = () => {
           </Grid>
         </Grid>
       </Box>
+
+      <TestVerification />
+      <TestResetPassword />
 
       <Box>
         <Typography variant='h6' gutterBottom>
