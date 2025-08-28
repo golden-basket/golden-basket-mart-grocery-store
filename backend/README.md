@@ -11,13 +11,16 @@ A robust Node.js/Express backend API for the Golden Basket Mart grocery store ap
 - **API Documentation** with Swagger/OpenAPI 3.0
 - **Performance Monitoring** and caching with memory-cache
 - **Input Validation** with Joi and Express Validator
-- **Rate Limiting** and security measures
+- **Enhanced Rate Limiting** with multiple tiers and endpoint-specific limits
 - **PDF Generation** for invoices using PDFKit
 - **Email Services** with Nodemailer
 - **Comprehensive Logging** with Winston
 - **Error Handling** and validation
 - **Response Compression** for optimized performance
 - **Database Indexing** for faster queries
+- **Token Management** with secure JWT handling
+- **Request ID Tracking** for debugging and monitoring
+- **Redis Integration** for enhanced caching and rate limiting
 
 ## 🏗️ Project Structure
 
@@ -31,7 +34,6 @@ backend/
 │   │   ├── orderController.js   # Order processing
 │   │   ├── categoryController.js # Category management
 │   │   ├── addressController.js # Address management
-│   │   └── projectController.js # Project utilities
 │   ├── models/              # MongoDB schemas
 │   │   ├── User.js          # User model with role-based access
 │   │   ├── Product.js       # Product model with text search
@@ -45,10 +47,15 @@ backend/
 │   ├── middleware/          # Custom middleware
 │   │   ├── auth.js          # Authentication middleware
 │   │   ├── validation.js    # Input validation
-│   │   └── cache.js         # Caching middleware
+│   │   ├── cache.js         # Caching middleware
+│   │   ├── errorHandler.js  # Error handling middleware
+│   │   ├── rateLimiter.js   # Basic rate limiting
+│   │   └── enhancedRateLimiter.js # Advanced rate limiting
 │   └── utils/               # Utility functions
 │       ├── logger.js        # Winston logging
-│       └── performance.js   # Performance monitoring
+│       ├── performance.js   # Performance monitoring
+│       ├── databaseOptimizer.js # Database optimization
+│       └── tokenManager.js  # JWT token management
 ├── index.js                 # Server entry point
 ├── package.json             # Dependencies
 └── performance-test.js      # Performance testing utilities
@@ -74,6 +81,11 @@ backend/
 - **Express Validator 7.0.1** - Input validation
 - **Memory Cache 0.2.0** - Caching
 - **Jest 29.7.0** - Testing framework
+- **Express Mongo Sanitize 2.2.0** - NoSQL injection prevention
+- **XSS Clean 0.1.4** - XSS protection
+- **HPP 0.2.3** - HTTP Parameter Pollution protection
+- **Redis 4.6.7** - Caching and rate limiting
+- **Rate Limit Redis 4.2.0** - Redis-based rate limiting
 
 ## 🚀 Getting Started
 
@@ -81,6 +93,7 @@ backend/
 
 - Node.js (v18 or higher)
 - MongoDB (local or cloud instance)
+- Redis (optional, for enhanced rate limiting)
 - npm or yarn package manager
 
 ### Installation
@@ -114,6 +127,9 @@ backend/
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
    EMAIL_FROM=noreply@goldenbasketmart.com
+
+   # Redis Configuration (optional)
+   REDIS_URL=redis://localhost:6379
 
    # Optional: Logging Configuration
    LOG_LEVEL=info
@@ -154,6 +170,8 @@ The application uses a flexible CORS configuration:
 - `npm start` - Start production server
 - `npm run dev` - Start development server with nodemon
 - `npm test` - Run Jest tests
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
 
 ## 🌐 API Endpoints
 
@@ -220,13 +238,10 @@ The application uses a flexible CORS configuration:
 - `GET /api/invoices` - Get user's invoices
 - `GET /api/invoice/:id` - Download invoice PDF
 
-### Projects (Admin only)
+### Performance & Monitoring
 
-- `GET /api/projects` - Get all projects
-- `GET /api/projects/:id` - Get single project
-- `POST /api/projects` - Create project
-- `PUT /api/projects/:id` - Update project
-- `DELETE /api/projects/:id` - Delete project
+- `GET /api/performance` - Performance metrics
+- `GET /api-docs` - API documentation
 
 ## 🔐 Authentication & Authorization
 
@@ -261,11 +276,13 @@ router.get('/admin', auth, admin, controller.method);
 router.post('/auth/login', authLimiter, controller.method);
 ```
 
-### Rate Limiting
+### Enhanced Rate Limiting
 
 - **Auth Routes**: 5 requests per 15 minutes
 - **General Routes**: 100 requests per 15 minutes
-- **Admin Routes**: 1000 requests per 15 minutes
+- **API Routes**: 200 requests per 15 minutes
+- **Sensitive Routes**: 10 requests per 15 minutes
+- **Redis Support**: Optional Redis-based rate limiting for production
 
 ## 🗄️ Database Models
 
@@ -349,11 +366,12 @@ router.post('/auth/login', authLimiter, controller.method);
 - **CORS** - Cross-origin protection with environment-specific configuration
 - **XSS Protection** - Cross-site scripting prevention
 - **NoSQL Injection Protection** - MongoDB query sanitization
-- **Rate Limiting** - Request throttling to prevent abuse
+- **Enhanced Rate Limiting** - Multi-tier request throttling with Redis support
 - **Input Validation** - Schema-based validation with Joi and Express Validator
 - **JWT Security** - Token-based authentication with secure storage
 - **Password Hashing** - BCrypt encryption for password security
 - **HTTP Parameter Pollution** - HPP protection
+- **Request ID Tracking** - Security monitoring and debugging
 
 ### CORS Configuration
 
@@ -368,20 +386,34 @@ cors({
 });
 ```
 
-### Rate Limiting Configuration
+### Enhanced Rate Limiting Configuration
 
 ```javascript
 // Auth routes: 5 requests per 15 minutes
-const authLimiter = rateLimit({
+const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
-  message: 'Too many authentication attempts, please try again later.',
+  max: 5, // 5 attempts per 15 minutes for auth endpoints
+  message: 'Too many authentication attempts. Please try again later.',
 });
 
 // General routes: 100 requests per 15 minutes
-const generalLimiter = rateLimit({
+const generalRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 100,
+});
+
+// API routes: 200 requests per 15 minutes
+const apiRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+});
+
+// Sensitive routes: 10 requests per 15 minutes
+const strictRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message:
+    'Too many requests to this sensitive endpoint. Please try again later.',
 });
 ```
 
@@ -401,6 +433,7 @@ const generalLimiter = rateLimit({
 - **Compound indexes** for complex queries
 - **Lean queries** for better performance
 - **Connection pooling** for MongoDB
+- **Query optimization** with database optimizer utility
 
 ### Caching Strategy
 
@@ -408,6 +441,7 @@ const generalLimiter = rateLimit({
 - **Cache middleware** for frequently accessed data
 - **Cache invalidation** on data updates
 - **Configurable cache TTL**
+- **Redis integration** for distributed caching
 
 ### Performance Monitoring
 
@@ -533,6 +567,7 @@ logger.debug('Development debugging');
 - **Memory usage** tracking
 - **Endpoint performance metrics**
 - **Response time analysis**
+- **Request ID tracking** for debugging
 
 ## 🚀 Deployment
 
@@ -544,6 +579,7 @@ logger.debug('Development debugging');
 4. Configure CORS origin for production domain
 5. Set up environment-specific variables
 6. Configure logging for production
+7. Set up Redis for production rate limiting
 
 ### Environment Variables for Production
 
@@ -555,6 +591,7 @@ JWT_SECRET=production-secret-key
 CORS_ORIGIN=https://yourdomain.com
 EMAIL_USER=your-production-email
 EMAIL_PASS=your-production-password
+REDIS_URL=redis://production-redis-uri
 LOG_LEVEL=error
 ```
 
@@ -563,11 +600,12 @@ LOG_LEVEL=error
 1. **Build and package** the application
 2. **Set up environment variables** for production
 3. **Configure MongoDB** connection
-4. **Set up reverse proxy** (Nginx/Apache)
-5. **Configure SSL/TLS** certificates
-6. **Set up process manager** (PM2)
-7. **Configure monitoring** and logging
-8. **Set up backup** strategies
+4. **Set up Redis** for rate limiting and caching
+5. **Set up reverse proxy** (Nginx/Apache)
+6. **Configure SSL/TLS** certificates
+7. **Set up process manager** (PM2)
+8. **Configure monitoring** and logging
+9. **Set up backup** strategies
 
 ### PM2 Configuration
 
@@ -668,6 +706,7 @@ For backend-specific issues and questions:
 - **Authentication issues**: Check JWT_SECRET and token expiration
 - **Performance issues**: Monitor `/api/performance` endpoint
 - **Email issues**: Verify email configuration and credentials
+- **Rate limiting issues**: Check Redis configuration and rate limit settings
 
 ---
 

@@ -65,23 +65,18 @@ const ForgotPassword = () => {
     setSuccess('');
 
     try {
-      console.log('ForgotPassword: Starting password reset request');
       // Call the actual API endpoint for password reset
       const response = await ApiService.forgotPassword(email.trim());
-      
-      console.log('ForgotPassword: Password reset request successful, response:', response);
 
-      const successMessage = response.message ||
+      const successMessage =
+        response.message ||
         'Password reset instructions have been sent to your email address. Please check your inbox and follow the instructions to reset your password.';
-      
-      console.log('ForgotPassword: Showing success message:', successMessage);
+
       showSuccess(successMessage);
 
       // Auto-redirect after 5 seconds
       setTimeout(() => navigate(ROUTES.LOGIN), 5000);
     } catch (err) {
-      console.error('Forgot password error:', err);
-
       showError(
         err.message || 'Failed to send password reset email. Please try again.'
       );

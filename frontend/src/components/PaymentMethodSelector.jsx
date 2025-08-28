@@ -51,7 +51,7 @@ const PaymentMethodSelector = ({
     getResponsiveAlertSize,
   } = useFoldableDisplay();
 
-  // Only support COD and UPI for now
+  // Support COD and UPI payment methods
   const paymentMethods = [
     {
       value: 'cod',
@@ -64,7 +64,7 @@ const PaymentMethodSelector = ({
     // {
     //   value: 'upi',
     //   label: 'UPI Payment',
-    //   icon: <UpiIcon />,
+    //   icon: <QrCodeIcon />,
     //   description: 'Pay using UPI ID and upload payment screenshot',
     //   color: '#9c27b0',
     //   fields: [
@@ -145,6 +145,8 @@ const PaymentMethodSelector = ({
           color: 'var(--color-primary)',
           mb: getResponsiveSpacing(),
           textAlign: isMobile ? 'center' : 'left',
+          fontSize: getResponsiveSpacing() === 1 ? '0.9rem' : getResponsiveSpacing() === 2 ? '1rem' : '1.1rem',
+          letterSpacing: '0.5px',
         }}
       >
         Select Payment Method
@@ -164,9 +166,9 @@ const PaymentMethodSelector = ({
         className={getResponsiveAlertSize()}
       >
         <Typography variant='body2' className={getResponsiveTextClasses()}>
-          <strong>Note:</strong> We currently support Cash on Delivery (COD) and
-          UPI payments only. For UPI payments, please upload a screenshot of
-          your payment confirmation.
+          <strong>Payment Options:</strong> Choose between Cash on Delivery (COD) 
+          or UPI payment. For UPI payments, please upload a screenshot of
+          your payment confirmation after completing the transaction.
         </Typography>
       </Alert>
 
@@ -182,7 +184,7 @@ const PaymentMethodSelector = ({
       >
         <Grid container spacing={getResponsiveSpacing()}>
           {paymentMethods.map(method => (
-            <Grid item size={{ xs: 12, sm: 6 }} key={method.value}>
+            <Grid item xs={12} sm={6} key={method.value}>
               <Card
                 sx={{
                   cursor: 'pointer',
@@ -190,24 +192,28 @@ const PaymentMethodSelector = ({
                     selectedMethod === method.value
                       ? '2px solid var(--color-primary)'
                       : '1px solid var(--color-primary-light)',
-                  borderRadius: 2,
+                  borderRadius: getResponsiveSpacing() * 0.5,
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     borderColor: 'var(--color-primary)',
-                    boxShadow: '0 4px 12px rgba(163,130,76,0.2)',
-                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(163,130,76,0.15)',
+                    transform: 'translateY(-1px)',
                   },
                   background:
                     selectedMethod === method.value
-                      ? 'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)'
+                      ? 'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)'
                       : 'white',
+                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
                   ...getResponsiveCardSize(),
                 }}
                 onClick={() => onMethodChange(method.value)}
-                className='card-golden hover-responsive'
+                className='card-golden'
               >
-                <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
-                  <Box display='flex' alignItems='center' mb={1}>
+                <CardContent sx={{ 
+                  p: getResponsiveSpacing() * 0.75,
+                  '&:last-child': { pb: getResponsiveSpacing() * 0.75 }
+                }}>
+                  <Box display='flex' alignItems='center' mb={getResponsiveSpacing() * 0.5}>
                     <Box
                       sx={{
                         color: method.color,
@@ -225,7 +231,7 @@ const PaymentMethodSelector = ({
                         <Typography
                           variant={isMobile ? 'body2' : 'body1'}
                           fontWeight={600}
-                          color='var(--color-text-primary)'
+                          color='var(--color-primary)'
                         >
                           {method.label}
                         </Typography>
@@ -234,7 +240,7 @@ const PaymentMethodSelector = ({
                         margin: 0,
                         '& .MuiFormControlLabel-label': {
                           fontWeight: 600,
-                          color: 'var(--color-text-primary)',
+                          color: 'var(--color-primary)',
                         },
                       }}
                     />
@@ -242,7 +248,7 @@ const PaymentMethodSelector = ({
                   <Typography
                     variant='body2'
                     color='textSecondary'
-                    sx={{ ml: 4 }}
+                    sx={{ ml: getResponsiveSpacing() * 2 }}
                     className={getResponsiveTextClasses()}
                   >
                     {method.description}
@@ -260,12 +266,13 @@ const PaymentMethodSelector = ({
         selectedMethodData.fields.length > 0 && (
           <Paper
             sx={{
-              p: getResponsiveSpacing(),
+              p: getResponsiveSpacing() * 0.75,
               background:
-                'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
               border: '1px solid var(--color-primary-light)',
-              borderRadius: 2,
+              borderRadius: getResponsiveSpacing() * 0.5,
               mb: getResponsiveSpacing(),
+              boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
             }}
             className='card-golden'
           >
@@ -277,6 +284,8 @@ const PaymentMethodSelector = ({
                 color: 'var(--color-primary)',
                 mb: getResponsiveSpacing(),
                 textAlign: isMobile ? 'center' : 'left',
+                fontSize: getResponsiveSpacing() === 1 ? '0.85rem' : getResponsiveSpacing() === 2 ? '0.9rem' : '1rem',
+                letterSpacing: '0.3px',
               }}
             >
               {selectedMethodData.label} Details
@@ -284,7 +293,7 @@ const PaymentMethodSelector = ({
 
             <Grid container spacing={getResponsiveSpacing()}>
               {selectedMethodData.fields.map(field => (
-                <Grid item size={{ xs: 12, sm: 6 }} key={field.name}>
+                <Grid item xs={12} sm={6} key={field.name}>
                   <TextField
                     fullWidth
                     label={field.label}
@@ -298,7 +307,7 @@ const PaymentMethodSelector = ({
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         background: 'white',
-                        borderRadius: 1,
+                        borderRadius: getResponsiveSpacing() * 0.25,
                         '&:hover fieldset': {
                           borderColor: 'var(--color-primary)',
                         },
@@ -325,12 +334,13 @@ const PaymentMethodSelector = ({
       {selectedMethod === 'upi' && (
         <Paper
           sx={{
-            p: getResponsiveSpacing(),
+            p: getResponsiveSpacing() * 0.75,
             background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+              'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
             border: '1px solid var(--color-primary-light)',
-            borderRadius: 2,
+            borderRadius: getResponsiveSpacing() * 0.5,
             mb: getResponsiveSpacing(),
+            boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
           }}
           className='card-golden'
         >
@@ -342,14 +352,16 @@ const PaymentMethodSelector = ({
               color: 'var(--color-primary)',
               mb: getResponsiveSpacing(),
               textAlign: 'center',
+              fontSize: getResponsiveSpacing() === 1 ? '0.85rem' : getResponsiveSpacing() === 2 ? '0.9rem' : '1rem',
+              letterSpacing: '0.3px',
             }}
           >
             UPI Payment Instructions
           </Typography>
 
           {/* QR Code Section */}
-          <Box sx={{ mb: getResponsiveSpacing(), textAlign: 'center' }}>
-            <Typography variant='body2' color='textSecondary' sx={{ mb: 1 }}>
+          <Box sx={{ mb: getResponsiveSpacing() * 0.75, textAlign: 'center' }}>
+            <Typography variant='body2' color='textSecondary' sx={{ mb: getResponsiveSpacing() * 0.5 }}>
               Scan this QR code to pay via UPI:
             </Typography>
             <Box
@@ -359,11 +371,12 @@ const PaymentMethodSelector = ({
                 margin: '0 auto',
                 background: 'white',
                 border: '2px solid var(--color-primary-light)',
-                borderRadius: 2,
+                borderRadius: getResponsiveSpacing() * 0.5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 2,
+                p: getResponsiveSpacing() * 0.75,
+                boxShadow: '0 2px 8px rgba(163,130,76,0.1)',
               }}
             >
               <QrCodeIcon
@@ -376,7 +389,7 @@ const PaymentMethodSelector = ({
             <Typography
               variant='caption'
               color='textSecondary'
-              sx={{ mt: 1, display: 'block' }}
+              sx={{ mt: getResponsiveSpacing() * 0.5, display: 'block' }}
             >
               UPI ID: goldenbasket@upi
             </Typography>
@@ -384,7 +397,7 @@ const PaymentMethodSelector = ({
 
           {/* Payment Screenshot Upload */}
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant='body2' color='textSecondary' sx={{ mb: 1 }}>
+            <Typography variant='body2' color='textSecondary' sx={{ mb: getResponsiveSpacing() * 0.5 }}>
               After payment, upload a screenshot of your payment confirmation:
             </Typography>
 
@@ -396,10 +409,16 @@ const PaymentMethodSelector = ({
                 sx={{
                   borderColor: 'var(--color-primary)',
                   color: 'var(--color-primary)',
+                  borderRadius: getResponsiveSpacing() * 0.5,
+                  fontWeight: 600,
+                  textTransform: 'none',
                   '&:hover': {
                     borderColor: 'var(--color-primary-dark)',
                     backgroundColor: 'rgba(163,130,76,0.1)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(163,130,76,0.15)',
                   },
+                  transition: 'all 0.3s ease',
                 }}
                 className={getResponsiveButtonSize()}
               >
@@ -417,21 +436,27 @@ const PaymentMethodSelector = ({
                   label='Screenshot uploaded'
                   color='success'
                   icon={<UploadIcon />}
-                  sx={{ mb: 1 }}
+                  sx={{ mb: getResponsiveSpacing() * 0.5 }}
                 />
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: getResponsiveSpacing() * 0.5 }}>
                   <Button
                     variant='outlined'
                     size='small'
                     onClick={removeScreenshot}
                     startIcon={<DeleteIcon />}
                     sx={{
-                      borderColor: 'var(--color-error)',
-                      color: 'var(--color-error)',
+                      borderColor: '#d32f2f',
+                      color: '#d32f2f',
+                      borderRadius: getResponsiveSpacing() * 0.25,
+                      fontWeight: 600,
+                      textTransform: 'none',
                       '&:hover': {
-                        borderColor: 'var(--color-error)',
+                        borderColor: '#d32f2f',
                         backgroundColor: 'rgba(211,47,47,0.1)',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 2px 8px rgba(211,47,47,0.15)',
                       },
+                      transition: 'all 0.3s ease',
                     }}
                   >
                     Remove
@@ -446,20 +471,19 @@ const PaymentMethodSelector = ({
       {/* COD Notice */}
       {selectedMethod === 'cod' && (
         <Alert
-          severity='warning'
+          severity='info'
           sx={{
-            background: 'rgba(255,152,0,0.1)',
-            border: '1px solid var(--color-warning)',
+            background: 'rgba(163,130,76,0.1)',
+            border: '1px solid var(--color-primary-light)',
             '& .MuiAlert-icon': {
-              color: 'var(--color-warning)',
+              color: 'var(--color-primary)',
             },
           }}
           className={getResponsiveAlertSize()}
         >
           <Typography variant='body2' className={getResponsiveTextClasses()}>
             <strong>Cash on Delivery:</strong> Please have exact change ready.
-            Additional delivery charges may apply based on your location and
-            order amount.
+            Free delivery is included with all orders.
           </Typography>
         </Alert>
       )}

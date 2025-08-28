@@ -125,9 +125,13 @@ const Cart = () => {
     });
   };
 
-  const total = cart
+  const subtotal = cart
     .filter(item => item && item.product && item.product.price)
     .reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  
+  const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
+  const gst = subtotal * 0.18; // 18% GST
+  const total = subtotal + deliveryCharge + gst; // Total including delivery and GST
 
   // Show loading state
   if (isLoading) {
@@ -1507,7 +1511,7 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          ₹{total.toFixed(2)}
+                          ₹{subtotal.toFixed(2)}
                         </Typography>
                       </Box>
                       <Box
@@ -1550,7 +1554,7 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          Free
+                          {deliveryCharge === 0 ? 'Free' : `Rs.${deliveryCharge.toFixed(2)}`}
                         </Typography>
                       </Box>
                       <Box
@@ -1593,7 +1597,7 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          ₹{(total * 0.18).toFixed(2)}
+                          ₹{gst.toFixed(2)}
                         </Typography>
                       </Box>
                       <Divider
@@ -1653,10 +1657,108 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          ₹{(total * 1.18).toFixed(2)}
+                          ₹{total.toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
+
+                    {/* Delivery Charges Information */}
+                    <Alert
+                      severity='info'
+                      sx={{
+                        mb: 0.5,
+                        borderRadius: getResponsiveValue(0.5, 0.5, 1, 1.5, 2, 2.5, 1),
+                        background:
+                          'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                        border: '1px solid var(--color-primary-light)',
+                        '& .MuiAlert-icon': {
+                          color: 'var(--color-primary)',
+                        },
+                      }}
+                      className={getResponsiveCardSize()}
+                    >
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.5rem',
+                            '0.55rem',
+                            '0.6rem',
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.6rem'
+                          ),
+                          fontWeight: 600,
+                          color: 'var(--color-primary)',
+                          mb: 0.25,
+                          display: 'block',
+                        }}
+                      >
+                        📦 Delivery Info
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.45rem',
+                            '0.5rem',
+                            '0.55rem',
+                            '0.6rem',
+                            '0.65rem',
+                            '0.7rem',
+                            '0.55rem'
+                          ),
+                          color: 'var(--color-primary-dark)',
+                          display: 'block',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        Orders ≥ Rs.499: <strong style={{color: 'var(--color-primary)'}}>FREE</strong>
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.45rem',
+                            '0.5rem',
+                            '0.55rem',
+                            '0.6rem',
+                            '0.65rem',
+                            '0.7rem',
+                            '0.55rem'
+                          ),
+                          color: 'var(--color-primary-dark)',
+                          display: 'block',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        Orders under Rs.499: <strong style={{color: 'var(--color-primary)'}}>Rs.50</strong>
+                      </Typography>
+                      {subtotal < 499 && (
+                        <Typography
+                          variant='caption'
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              '0.45rem',
+                              '0.5rem',
+                              '0.55rem',
+                              '0.6rem',
+                              '0.65rem',
+                              '0.7rem',
+                              '0.55rem'
+                            ),
+                            color: 'var(--color-primary)',
+                            display: 'block',
+                            lineHeight: 1.2,
+                            mt: 0.25,
+                            fontWeight: 600,
+                          }}
+                        >
+                          💡 Add Rs.{(499 - subtotal).toFixed(2)} more for free delivery!
+                        </Typography>
+                      )}
+                    </Alert>
 
                     {/* Checkout Button */}
                     <Button

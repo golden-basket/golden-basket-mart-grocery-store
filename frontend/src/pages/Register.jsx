@@ -219,6 +219,22 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleReset = () => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
+    setTouched({});
+    setErrors({});
+    setSuccess('');
+    setLoading(false);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
 
@@ -231,7 +247,6 @@ const Register = () => {
     setSuccess('');
 
     try {
-      console.log('Register: Starting registration process');
       const res = await ApiService.register({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
@@ -239,15 +254,18 @@ const Register = () => {
         password: formData.password,
       });
 
-      console.log('Register: Registration successful, response:', res);
-
       // Show success message
-      const successMessage = res.message || 'Registration successful! Please check your email to verify your account.';
-      console.log('Register: Showing success message:', successMessage);
+      const successMessage =
+        res.message ||
+        'Registration successful! Please check your email to verify your account.';
+
       showSuccess(successMessage);
-      
+
       // Set success state for UI
       setSuccess(successMessage);
+
+      // Clear Form Data
+      handleReset();
 
       // Auto-redirect after 3 seconds
       setTimeout(() => navigate(ROUTES.LOGIN), 3000);
@@ -257,12 +275,13 @@ const Register = () => {
         message: err.message,
         response: err.response,
         status: err.response?.status,
-        data: err.response?.data
+        data: err.response?.data,
       });
 
       // Show error toast
-      const errorMessage = err.message || 'Registration failed. Please try again.';
-      console.log('Register: Showing error message:', errorMessage);
+      const errorMessage =
+        err.message || 'Registration failed. Please try again.';
+
       showError(errorMessage);
 
       // Clear any previous inline errors and success state
@@ -385,7 +404,12 @@ const Register = () => {
           )}
 
           {/* Registration Form */}
-          <Box component='form' onSubmit={handleSubmit} noValidate>
+          <Box
+            component='form'
+            onSubmit={handleSubmit}
+            onReset={handleReset}
+            noValidate
+          >
             <Grid container spacing={2}>
               <Grid item size={{ xs: 12, sm: 6 }}>
                 <TextField

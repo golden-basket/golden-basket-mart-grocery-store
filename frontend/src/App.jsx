@@ -58,17 +58,25 @@ const App = () => {
                     <Route path={ROUTES.HOME} element={<HomeComponent />} />
                     <Route path={ROUTES.TEST} element={<TestComponent />} />
                     <Route path={ROUTES.CATALOGUE} element={<Catalogue />} />
-                    
+
                     {/* Authentication Routes */}
                     <Route path={ROUTES.LOGIN} element={<Login />} />
                     <Route path={ROUTES.REGISTER} element={<Register />} />
-                    <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
-                    <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
-                    
+                    <Route
+                      path={ROUTES.FORGOT_PASSWORD}
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path={ROUTES.RESET_PASSWORD}
+                      element={<ResetPassword />}
+                    />
+
                     {/* Email Verification Routes */}
-                    <Route path={ROUTES.VERIFY_EMAIL} element={<EmailVerification />} />
-                    <Route path={ROUTES.VERIFY_EMAIL_WITH_TOKEN} element={<EmailVerification />} />
-                    
+                    <Route
+                      path={ROUTES.VERIFY_EMAIL}
+                      element={<EmailVerification />}
+                    />
+
                     {/* Protected User Routes */}
                     <Route
                       path={ROUTES.PROFILE}
@@ -94,7 +102,7 @@ const App = () => {
                         </ProtectedRoute>
                       }
                     />
-                    
+
                     {/* Shopping Routes */}
                     <Route
                       path={ROUTES.CART}
@@ -120,7 +128,7 @@ const App = () => {
                         </ProtectedRoute>
                       }
                     />
-                    
+
                     {/* Admin Routes */}
                     <Route
                       path={ROUTES.ADMIN}
@@ -130,7 +138,7 @@ const App = () => {
                         </ProtectedRoute>
                       }
                     />
-                    
+
                     {/* 404 - Catch All Route */}
                     <Route path='*' element={<NotFound />} />
                   </Routes>

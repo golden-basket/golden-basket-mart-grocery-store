@@ -17,7 +17,6 @@ import {
   useMediaQuery,
   Tooltip,
   Zoom,
-  Grid,
   LinearProgress,
 } from '@mui/material';
 import {
@@ -134,7 +133,9 @@ const ResetPassword = () => {
   useEffect(() => {
     const tokenFromUrl = searchParams.get('token');
     if (!tokenFromUrl) {
-      showError('Invalid or missing reset token. Please request a new password reset.');
+      showError(
+        'Invalid or missing reset token. Please request a new password reset.'
+      );
       setTimeout(() => navigate(ROUTES.FORGOT_PASSWORD), 3000);
       return;
     }
@@ -209,14 +210,12 @@ const ResetPassword = () => {
     setSuccess('');
 
     try {
-      console.log('ResetPassword: Starting password reset process');
       const response = await ApiService.resetPassword(token, formData.password);
-      
-      console.log('ResetPassword: Password reset successful, response:', response);
 
-      const successMessage = response.message || 'Password reset successful! You can now log in with your new password.';
-      console.log('ResetPassword: Showing success message:', successMessage);
-      
+      const successMessage =
+        response.message ||
+        'Password reset successful! You can now log in with your new password.';
+
       showSuccess(successMessage);
       setSuccess(successMessage);
 
@@ -228,11 +227,12 @@ const ResetPassword = () => {
         message: err.message,
         response: err.response,
         status: err.response?.status,
-        data: err.response?.data
+        data: err.response?.data,
       });
 
-      const errorMessage = err.message || 'Password reset failed. Please try again.';
-      console.log('ResetPassword: Showing error message:', errorMessage);
+      const errorMessage =
+        err.message || 'Password reset failed. Please try again.';
+
       showError(errorMessage);
       setErrors({ submit: errorMessage });
     } finally {
@@ -255,7 +255,8 @@ const ResetPassword = () => {
           alignItems: 'center',
           minHeight: '100vh',
           p: { xs: 1, sm: 2, md: 3 },
-          background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+          background:
+            'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
         }}
       >
         <Paper
@@ -265,14 +266,15 @@ const ResetPassword = () => {
             width: { xs: '100%', sm: '95%', md: '80%', lg: '60%', xl: '50%' },
             maxWidth: 600,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background: 'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
+            background:
+              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
             border: '2px solid #e6d897',
             boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
             textAlign: 'center',
           }}
         >
           <CircularProgress size={60} sx={{ color: '#a3824c', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant='h6' color='text.secondary'>
             Validating reset token...
           </Typography>
         </Paper>
@@ -288,7 +290,8 @@ const ResetPassword = () => {
         alignItems: 'center',
         minHeight: '100vh',
         p: { xs: 1, sm: 2, md: 3 },
-        background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        background:
+          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
       }}
     >
       <Slide direction='up' in={true} timeout={400}>
@@ -299,7 +302,8 @@ const ResetPassword = () => {
             width: { xs: '100%', sm: '95%', md: '80%', lg: '60%', xl: '50%' },
             maxWidth: 600,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background: 'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
+            background:
+              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
             border: '2px solid #e6d897',
             boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
             position: 'relative',
@@ -311,7 +315,8 @@ const ResetPassword = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background:
+                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
             },
           }}
         >
@@ -324,7 +329,8 @@ const ResetPassword = () => {
               variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
-                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background:
+                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 1,
@@ -350,7 +356,8 @@ const ResetPassword = () => {
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background: 'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
+                  background:
+                    'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
                   color: '#c53030',
                   border: '1px solid #feb2b2',
                   '& .MuiAlert-icon': { color: '#c53030' },
@@ -369,7 +376,8 @@ const ResetPassword = () => {
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background: 'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
+                  background:
+                    'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
                   color: '#22543d',
                   border: '1px solid #9ae6b4',
                   '& .MuiAlert-icon': { color: '#22543d' },
@@ -416,7 +424,9 @@ const ResetPassword = () => {
                         edge='end'
                         disabled={loading}
                         sx={{ color: '#a3824c' }}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-label={
+                          showPassword ? 'Hide password' : 'Show password'
+                        }
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
@@ -470,17 +480,29 @@ const ResetPassword = () => {
                 endAdornment: (
                   <InputAdornment position='end'>
                     <Tooltip
-                      title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      title={
+                        showConfirmPassword ? 'Hide password' : 'Show password'
+                      }
                       TransitionComponent={Zoom}
                     >
                       <IconButton
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         edge='end'
                         disabled={loading}
                         sx={{ color: '#a3824c' }}
-                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                        aria-label={
+                          showConfirmPassword
+                            ? 'Hide password'
+                            : 'Show password'
+                        }
                       >
-                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        {showConfirmPassword ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
                       </IconButton>
                     </Tooltip>
                   </InputAdornment>
@@ -521,18 +543,21 @@ const ResetPassword = () => {
                 fontWeight: 700,
                 fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
-                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background:
+                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 color: '#fff',
                 textTransform: 'none',
                 boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
                 '&:hover': {
-                  background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
+                  background:
+                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
                   color: '#000',
                   transform: 'translateY(-2px)',
                   boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
                 },
                 '&:disabled': {
-                  background: 'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
+                  background:
+                    'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
                   color: '#999',
                   borderColor: '#ccc',
                   transform: 'none',

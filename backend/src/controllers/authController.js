@@ -187,9 +187,7 @@ exports.verifyEmail = async (req, res) => {
 
     if (!token) {
       logger.warn('Email verification attempt without token');
-      return res
-        .status(400)
-        .json({ error: 'Verification token is required.' });
+      return res.status(400).json({ error: 'Verification token is required.' });
     }
 
     // Hash the token to compare with stored hash
@@ -202,17 +200,21 @@ exports.verifyEmail = async (req, res) => {
     });
 
     if (!user) {
-      logger.warn(`Email verification attempt with invalid/expired token: ${token.substring(0, 10)}...`);
+      logger.warn(
+        `Email verification attempt with invalid/expired token: ${token.substring(0, 10)}...`
+      );
       return res
         .status(400)
         .json({ error: 'Invalid or expired verification token.' });
     }
 
     if (user.isVerified) {
-      logger.info(`Email verification attempt for already verified user: ${user.email}`);
-      return res.status(200).json({ 
+      logger.info(
+        `Email verification attempt for already verified user: ${user.email}`
+      );
+      return res.status(200).json({
         message: 'Email is already verified. You can log in.',
-        alreadyVerified: true 
+        alreadyVerified: true,
       });
     }
 
@@ -230,7 +232,9 @@ exports.verifyEmail = async (req, res) => {
     });
   } catch (err) {
     logger.error('Email verification error:', err);
-    res.status(500).json({ error: 'Email verification failed. Please try again.' });
+    res
+      .status(500)
+      .json({ error: 'Email verification failed. Please try again.' });
   }
 };
 

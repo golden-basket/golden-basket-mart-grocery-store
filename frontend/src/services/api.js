@@ -53,13 +53,12 @@ apiClient.interceptors.response.use(
 class ApiService {
   // Generic request method
   static async request(endpoint, options = {}) {
-    console.log('ApiService.request: Making request to:', endpoint, 'with options:', options);
     try {
       const response = await apiClient({
         url: endpoint,
         ...options,
       });
-      console.log('ApiService.request: Response received:', response.data);
+
       return response.data;
     } catch (error) {
       console.error('ApiService.request: Error occurred:', error);
@@ -84,12 +83,11 @@ class ApiService {
   }
 
   static async verifyEmail(token) {
-    console.log('ApiService.verifyEmail: Starting verification with token:', token);
     try {
       const result = await this.request(`/auth/verify/${token}`, {
         method: 'GET',
       });
-      console.log('ApiService.verifyEmail: Success response:', result);
+
       return result;
     } catch (error) {
       console.error('ApiService.verifyEmail: Error:', error);

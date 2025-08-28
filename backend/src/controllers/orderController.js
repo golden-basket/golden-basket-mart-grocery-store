@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
+const logger = require('../utils/logger');
 
 const Order = require('../models/Orders');
 const Cart = require('../models/Cart');
@@ -287,11 +288,8 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     // Draw header line
     drawLine(currentY);
 
-    // Table rows
-    let subtotal = 0;
-    let taxAmount = 0;
-    const gstRate = 0.18; // 18% GST
-
+    // Table rows - use stored values from invoice for consistency
+    let calculatedSubtotal = 0;
     let validItemsCount = 0;
     order.items.forEach((item, index) => {
       // Safety check for item structure
@@ -307,7 +305,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
 
       validItemsCount++;
       const itemSubtotal = item.price * item.quantity;
-      subtotal += itemSubtotal;
+      calculatedSubtotal += itemSubtotal;
 
       // Alternate row colors
       if (index % 2 === 0) {
@@ -377,9 +375,11 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
       '#34495e'
     );
 
-    // Calculate totals
-    taxAmount = subtotal * gstRate;
-    const total = subtotal + taxAmount;
+    // Use stored values from invoice for consistency with frontend
+    const subtotal = invoice.subtotal || calculatedSubtotal;
+    const gst = invoice.gst || (calculatedSubtotal * 0.18);
+    const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
+    const total = invoice.amount || (subtotal + deliveryCharge + gst); // Use stored total
 
     // Summary rows
     doc.fontSize(9).font('Helvetica').fill('#ffffff');
@@ -389,11 +389,20 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
 
     currentY += 16;
     doc.text('GST (18%):', summaryX, currentY);
-    rightAlignText(`INR ${taxAmount.toFixed(2)}`, currentY);
+    rightAlignText(`INR ${gst.toFixed(2)}`, currentY);
 
     currentY += 16;
     doc.text('Shipping:', summaryX, currentY);
-    rightAlignText(`INR ${subtotal > 499 ? 0 : 50}`, currentY, 10);
+    rightAlignText(`INR ${subtotal >= 499 ? 0 : 50}`, currentY, 10);
+
+    // Add delivery charges explanation
+    currentY += 16;
+    doc.fontSize(7).font('Helvetica').fill('#666666');
+    doc.text(
+      subtotal >= 499 ? '(Free delivery for orders ≥ Rs.499)' : '(Rs.50 delivery charge for orders < Rs.499)',
+      summaryX,
+      currentY
+    );
 
     currentY += 20;
 
@@ -414,7 +423,29 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
 
     currentY += 150;
 
+    // Delivery Charges Information Section
+    currentY += 20;
+    drawFilledRect(leftMargin, currentY, pageWidth, 60, '#f8f9fa');
+    
+    doc.fontSize(10).font('Helvetica-Bold').fill('#000000');
+    centerText('📦 DELIVERY CHARGES POLICY', currentY + 15, 10);
+    
+    doc.fontSize(8).font('Helvetica').fill('#000000');
+    centerText(
+      'Orders ≥ Rs.499: FREE delivery | Orders < Rs.499: Rs.50 delivery charge',
+      currentY + 30,
+      8
+    );
+    
+    doc.fontSize(8).font('Helvetica').fill('#666666');
+    centerText(
+      'Delivery charges are calculated based on order subtotal before GST',
+      currentY + 45,
+      8
+    );
+
     // Footer Section
+    currentY += 70;
     drawFilledRect(leftMargin, currentY, pageWidth, 90, '#f8f9fa');
 
     doc.fontSize(12).font('Helvetica').fill('#000000');
@@ -534,22 +565,29 @@ exports.placeOrder = async (req, res) => {
       await item.product.save();
     }
 
-    // Calculate total
-    let totalAmount = 0;
+    // Calculate total including GST (matching frontend)
+    let subtotal = 0;
     const orderItems = cart.items.map(item => {
-      totalAmount += item.product.price * item.quantity;
+      subtotal += item.product.price * item.quantity;
       return {
         product: item.product._id,
         quantity: item.quantity,
         price: item.product.price,
       };
     });
+    
+    const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
+    const gst = subtotal * 0.18; // 18% GST
+    const totalAmount = subtotal + deliveryCharge + gst; // Total including delivery and GST
 
-    // Create order
+    // Create order with detailed breakdown
     const order = await Order.create({
       user: userId,
       items: orderItems,
-      totalAmount,
+      totalAmount, // Total including delivery and GST
+      subtotal, // Subtotal before GST
+      gst, // GST amount
+      deliveryCharge, // Delivery charge
       paymentStatus: 'pending',
       orderStatus: 'processing',
       paymentMode: req.body.paymentMode || 'cod',
@@ -565,11 +603,14 @@ exports.placeOrder = async (req, res) => {
       );
     }
 
-    // Create invoice
+    // Create invoice with detailed breakdown
     const invoice = await Invoice.create({
       user: userId,
       order: order._id,
-      amount: totalAmount,
+      amount: totalAmount, // Total including delivery and GST
+      subtotal: subtotal, // Subtotal before GST
+      gst: gst, // GST amount
+      deliveryCharge: deliveryCharge, // Delivery charge
       paymentMethod: order.paymentMode,
       paymentStatus: 'unpaid',
       orderDate: new Date(),
@@ -968,12 +1009,12 @@ exports.getOrdersWithFilters = async (req, res) => {
           filter._id = objectId;
         } catch (error) {
           // If it's not a valid ObjectId, ignore the search
-          console.log('Invalid ObjectId format:', search);
+          logger.warn('Invalid ObjectId format:', search);
         }
       } else if (search.length < 24 && /^[0-9a-fA-F]+$/.test(search)) {
         // For partial ObjectId searches, we'll need to handle this differently
         // since we can't use regex on ObjectId fields
-        console.log('Partial ObjectId search not supported:', search);
+        logger.warn('Partial ObjectId search not supported:', search);
       }
     }
 

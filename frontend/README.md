@@ -16,6 +16,8 @@ A modern, responsive React frontend for the Golden Basket Mart grocery store app
 - **Error Boundaries** for graceful error handling
 - **Custom Hooks** for authentication, cart management, and responsive design
 - **Performance Optimization** with code splitting and bundle optimization
+- **Service Worker Support** for offline functionality
+- **Dark Mode Toggle** with theme switching capability
 
 ### User Experience
 
@@ -27,6 +29,8 @@ A modern, responsive React frontend for the Golden Basket Mart grocery store app
 - **Address Book** for shipping address management
 - **Admin Panel** for comprehensive product, user, and order management
 - **Responsive Design** for all screen sizes with adaptive layouts
+- **Permission-Based UI** with role-based access control
+- **Performance Monitoring** and analytics
 
 ### Performance Features
 
@@ -37,6 +41,7 @@ A modern, responsive React frontend for the Golden Basket Mart grocery store app
 - **Responsive Images** for different screen densities
 - **Tree Shaking** for unused code elimination
 - **Vendor Chunk Splitting** for better caching
+- **Service Worker** for offline functionality and caching
 
 ## 🏗️ Project Structure
 
@@ -56,10 +61,21 @@ frontend/
 │   │   ├── ChangePasswordDialog.jsx # Password management dialog
 │   │   ├── PaymentMethodSelector.jsx # Payment selection component
 │   │   ├── ReusableFilterControls.jsx # Filter components with responsive design
-│   │   ├── ThemeSnackbar.jsx # Notifications with Material-UI
+│   │   ├── ToastNotifications.jsx # Notifications with Material-UI
 │   │   ├── ImageWithFallback.jsx # Image handling with error fallback
+│   │   ├── DarkModeToggle.jsx # Theme switching component
+│   │   ├── EnhancedSearch.jsx # Advanced search functionality
 │   │   ├── FilterStatusBar.jsx # Filter status display
 │   │   ├── JumpingCartAvatar.jsx # Animated cart indicator
+│   │   ├── LoadingSkeleton.jsx # Loading placeholders
+│   │   ├── OptimizedProductCard.jsx # Product display component
+│   │   ├── PermissionGuard.jsx # Permission checking component
+│   │   ├── RoleBasedAccess.jsx # Role-based UI components
+│   │   ├── RoleBasedNavigation.jsx # Role-based navigation
+│   │   ├── RoleBasedUI.jsx # Role-based component rendering
+│   │   ├── TestComponent.jsx # Testing component
+│   │   ├── TestResetPassword.jsx # Password reset testing
+│   │   ├── TestVerification.jsx # Email verification testing
 │   │   └── admin/           # Admin-specific components
 │   │       ├── CategoryManagement.jsx # Category CRUD operations
 │   │       ├── OrderManagement.jsx # Order processing interface
@@ -77,7 +93,10 @@ frontend/
 │   │   ├── OrderCheckout.jsx # Checkout process
 │   │   ├── OrderHistory.jsx # Order tracking and history
 │   │   ├── AddressBook.jsx  # Address management
-│   │   └── ChangePassword.jsx # Password change functionality
+│   │   ├── ChangePassword.jsx # Password change functionality
+│   │   ├── ForgotPassword.jsx # Password recovery
+│   │   ├── ResetPassword.jsx # Password reset
+│   │   └── EmailVerification.jsx # Email verification
 │   ├── hooks/               # Custom React hooks
 │   │   ├── useAuth.js       # Authentication logic and state
 │   │   ├── useCart.js       # Cart management with React Query
@@ -85,17 +104,26 @@ frontend/
 │   │   ├── useAdmin.js      # Admin functionality and permissions
 │   │   ├── useApi.js        # API utilities and error handling
 │   │   ├── useProfile.js    # Profile management and updates
-│   │   └── useFoldableDisplay.js # Responsive utilities and breakpoints
+│   │   ├── useFoldableDisplay.js # Responsive utilities and breakpoints
+│   │   ├── usePerformance.js # Performance monitoring
+│   │   ├── usePermissions.js # Permission management
+│   │   ├── useServiceWorker.js # Service worker utilities
+│   │   ├── useTheme.js      # Theme management
+│   │   └── useToast.js      # Toast notifications
 │   ├── services/            # API services
 │   │   └── api.js           # HTTP client and API calls with Axios
 │   ├── providers/           # Context providers
 │   │   └── QueryProvider.jsx # React Query provider configuration
 │   ├── contexts/            # React contexts
-│   │   └── AuthContext.js   # Authentication context definition
+│   │   ├── AuthContext.js   # Authentication context definition
+│   │   └── ThemeContext.jsx # Theme context
 │   ├── styles/              # Styling and theming
 │   │   └── theme.js         # Material-UI theme configuration
 │   ├── utils/               # Utility functions
-│   │   └── common.js        # Common utilities and helpers
+│   │   ├── common.js        # Common utilities and helpers
+│   │   ├── errorHandler.js  # Error handling utilities
+│   │   ├── routeConstants.js # Route definitions
+│   │   └── toastConstants.js # Toast configuration
 │   ├── assets/              # Static assets
 │   │   ├── golden-basket-rounded.png
 │   │   └── golden-basket.jpeg
@@ -187,6 +215,8 @@ frontend/
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
 
 ## 🎨 Component Architecture
 
@@ -329,6 +359,39 @@ const { isAdmin, adminStats, manageProducts, manageUsers, manageOrders } =
 - **Product management** with CRUD operations
 - **User management** with role changes
 - **Order processing** with status updates
+
+### usePerformance
+
+```javascript
+const { trackEvent, measurePerformance, getMetrics } = usePerformance();
+```
+
+- **Performance monitoring** and tracking
+- **User interaction metrics** collection
+- **Performance measurement** utilities
+- **Analytics integration** for optimization
+
+### usePermissions
+
+```javascript
+const { hasPermission, checkRole, getPermissions } = usePermissions();
+```
+
+- **Permission checking** for UI components
+- **Role-based access control** utilities
+- **Permission management** for features
+- **Access control** for admin functions
+
+### useServiceWorker
+
+```javascript
+const { registerSW, updateSW, checkForUpdates } = useServiceWorker();
+```
+
+- **Service worker registration** and management
+- **Offline functionality** support
+- **Update checking** and notifications
+- **Caching strategies** for performance
 
 ## 🌐 API Integration
 
@@ -508,11 +571,17 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          mui: ['@mui/material', '@mui/icons-material'],
-          router: ['react-router-dom'],
-          query: ['@tanstack/react-query'],
-          carousel: ['react-slick', 'slick-carousel'],
+          'react-vendor': ['react', 'react-dom'],
+          'mui-vendor': [
+            '@mui/material',
+            '@mui/icons-material',
+            '@emotion/react',
+            '@emotion/styled',
+          ],
+          'router-vendor': ['react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'form-vendor': ['react-hook-form'],
+          'utils-vendor': ['axios', 'dayjs', 'react-slick'],
         },
       },
     },
@@ -666,11 +735,17 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          mui: ['@mui/material', '@mui/icons-material'],
-          router: ['react-router-dom'],
-          query: ['@tanstack/react-query'],
-          carousel: ['react-slick', 'slick-carousel'],
+          'react-vendor': ['react', 'react-dom'],
+          'mui-vendor': [
+            '@mui/material',
+            '@mui/icons-material',
+            '@emotion/react',
+            '@emotion/styled',
+          ],
+          'router-vendor': ['react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'form-vendor': ['react-hook-form'],
+          'utils-vendor': ['axios', 'dayjs', 'react-slick'],
         },
       },
     },
@@ -678,7 +753,20 @@ export default defineConfig({
     sourcemap: false,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@mui/material', '@mui/icons-material'],
+    include: [
+      'react',
+      'react-dom',
+      '@mui/material',
+      '@mui/icons-material',
+      '@emotion/react',
+      '@emotion/styled',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'react-hook-form',
+      'axios',
+      'dayjs',
+      'react-slick',
+    ],
   },
 });
 ```
@@ -745,7 +833,6 @@ VITE_APP_NAME=Golden Basket Mart
 - **Advanced Search** - Elasticsearch integration with autocomplete
 - **Payment Integration** - Stripe/PayPal support with secure checkout
 - **Multi-language** - Internationalization (i18n) with react-intl
-- **Dark Mode** - Theme switching capability with system preference
 - **Push Notifications** - Order status updates and promotions
 - **Social Login** - Google, Facebook authentication integration
 - **Wishlist** - Save favorite products with sync

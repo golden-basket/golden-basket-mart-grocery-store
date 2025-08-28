@@ -14,27 +14,26 @@ const STATIC_FILES = [
 ];
 
 // Install event - cache static files
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        console.log('Opened cache');
+    caches
+      .open(STATIC_CACHE)
+      .then(cache => {
         return cache.addAll(STATIC_FILES);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Cache installation failed:', error);
       })
   );
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
+        cacheNames.map(cacheName => {
           if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -44,7 +43,7 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch event - serve from cache or network
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -84,13 +83,13 @@ self.addEventListener('fetch', (event) => {
 async function handleApiRequest(request) {
   try {
     const response = await fetch(request);
-    
+
     // Cache successful GET responses
     if (response.ok && request.method === 'GET') {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, response.clone());
     }
-    
+
     return response;
   } catch (error) {
     // Try to serve from cache if network fails
@@ -99,7 +98,7 @@ async function handleApiRequest(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline response for API calls
     return new Response(
       JSON.stringify({ error: 'Network error, please check your connection' }),
@@ -130,10 +129,14 @@ async function handleStaticAsset(request) {
     console.error('Static asset request failed:', error);
     // Return a default response for failed static assets
     if (request.url.includes('.css')) {
-      return new Response('/* Offline */', { headers: { 'Content-Type': 'text/css' } });
+      return new Response('/* Offline */', {
+        headers: { 'Content-Type': 'text/css' },
+      });
     }
     if (request.url.includes('.js')) {
-      return new Response('// Offline', { headers: { 'Content-Type': 'application/javascript' } });
+      return new Response('// Offline', {
+        headers: { 'Content-Type': 'application/javascript' },
+      });
     }
     return new Response('Offline', { status: 503 });
   }
@@ -142,7 +145,7 @@ async function handleStaticAsset(request) {
 // Handle navigation requests for SPA (Single Page Application)
 async function handleNavigation(request) {
   const url = new URL(request.url);
-  
+
   // For SPA with HashRouter, all routes should serve index.html
   // Only handle the root path and let React Router handle the rest
   if (url.pathname === '/' || url.pathname === '/index.html') {
@@ -160,10 +163,12 @@ async function handleNavigation(request) {
       if (cachedResponse) {
         return cachedResponse;
       }
-      
+
       // Return offline page
-      return caches.match('/offline.html') || new Response(
-        `
+      return (
+        caches.match('/offline.html') ||
+        new Response(
+          `
         <!DOCTYPE html>
         <html>
           <head>
@@ -214,11 +219,12 @@ async function handleNavigation(request) {
           </body>
         </html>
         `,
-        { headers: { 'Content-Type': 'text/html' } }
+          { headers: { 'Content-Type': 'text/html' } }
+        )
       );
     }
   }
-  
+
   // For all other paths (like /reset-password), serve index.html
   // This allows React Router to handle the routing
   try {
@@ -236,10 +242,12 @@ async function handleNavigation(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline page as fallback
-    return caches.match('/offline.html') || new Response(
-      `
+    return (
+      caches.match('/offline.html') ||
+      new Response(
+        `
       <!DOCTYPE html>
       <html>
         <head>
@@ -290,7 +298,8 @@ async function handleNavigation(request) {
         </body>
       </html>
       `,
-      { headers: { 'Content-Type': 'text/html' } }
+        { headers: { 'Content-Type': 'text/html' } }
+      )
     );
   }
 }
@@ -330,7 +339,7 @@ function isStaticAsset(request) {
 }
 
 // Background sync for offline actions
-self.addEventListener('sync', (event) => {
+self.addEventListener('sync', event => {
   if (event.tag === 'background-sync') {
     event.waitUntil(doBackgroundSync());
   }
@@ -341,7 +350,7 @@ async function doBackgroundSync() {
   try {
     // Get pending actions from IndexedDB
     const pendingActions = await getPendingActions();
-    
+
     for (const action of pendingActions) {
       try {
         await processPendingAction(action);
@@ -376,7 +385,7 @@ async function removePendingAction(actionId) {
 }
 
 // Push notification handling
-self.addEventListener('push', (event) => {
+self.addEventListener('push', event => {
   const options = {
     body: event.data ? event.data.text() : 'New update available!',
     icon: '/golden-basket-rounded.png',
@@ -384,20 +393,20 @@ self.addEventListener('push', (event) => {
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: 1
+      primaryKey: 1,
     },
     actions: [
       {
         action: 'explore',
         title: 'View',
-        icon: '/golden-basket-rounded.png'
+        icon: '/golden-basket-rounded.png',
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/golden-basket-rounded.png'
-      }
-    ]
+        icon: '/golden-basket-rounded.png',
+      },
+    ],
   };
 
   event.waitUntil(
@@ -406,22 +415,20 @@ self.addEventListener('push', (event) => {
 });
 
 // Notification click handling
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', event => {
   event.notification.close();
 
   if (event.action === 'explore') {
-    event.waitUntil(
-      self.clients.openWindow('/')
-    );
+    event.waitUntil(self.clients.openWindow('/'));
   }
 });
 
 // Message handling for communication with main thread
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({ version: CACHE_NAME });
   }

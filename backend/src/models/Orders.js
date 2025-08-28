@@ -10,7 +10,10 @@ const orderSchema = new mongoose.Schema(
         price: { type: Number },
       },
     ],
-    totalAmount: { type: Number },
+    totalAmount: { type: Number }, // Total including delivery and GST
+    subtotal: { type: Number, required: false }, // Subtotal before GST (optional for existing data)
+    gst: { type: Number, required: false }, // GST amount (optional for existing data)
+    deliveryCharge: { type: Number, required: false }, // Delivery charge (optional for existing data)
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],

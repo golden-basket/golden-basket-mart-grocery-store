@@ -20,6 +20,7 @@ import PaymentMethodSelector from '../components/PaymentMethodSelector';
 import { useNavigate } from 'react-router-dom';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import { useToastNotifications } from '../hooks/useToast';
+import { useCart } from '../hooks/useCart';
 
 const OrderCheckout = () => {
   const { token } = useAuth();
@@ -27,16 +28,19 @@ const OrderCheckout = () => {
   const showErrorRef = useRef();
   showErrorRef.current = showError;
   const [addresses, setAddresses] = useState([]);
-  const [cart, setCart] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
   const [paymentDetails, setPaymentDetails] = useState({});
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
-  const [deliveryDistance] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [invoice, setInvoice] = useState(null);
   const navigate = useNavigate();
+
+  // Use cart hook for consistent state management
+  const { data: cartData, refetch: refetchCart } = useCart();
+  const cart = cartData?.items || [];
 
   // Enhanced responsive utilities from useFoldableDisplay
   const {
@@ -59,18 +63,17 @@ const OrderCheckout = () => {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-    Promise.all([ApiService.getAddresses(), ApiService.getCart()])
-      .then(([addrRes, cartRes]) => {
+    ApiService.getAddresses()
+      .then((addrRes) => {
         if (isMounted) {
           setAddresses(addrRes);
-          setCart(cartRes.items || []);
           setLoading(false);
         }
       })
       .catch(() => {
         if (isMounted) {
           showErrorRef.current(
-            'Failed to load addresses or cart. Please try again.'
+            'Failed to load addresses. Please try again.'
           );
           setLoading(false);
         }
@@ -80,43 +83,22 @@ const OrderCheckout = () => {
     };
   }, [token]); // Only depend on token
 
-  // Calculate delivery charges based on distance and order amount
-  const calculateDeliveryCharges = (distance, orderAmount) => {
-    let baseCharge = 0;
-
-    // Base delivery charge based on distance
-    if (distance <= 5) {
-      baseCharge = 30; // Within 5km
-    } else if (distance <= 10) {
-      baseCharge = 50; // 5-10km
-    } else if (distance <= 15) {
-      baseCharge = 80; // 10-15km
-    } else if (distance <= 20) {
-      baseCharge = 120; // 15-20km
-    } else {
-      baseCharge = 150; // Beyond 20km
-    }
-
-    // Free delivery for orders above ₹499
-    if (orderAmount >= 499) {
-      baseCharge = 0;
-    }
-
-    // Additional discount for orders above ₹999
-    if (orderAmount >= 999) {
-      baseCharge = Math.max(0, baseCharge - 20); // Additional ₹20 off
-    }
-
-    return baseCharge;
-  };
-
-  // Calculate total with delivery charges
+  // Calculate total with conditional delivery charges
   const calculateTotal = () => {
+    if (!cart || cart.length === 0) {
+      return {
+        subtotal: 0,
+        deliveryCharge: 0,
+        gst: 0,
+        total: 0,
+      };
+    }
+    
     const subtotal = cart.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + (item.product?.price || 0) * (item.quantity || 0),
       0
     );
-    const deliveryCharge = calculateDeliveryCharges(deliveryDistance, subtotal);
+    const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
     const gst = subtotal * 0.18; // 18% GST
     return {
       subtotal,
@@ -165,14 +147,15 @@ const OrderCheckout = () => {
         paymentDetails:
           selectedPaymentMethod === 'upi' ? paymentDetails : undefined,
         paymentScreenshot: paymentScreenshot,
-        deliveryDistance: deliveryDistance,
-        deliveryCharges: totals.deliveryCharge,
+
+        deliveryCharges: totals.deliveryCharge, // Conditional delivery charges
       };
 
       const res = await ApiService.placeOrder(orderData);
       showSuccess('Order placed successfully!');
       setInvoice(res.invoice);
-      setCart([]);
+      // Refresh cart data to update navbar count
+      refetchCart();
       navigate('/orders');
     } catch (err) {
       showError(err.message || 'Failed to place order. Please try again.');
@@ -478,7 +461,7 @@ const OrderCheckout = () => {
                     }}
                     className={getResponsiveTextClasses()}
                   >
-                    Free delivery (no distance charges)
+                    Free delivery for orders ≥ ₹499
                   </Typography>
                 </Box>
               </Box>
@@ -625,7 +608,7 @@ const OrderCheckout = () => {
                   >
                     📍
                   </Box>
-                  Distance-based Charges
+                  Delivery Charges
                 </Typography>
                 <Box
                   sx={{ display: 'flex', flexDirection: 'column', gap: 0.125 }}
@@ -667,7 +650,7 @@ const OrderCheckout = () => {
                     >
                       •
                     </Box>
-                    Within 5km: ₹30 | 5-10km: ₹50 | 10-15km: ₹80
+                    Orders ≥ ₹499: Free delivery
                   </Typography>
                   <Typography
                     variant='body2'
@@ -706,7 +689,7 @@ const OrderCheckout = () => {
                     >
                       •
                     </Box>
-                    15-20km: ₹120 | Beyond 20km: ₹150
+                    Orders under Rs.499: Rs.50 delivery charge
                   </Typography>
                 </Box>
               </Box>
@@ -1084,7 +1067,7 @@ const OrderCheckout = () => {
         </Box>
       </Box>
 
-      {loading ? (
+      {loading || !cartData ? (
         <Loading />
       ) : (
         <Grid
@@ -1535,28 +1518,28 @@ const OrderCheckout = () => {
                   </Typography>
                 ) : (
                   <>
-                    {cart.map(item => (
-                      <Box
-                        key={item.product._id}
-                        sx={{
-                          mb: 1,
-                          px: 1,
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          borderRadius: getResponsiveValue(
-                            0.5,
-                            0.5,
-                            1,
-                            1.5,
-                            2,
-                            2.5,
-                            1
-                          ),
-                          background: 'rgba(163,130,76,0.05)',
-                          border: '1px solid rgba(163,130,76,0.1)',
-                        }}
-                      >
+                                    {cart && cart.length > 0 && cart.map(item => (
+                  <Box
+                    key={item.product._id}
+                    sx={{
+                      mb: 1,
+                      px: 1,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      borderRadius: getResponsiveValue(
+                        0.5,
+                        0.5,
+                        1,
+                        1.5,
+                        2,
+                        2.5,
+                        1
+                      ),
+                      background: 'rgba(163,130,76,0.05)',
+                      border: '1px solid rgba(163,130,76,0.1)',
+                    }}
+                  >
                         <Box sx={{ flex: 1 }}>
                           <Typography
                             sx={{
@@ -1849,6 +1832,130 @@ const OrderCheckout = () => {
                       />
                     </Box>
 
+                    {/* Delivery Charges Information */}
+                    <Alert
+                      severity='info'
+                      sx={{
+                        mb: 1,
+                        borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+                        background:
+                          'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                        border: '1px solid var(--color-primary-light)',
+                        '& .MuiAlert-icon': {
+                          color: 'var(--color-primary)',
+                        },
+                      }}
+                      className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
+                    >
+                      <Typography
+                        variant='body2'
+                        className={getResponsiveTextClasses()}
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.9rem',
+                            '0.95rem',
+                            '0.8rem'
+                          ),
+                          fontWeight: 600,
+                          color: 'var(--color-primary)',
+                          mb: 0.5,
+                        }}
+                      >
+                        📦 Delivery Charges Explained
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.9rem',
+                            '0.75rem'
+                          ),
+                          color: 'var(--color-primary-dark)',
+                          display: 'block',
+                          lineHeight: 1.3,
+                          mb: 0.5,
+                        }}
+                        className={getResponsiveTextClasses()}
+                      >
+                        <strong>How it works:</strong>
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.9rem',
+                            '0.75rem'
+                          ),
+                          color: 'var(--color-primary-dark)',
+                          display: 'block',
+                          lineHeight: 1.3,
+                          mb: 0.25,
+                        }}
+                        className={getResponsiveTextClasses()}
+                      >
+                        • Orders <strong>≥ Rs.499</strong>: <span style={{color: 'var(--color-primary)', fontWeight: 600}}>FREE delivery</span>
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.9rem',
+                            '0.75rem'
+                          ),
+                          color: 'var(--color-primary-dark)',
+                          display: 'block',
+                          lineHeight: 1.3,
+                          mb: 0.25,
+                        }}
+                        className={getResponsiveTextClasses()}
+                      >
+                        • Orders <strong>under Rs.499</strong>: <span style={{color: 'var(--color-primary)', fontWeight: 600}}>Rs.50 delivery charge</span>
+                      </Typography>
+                      {totals.subtotal < 499 && (
+                        <Typography
+                          variant='caption'
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.9rem',
+                              '0.75rem'
+                            ),
+                            color: 'var(--color-primary)',
+                            display: 'block',
+                            lineHeight: 1.3,
+                            mt: 0.5,
+                            fontWeight: 600,
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          💡 Tip: Add ₹{(499 - totals.subtotal).toFixed(2)} more to your cart for free delivery!
+                        </Typography>
+                      )}
+                    </Alert>
+
                     {/* Minimum Order Notice */}
                     {totals.total < MIN_ORDER_AMOUNT && (
                       <Alert
@@ -1906,7 +2013,7 @@ const OrderCheckout = () => {
                           Almost there! Add ₹
                           {(MIN_ORDER_AMOUNT - totals.total).toFixed(2)} more
                           items to reach our minimum order amount of ₹
-                          {MIN_ORDER_AMOUNT} and enjoy delivery to your
+                          {MIN_ORDER_AMOUNT} and enjoy free delivery to your
                           doorstep!
                         </Typography>
                       </Alert>
@@ -1919,6 +2026,7 @@ const OrderCheckout = () => {
                       onClick={handlePlaceOrder}
                       disabled={
                         placing ||
+                        !cart ||
                         cart.length === 0 ||
                         totals.total < MIN_ORDER_AMOUNT
                       }

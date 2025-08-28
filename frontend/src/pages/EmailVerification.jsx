@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
   CircularProgress,
-  Alert,
   Button,
   Paper,
   Container,
@@ -15,65 +14,58 @@ import { useToast } from '../hooks/useToast';
 import { ROUTES } from '../utils/routeConstants';
 
 const EmailVerification = () => {
-  const { token } = useParams();
-  const [searchParams] = useSearchParams();
+  const { success, error: showError } = useToast();
   const navigate = useNavigate();
-  const { showToast } = useToast();
-  
+  const hasVerified = useRef(false);
+  const { token } = useParams();
   const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'error'
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        console.log('EmailVerification: Starting verification process');
-        console.log('EmailVerification: token from params:', token);
-        console.log('EmailVerification: searchParams:', searchParams.toString());
-        
-        // Get token from URL params or search params
-        const verificationToken = token || searchParams.get('token');
-        console.log('EmailVerification: verificationToken:', verificationToken);
-        
-        if (!verificationToken) {
-          console.log('EmailVerification: No token found');
-          setStatus('error');
-          setError('No verification token found in the URL.');
-          return;
-        }
+  const verifyEmail = useCallback(async () => {
+    // Prevent duplicate API calls
+    if (hasVerified.current) {
+      return;
+    }
 
-        console.log('EmailVerification: Calling ApiService.verifyEmail with token:', verificationToken);
-        const response = await ApiService.verifyEmail(verificationToken);
-        console.log('EmailVerification: API response:', response);
-        
-        setStatus('success');
-        setMessage(response.message || 'Email verified successfully!');
-        
-        showToast('Email verified successfully!', 'success');
-        
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate(ROUTES.LOGIN);
-        }, 3000);
-        
-      } catch (err) {
-        console.error('EmailVerification: Error during verification:', err);
-        console.error('EmailVerification: Error details:', {
-          message: err.message,
-          response: err.response,
-          status: err.response?.status,
-          data: err.response?.data
-        });
-        
+    try {
+      hasVerified.current = true;
+
+      // Get token from URL params or search params
+      const verificationToken = token;
+
+      if (!verificationToken) {
         setStatus('error');
-        const errorMessage = err.response?.data?.error || err.message || 'Verification failed. Please try again.';
-        setError(errorMessage);
-        showToast(errorMessage, 'error');
+        setError('No verification token found in the URL.');
+        return;
       }
-    };
 
+      const response = await ApiService.verifyEmail(verificationToken);
+
+      setStatus('success');
+      setMessage(response.message || 'Email verified successfully!');
+
+      success('Email verified successfully!');
+
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate(ROUTES.LOGIN);
+      }, 3000);
+    } catch (err) {
+      console.error('Email verification error:', err);
+      setStatus('error');
+      const errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        'Verification failed. Please try again.';
+      setError(errorMessage);
+      showError(errorMessage);
+    }
+  }, [token, navigate, success, showError]);
+
+  useEffect(() => {
     verifyEmail();
-  }, [token, searchParams, navigate, showToast]);
+  }, [verifyEmail]);
 
   const handleResendVerification = async () => {
     try {
@@ -82,7 +74,7 @@ const EmailVerification = () => {
       // or have a form to enter it
       navigate(ROUTES.FORGOT_PASSWORD);
     } catch {
-      showToast('Failed to resend verification email', 'error');
+      showError('Failed to resend verification email');
     }
   };
 
@@ -96,10 +88,10 @@ const EmailVerification = () => {
         return (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <CircularProgress size={60} sx={{ color: '#a3824c', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
+            <Typography variant='h6' color='text.secondary' gutterBottom>
               Verifying your email...
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               Please wait while we verify your email address.
             </Typography>
           </Box>
@@ -109,22 +101,24 @@ const EmailVerification = () => {
         return (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <CheckCircle sx={{ fontSize: 80, color: '#4caf50', mb: 2 }} />
-            <Typography variant="h5" color="success.main" gutterBottom>
+            <Typography variant='h5' color='success.main' gutterBottom>
               Email Verified Successfully!
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
               {message}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
               You will be redirected to the login page in a few seconds...
             </Typography>
             <Button
-              variant="contained"
+              variant='contained'
               onClick={handleGoToLogin}
               sx={{
-                background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background:
+                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(90deg, #8b6f3f 0%, #d4c085 50%, #a08555 100%)',
+                  background:
+                    'linear-gradient(90deg, #8b6f3f 0%, #d4c085 50%, #a08555 100%)',
                 },
               }}
             >
@@ -137,15 +131,22 @@ const EmailVerification = () => {
         return (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Error sx={{ fontSize: 80, color: '#f44336', mb: 2 }} />
-            <Typography variant="h5" color="error.main" gutterBottom>
+            <Typography variant='h5' color='error.main' gutterBottom>
               Verification Failed
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
               {error}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2,
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
               <Button
-                variant="outlined"
+                variant='outlined'
                 startIcon={<Email />}
                 onClick={handleResendVerification}
                 sx={{
@@ -160,12 +161,14 @@ const EmailVerification = () => {
                 Resend Verification
               </Button>
               <Button
-                variant="contained"
+                variant='contained'
                 onClick={handleGoToLogin}
                 sx={{
-                  background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                  background:
+                    'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
                   '&:hover': {
-                    background: 'linear-gradient(90deg, #8b6f3f 0%, #d4c085 50%, #a08555 100%)',
+                    background:
+                      'linear-gradient(90deg, #8b6f3f 0%, #d4c085 50%, #a08555 100%)',
                   },
                 }}
               >
@@ -181,7 +184,7 @@ const EmailVerification = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth='sm'>
       <Box
         sx={{
           minHeight: '60vh',
@@ -198,13 +201,14 @@ const EmailVerification = () => {
             maxWidth: 500,
             p: 4,
             borderRadius: 2,
-            background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+            background:
+              'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Typography
-              variant="h4"
-              component="h1"
+              variant='h4'
+              component='h1'
               sx={{
                 color: '#a3824c',
                 fontWeight: 600,
@@ -213,11 +217,11 @@ const EmailVerification = () => {
             >
               Email Verification
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               Golden Basket Mart
             </Typography>
           </Box>
-          
+
           {renderContent()}
         </Paper>
       </Box>

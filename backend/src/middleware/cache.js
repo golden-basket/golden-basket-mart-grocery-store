@@ -1,8 +1,9 @@
 const cache = require('memory-cache');
+const logger = require('../utils/logger');
 
 // Enhanced cache middleware with better performance
 const cacheMiddleware = (duration = 300) => {
-  console.log('Cache middleware called');
+  logger.info('Cache middleware called');
   return (req, res, next) => {
     // Only cache GET requests
     if (req.method !== 'GET') {

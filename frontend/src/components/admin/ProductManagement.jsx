@@ -192,6 +192,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
       );
       handleProdDialogClose();
     } catch (error) {
+      console.log('Error in handleProdSave', error);
       showError(
         prodDialogMode === 'add'
           ? 'Failed to add product. Please try again.'
@@ -213,6 +214,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         onProductUpdate('delete', null, id);
         showSuccess('Product deleted successfully!');
       } catch (error) {
+        console.log('Error in handleProdDelete', error);
         showError('Failed to delete product. Please try again.');
       }
     },
