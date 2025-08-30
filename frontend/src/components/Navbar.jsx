@@ -183,6 +183,7 @@ const Navbar = () => {
             : 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #a3824c 100%)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
           zIndex: 1200,
+          borderRadius: '0 !important',
         }}
       >
         <Toolbar
