@@ -12,18 +12,47 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 const EMAIL_FROM = process.env.EMAIL_FROM;
 const FRONTEND_URL = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
-// Email transporter with enhanced configuration
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  rateLimit: 14, // 14 emails per second
-});
+// Gmail-only configuration - no alternative services needed
+
+// Create optimized Gmail transporter for cloud platforms
+const createGmailTransporter = () => {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
+    },
+    // Optimized settings for cloud platforms like Render
+    pool: true,
+    maxConnections: 2, // Conservative for cloud stability
+    maxMessages: 20, // Conservative message limit
+    rateLimit: 5, // Conservative rate limit
+    // Extended timeouts for cloud environments
+    connectionTimeout: 120000, // 2 minutes
+    greetingTimeout: 60000, // 1 minute
+    socketTimeout: 120000, // 2 minutes
+    // Gmail-specific optimizations
+    secure: true,
+    port: 465,
+    tls: {
+      rejectUnauthorized: false,
+      ciphers: 'SSLv3',
+      secureProtocol: 'TLSv1_2_method',
+    },
+    // Connection management
+    keepAlive: true,
+    keepAliveTimeout: 60000, // 1 minute
+    // Retry configuration
+    retryDelay: 10000, // 10 seconds between retries
+    maxRetries: 5, // More retries for cloud reliability
+  });
+};
+
+// Optimized Gmail configuration for cloud platforms like Render
+
+// Initialize primary transporter
+let transporter = createGmailTransporter();
+let currentTransporterType = 'gmail';
 
 // Enhanced validation schemas
 const registerSchema = Joi.object({
@@ -96,21 +125,110 @@ const getUserAgent = req => {
 const emailQueue = [];
 let isProcessingQueue = false;
 
-// Helper function to send email
-const sendEmail = async (to, subject, html) => {
+// Function to reconnect Gmail service
+const reconnectGmailService = async () => {
   try {
+    // Close current transporter
+    if (transporter) {
+      transporter.close();
+    }
+
+    // Wait a bit before reconnecting
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Create new Gmail transporter
+    transporter = createGmailTransporter();
+    currentTransporterType = 'gmail';
+
+    // Test the new connection
+    await transporter.verify();
+    logger.info('Gmail service reconnected successfully');
+    return true;
+  } catch (error) {
+    logger.error('Failed to reconnect Gmail service:', error);
+    return false;
+  }
+};
+
+// Helper function to send email with retry logic and service switching
+const sendEmail = async (to, subject, html, retryCount = 0) => {
+  const maxRetries = 3;
+  const retryDelay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+
+  try {
+    // Verify connection before sending
+    if (!transporter.isIdle()) {
+      await transporter.verify();
+    }
+
     const mailOptions = {
       from: EMAIL_FROM,
       to: to,
       subject: subject,
       html: html,
+      // Add headers for better deliverability
+      headers: {
+        'X-Mailer': 'Golden Basket Mart',
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+      },
     };
 
     const result = await transporter.sendMail(mailOptions);
-    logger.info(`Email sent successfully to ${to}: ${subject}`);
+    logger.info(
+      `Email sent successfully to ${to} via ${currentTransporterType}: ${subject}`
+    );
     return result;
   } catch (error) {
-    logger.error(`Failed to send email to ${to}:`, error);
+    logger.error(
+      `Failed to send email to ${to} via ${currentTransporterType} (attempt ${retryCount + 1}):`,
+      {
+        error: error.message,
+        code: error.code,
+        command: error.command,
+      }
+    );
+
+    // Try reconnecting Gmail on connection errors
+    if (
+      retryCount === 0 &&
+      (error.code === 'ETIMEDOUT' ||
+        error.code === 'ECONNRESET' ||
+        error.code === 'ENOTFOUND' ||
+        error.message.includes('timeout') ||
+        error.message.includes('connection'))
+    ) {
+      logger.warn(
+        `Attempting to reconnect Gmail service due to connection error`
+      );
+      const reconnected = await reconnectGmailService();
+      if (reconnected) {
+        // Retry with reconnected service
+        return sendEmail(to, subject, html, retryCount + 1);
+      }
+    }
+
+    // Retry logic for specific error types
+    if (
+      retryCount < maxRetries &&
+      (error.code === 'ETIMEDOUT' ||
+        error.code === 'ECONNRESET' ||
+        error.code === 'ENOTFOUND' ||
+        error.message.includes('timeout') ||
+        error.message.includes('connection'))
+    ) {
+      logger.warn(
+        `Retrying email send to ${to} in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`
+      );
+
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+      // Recursive retry
+      return sendEmail(to, subject, html, retryCount + 1);
+    }
+
+    // If all retries failed, throw the error
     throw error;
   }
 };
@@ -136,7 +254,7 @@ const queueEmail = (to, subject, html, priority = 'normal') => {
   }
 };
 
-// Process email queue in background
+// Process email queue in background with enhanced error handling
 const processEmailQueue = async () => {
   if (isProcessingQueue || emailQueue.length === 0) {
     return;
@@ -149,21 +267,45 @@ const processEmailQueue = async () => {
     const emailJob = emailQueue.shift();
 
     try {
+      // Add connection health check before processing
+      try {
+        await transporter.verify();
+      } catch (verifyError) {
+        logger.warn(
+          `Email connection verification failed: ${verifyError.message}`
+        );
+        // Reset transporter connection
+        transporter.close();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
       await sendEmail(emailJob.to, emailJob.subject, emailJob.html);
       logger.info(`Background email sent successfully to ${emailJob.to}`);
     } catch (error) {
       // Handle email sending errors with retry logic
       emailJob.attempts++;
-      logger.error(`Email sending failed for ${emailJob.to}:`, error);
+      logger.error(`Email sending failed for ${emailJob.to}:`, {
+        error: error.message,
+        code: error.code,
+        attempts: emailJob.attempts,
+        maxAttempts: emailJob.maxAttempts,
+      });
 
       if (emailJob.attempts < emailJob.maxAttempts) {
+        // Calculate exponential backoff delay
+        const delay = Math.min(
+          5000 * Math.pow(2, emailJob.attempts - 1),
+          30000
+        ); // Max 30 seconds
+
         // Retry after delay
         setTimeout(() => {
           emailQueue.unshift(emailJob);
           processEmailQueue();
-        }, 5000 * emailJob.attempts); // Exponential backoff
+        }, delay);
+
         logger.warn(
-          `Email failed for ${emailJob.to}, retrying (attempt ${emailJob.attempts})`
+          `Email failed for ${emailJob.to}, retrying in ${delay}ms (attempt ${emailJob.attempts}/${emailJob.maxAttempts})`
         );
       } else {
         logger.error(
@@ -173,8 +315,9 @@ const processEmailQueue = async () => {
       }
     }
 
-    // Small delay between emails to avoid overwhelming the email service
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Adaptive delay between emails based on queue size and errors
+    const delay = emailQueue.length > 10 ? 200 : 100;
+    await new Promise(resolve => setTimeout(resolve, delay));
   }
 
   isProcessingQueue = false;
@@ -997,28 +1140,5 @@ exports.createUser = async (req, res) => {
   } catch (err) {
     logger.error('Create user error:', err);
     res.status(500).json({ error: 'Failed to create user.' });
-  }
-};
-
-// Get email queue status (admin only)
-exports.getEmailQueueStatus = async (req, res) => {
-  try {
-    const queueStatus = {
-      queueLength: emailQueue.length,
-      isProcessing: isProcessingQueue,
-      queueItems: emailQueue.map(job => ({
-        to: job.to,
-        subject: job.subject,
-        priority: job.priority,
-        timestamp: job.timestamp,
-        attempts: job.attempts,
-        maxAttempts: job.maxAttempts,
-      })),
-    };
-
-    res.json(queueStatus);
-  } catch (err) {
-    logger.error('Get email queue status error:', err);
-    res.status(500).json({ error: 'Failed to get email queue status.' });
   }
 };
