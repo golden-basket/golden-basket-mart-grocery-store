@@ -52,18 +52,102 @@ const UserManagement = ({ users, onUserUpdate }) => {
     role: 'user',
   });
 
+  // Form validation state
+  const [formErrors, setFormErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
+
   // Get styles from shared utility
   const styles = useMemo(
     () => createAdminStyles(isMobile, theme),
     [isMobile, theme]
   );
 
+  // Validation functions (declared first)
+  const validateField = useCallback((field, value, hasInteracted = false) => {
+    const errors = {};
+
+    // Ensure value is a string before calling trim
+    const stringValue = value ? String(value) : '';
+
+    switch (field) {
+      case 'firstName':
+        if (!stringValue.trim()) {
+          if (hasInteracted) {
+            errors.firstName = 'First name is required';
+          }
+        } else if (stringValue.trim().length < 2) {
+          errors.firstName = 'First name must be at least 2 characters';
+        } else if (stringValue.trim().length > 50) {
+          errors.firstName = 'First name cannot exceed 50 characters';
+        } else if (!/^[a-zA-Z\s]+$/.test(stringValue.trim())) {
+          errors.firstName = 'First name can only contain letters and spaces';
+        }
+        break;
+
+      case 'lastName':
+        if (!stringValue.trim()) {
+          if (hasInteracted) {
+            errors.lastName = 'Last name is required';
+          }
+        } else if (stringValue.trim().length < 2) {
+          errors.lastName = 'Last name must be at least 2 characters';
+        } else if (stringValue.trim().length > 50) {
+          errors.lastName = 'Last name cannot exceed 50 characters';
+        } else if (!/^[a-zA-Z\s]+$/.test(stringValue.trim())) {
+          errors.lastName = 'Last name can only contain letters and spaces';
+        }
+        break;
+
+      case 'email':
+        if (!stringValue.trim()) {
+          if (hasInteracted) {
+            errors.email = 'Email is required';
+          }
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(stringValue.trim())) {
+          errors.email = 'Please provide a valid email address';
+        }
+        break;
+
+      case 'role':
+        if (!value || !['user', 'admin'].includes(value)) {
+          if (hasInteracted) {
+            errors.role = 'Please select a valid role';
+          }
+        }
+        break;
+    }
+
+    return errors;
+  }, []);
+
+  const validateForm = useCallback(
+    (formData, hasInteracted = false) => {
+      const errors = {};
+
+      // Validate all fields
+      Object.keys(formData).forEach(field => {
+        const fieldErrors = validateField(
+          field,
+          formData[field],
+          hasInteracted
+        );
+        Object.assign(errors, fieldErrors);
+      });
+
+      return {
+        errors,
+        isValid: Object.keys(errors).length === 0,
+      };
+    },
+    [validateField]
+  );
+
   // User handlers
-  const handleUserDialogOpen = useCallback((mode, user = null) => {
-    setUserDialogMode(mode);
-    setEditUser(user);
-    setUserDialogForm(
-      user
+  const handleUserDialogOpen = useCallback(
+    (mode, user = null) => {
+      setUserDialogMode(mode);
+      setEditUser(user);
+      const formData = user
         ? {
             firstName: user.firstName,
             lastName: user.lastName,
@@ -75,34 +159,98 @@ const UserManagement = ({ users, onUserUpdate }) => {
             lastName: '',
             email: '',
             role: 'user',
-          }
-    );
-    setUserDialogOpen(true);
-  }, []);
+          };
+
+      setUserDialogForm(formData);
+
+      // Only validate if editing an existing user, not for new users
+      if (user) {
+        const { errors, isValid } = validateForm(formData);
+        setFormErrors(errors);
+        setIsFormValid(isValid);
+      } else {
+        // For new users, start with no errors and invalid form
+        setFormErrors({});
+        setIsFormValid(false);
+      }
+
+      setUserDialogOpen(true);
+    },
+    [validateForm]
+  );
 
   const handleUserDialogClose = useCallback(() => {
     setUserDialogOpen(false);
     setEditUser(null);
     setUserDialogMode('add');
+    setFormErrors({});
+    setIsFormValid(false);
   }, []);
 
   const handleUserDialogSave = useCallback(() => {
-    try {
-      onUserUpdate(userDialogMode, userDialogForm, editUser?._id);
-      showSuccess(
-        userDialogMode === 'add'
-          ? 'User added successfully!'
-          : 'User updated successfully!'
-      );
-      handleUserDialogClose();
-    } catch (error) {
-      console.error('Failed to save user:', error);
-      showError(
-        userDialogMode === 'add'
-          ? 'Failed to add user. Please try again.'
-          : 'Failed to update user. Please try again.'
-      );
+    // Client-side validation before submission (with full validation for submission)
+    const { errors, isValid } = validateForm(userDialogForm, true);
+
+    if (!isValid) {
+      setFormErrors(errors);
+      showError('Please fix the validation errors before submitting.');
+      return;
     }
+
+    onUserUpdate(userDialogMode, userDialogForm, editUser?._id)
+      .then(() => {
+        showSuccess(
+          userDialogMode === 'add'
+            ? 'User added successfully!'
+            : 'User updated successfully!'
+        );
+        handleUserDialogClose();
+      })
+      .catch(error => {
+        console.error('Failed to save user:', error);
+
+        // Handle different error types with appropriate messages
+        let errorMessage;
+
+        if (
+          error.type === 'validation' &&
+          error.details &&
+          Array.isArray(error.details)
+        ) {
+          // Validation errors with field details
+          const fieldErrors = error.details
+            .map(detail => `${detail.field}: ${detail.message}`)
+            .join('\n');
+          errorMessage = `Validation failed:\n${fieldErrors}`;
+        } else if (error.type === 'authentication') {
+          // Authentication errors (401, 403, 423)
+          errorMessage =
+            error.message || 'Authentication failed. Please log in again.';
+        } else if (error.type === 'business') {
+          // Business logic errors (409, 404)
+          if (error.status === 409) {
+            errorMessage = 'User with this email already exists.';
+          } else if (error.status === 404) {
+            errorMessage = 'User not found.';
+          } else {
+            errorMessage = error.message || 'Operation failed.';
+          }
+        } else if (error.type === 'database') {
+          // Database errors
+          errorMessage = 'Database error occurred. Please try again.';
+        } else if (error.type === 'server') {
+          // Server errors (500+)
+          errorMessage = 'Server error occurred. Please try again later.';
+        } else {
+          // Fallback for other error types
+          errorMessage =
+            userDialogMode === 'add'
+              ? 'Failed to add user. Please try again.'
+              : 'Failed to update user. Please try again.';
+        }
+
+        showError(errorMessage);
+      });
   }, [
     userDialogMode,
     userDialogForm,
@@ -111,38 +259,128 @@ const UserManagement = ({ users, onUserUpdate }) => {
     onUserUpdate,
     showSuccess,
     showError,
+    validateForm,
   ]);
 
   const handleDeleteUser = useCallback(
     id => {
-      try {
-        onUserUpdate('delete', null, id);
-        showSuccess('User deleted successfully!');
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-        showError('Failed to delete user. Please try again.');
-      }
+      onUserUpdate('delete', null, id)
+        .then(() => {
+          showSuccess('User deleted successfully!');
+        })
+        .catch(error => {
+          console.error('Failed to delete user:', error);
+
+          // Handle different error types
+          let errorMessage;
+
+          if (
+            error.type === 'validation' &&
+            error.details &&
+            Array.isArray(error.details)
+          ) {
+            const fieldErrors = error.details
+              .map(detail => `${detail.field}: ${detail.message}`)
+              .join(', ');
+            errorMessage = `Validation failed: ${fieldErrors}`;
+          } else if (error.type === 'business' && error.status === 404) {
+            errorMessage = 'User not found.';
+          } else if (error.type === 'authentication') {
+            errorMessage = 'Authentication failed. Please log in again.';
+          } else if (error.type === 'server') {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else {
+            errorMessage = 'Failed to delete user. Please try again.';
+          }
+
+          showError(errorMessage);
+        });
     },
     [onUserUpdate, showSuccess, showError]
   );
 
   const handleInviteUser = useCallback(
     userId => {
-      try {
-        onUserUpdate('invite', null, userId);
-        showSuccess('User invitation sent successfully!');
-      } catch (error) {
-        console.error('Failed to send invitation:', error);
-        showError('Failed to send invitation. Please try again.');
-      }
+      onUserUpdate('invite', null, userId)
+        .then(() => {
+          showSuccess('User invitation sent successfully!');
+        })
+        .catch(error => {
+          console.error('Failed to send invitation:', error);
+
+          // Handle different error types
+          let errorMessage;
+
+          if (
+            error.type === 'validation' &&
+            error.details &&
+            Array.isArray(error.details)
+          ) {
+            const fieldErrors = error.details
+              .map(detail => `${detail.field}: ${detail.message}`)
+              .join(', ');
+            errorMessage = `Validation failed: ${fieldErrors}`;
+          } else if (error.type === 'business' && error.status === 404) {
+            errorMessage = 'User not found.';
+          } else if (error.type === 'authentication') {
+            errorMessage = 'Authentication failed. Please log in again.';
+          } else if (error.type === 'server') {
+            errorMessage = 'Server error occurred. Please try again later.';
+          } else {
+            errorMessage = 'Failed to send invitation. Please try again.';
+          }
+
+          showError(errorMessage);
+        });
     },
     [onUserUpdate, showSuccess, showError]
   );
 
   // Form change handlers
-  const handleUserFormChange = useCallback((field, value) => {
-    setUserDialogForm(f => ({ ...f, [field]: value }));
-  }, []);
+  const handleUserFormChange = useCallback(
+    (field, value) => {
+      setUserDialogForm(prevForm => {
+        const updatedForm = { ...prevForm, [field]: value };
+
+        // Validate the changed field (user has interacted)
+        const fieldErrors = validateField(field, value, true);
+        setFormErrors(prev => ({
+          ...prev,
+          ...fieldErrors,
+          // Clear error for this field if it's now valid
+          ...(Object.keys(fieldErrors).length === 0 ? { [field]: '' } : {}),
+        }));
+
+        // Validate entire form with interaction tracking
+        const { isValid } = validateForm(updatedForm, true);
+        setIsFormValid(isValid);
+
+        return updatedForm;
+      });
+    },
+    [validateField, validateForm]
+  );
+
+  // Form blur handler - validate field when user leaves it
+  const handleUserFormBlur = useCallback(
+    field => {
+      const value = userDialogForm[field];
+
+      // Validate the field when user leaves it (blur event)
+      const fieldErrors = validateField(field, value, true);
+      setFormErrors(prev => ({
+        ...prev,
+        ...fieldErrors,
+        // Clear error for this field if it's now valid
+        ...(Object.keys(fieldErrors).length === 0 ? { [field]: '' } : {}),
+      }));
+
+      // Validate entire form
+      const { isValid } = validateForm(userDialogForm, true);
+      setIsFormValid(isValid);
+    },
+    [userDialogForm, validateField, validateForm]
+  );
 
   // Enhanced mobile user card rendering
   const renderMobileUserCard = user => (
@@ -431,27 +669,41 @@ const UserManagement = ({ users, onUserUpdate }) => {
               label='First Name'
               value={userDialogForm.firstName}
               onChange={e => handleUserFormChange('firstName', e.target.value)}
+              onBlur={() => handleUserFormBlur('firstName')}
               fullWidth
+              error={!!formErrors.firstName}
+              helperText={formErrors.firstName}
               sx={styles.inputStyles}
+              required
             />
             <TextField
               label='Last Name'
               value={userDialogForm.lastName}
               onChange={e => handleUserFormChange('lastName', e.target.value)}
+              onBlur={() => handleUserFormBlur('lastName')}
               fullWidth
+              error={!!formErrors.lastName}
+              helperText={formErrors.lastName}
               sx={styles.inputStyles}
+              required
             />
             <TextField
               label='Email'
               value={userDialogForm.email}
               onChange={e => handleUserFormChange('email', e.target.value)}
+              onBlur={() => handleUserFormBlur('email')}
               fullWidth
+              error={!!formErrors.email}
+              helperText={formErrors.email}
               sx={styles.inputStyles}
+              required
             />
             <Select
               value={userDialogForm.role}
               onChange={e => handleUserFormChange('role', e.target.value)}
+              onBlur={() => handleUserFormBlur('role')}
               displayEmpty
+              error={!!formErrors.role}
               sx={{
                 ...styles.inputStyles['& .MuiOutlinedInput-root'],
                 color: theme.palette.primary.main,
@@ -461,6 +713,11 @@ const UserManagement = ({ users, onUserUpdate }) => {
               <MenuItem value='user'>User</MenuItem>
               <MenuItem value='admin'>Admin</MenuItem>
             </Select>
+            {formErrors.role && (
+              <Typography variant='caption' color='error' sx={{ mt: -1 }}>
+                {formErrors.role}
+              </Typography>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions
@@ -493,10 +750,12 @@ const UserManagement = ({ users, onUserUpdate }) => {
           <Button
             onClick={handleUserDialogSave}
             variant='contained'
+            disabled={!isFormValid}
             sx={{
               ...styles.buttonStyles,
               px: 3,
               flex: isMobile ? 1 : 'none',
+              opacity: !isFormValid ? 0.6 : 1,
             }}
           >
             Save

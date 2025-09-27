@@ -35,50 +35,39 @@ export const useAdmin = () => {
   // User management handlers
   const handleUserUpdate = useCallback(
     (mode, userData, userId) => {
+      let apiCall;
+      
       if (mode === 'add') {
-        ApiService.createUser(userData)
-          .then(() => {
-            fetchUsers();
-            setUserError('');
-          })
-          .catch(() => setUserError('Failed to create user.'));
+        apiCall = ApiService.createUser(userData);
       } else if (mode === 'edit') {
-        ApiService.request(`/users/${userId}`, {
+        apiCall = ApiService.request(`/users/${userId}`, {
           method: 'PUT',
           data: userData,
-        })
-          .then(() => {
-            fetchUsers();
-            setUserError('');
-          })
-          .catch(() => setUserError('Failed to update user.'));
+        });
       } else if (mode === 'delete') {
-        ApiService.request(`/users/${userId}`, { method: 'DELETE' })
-          .then(() => {
-            fetchUsers();
-            setUserError('');
-          })
-          .catch(() => setUserError('Failed to delete user.'));
+        apiCall = ApiService.request(`/users/${userId}`, { method: 'DELETE' });
       } else if (mode === 'role') {
-        ApiService.request(`/users/${userId}/role`, {
+        apiCall = ApiService.request(`/users/${userId}/role`, {
           method: 'PATCH',
           data: userData,
-        })
-          .then(() => {
-            fetchUsers();
-            setUserError('');
-          })
-          .catch(() => setUserError('Failed to change user role.'));
+        });
       } else if (mode === 'invite') {
-        ApiService.request(`/users/${userId}/invite`, {
+        apiCall = ApiService.request(`/users/${userId}/invite`, {
           method: 'PATCH',
-        })
-          .then(() => {
-            fetchUsers();
-            setUserError('');
-          })
-          .catch(() => setUserError('Failed to send invitation email.'));
+        });
       }
+
+      return apiCall
+        .then(() => {
+          fetchUsers();
+          setUserError('');
+        })
+        .catch(error => {
+          console.error('User update error:', error);
+          const errorMessage = error.message || `Failed to ${mode} user.`;
+          setUserError(errorMessage);
+          throw error; // Re-throw to be caught by the component handlers
+        });
     },
     [fetchUsers]
   );

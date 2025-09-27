@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
 import OrderStats from './OrderManagement/OrderStats';
 import OrderTable from './OrderManagement/OrderTable';
@@ -16,6 +16,10 @@ const OrderManagement = () => {
   const { getResponsiveSpacingClasses, getResponsiveTypography } =
     useFoldableDisplay();
   const { showSuccess, showError } = useToastNotifications();
+  
+  // Use ref to access current showError function without causing dependency issues
+  const showErrorRef = useRef(showError);
+  showErrorRef.current = showError;
 
   // Main state
   const [orders, setOrders] = useState([]);
@@ -76,7 +80,7 @@ const OrderManagement = () => {
       setTotalOrders(response.pagination?.totalOrders || 0);
     } catch (error) {
       console.error('Failed to load orders:', error);
-      showError('Failed to load orders. Please try again.');
+      showErrorRef.current('Failed to load orders. Please try again.');
     } finally {
       setLoading(false);
       // Clear searching state when API call completes
@@ -107,12 +111,12 @@ const OrderManagement = () => {
     // Validate date range
     if (field === 'startDate') {
       if (filters.endDate && value && value > filters.endDate) {
-        showError('Start date cannot be after end date');
+        showErrorRef.current('Start date cannot be after end date');
         return;
       }
     } else if (field === 'endDate') {
       if (filters.startDate && value && value < filters.startDate) {
-        showError('End date cannot be before start date');
+        showErrorRef.current('End date cannot be before start date');
       }
     }
 

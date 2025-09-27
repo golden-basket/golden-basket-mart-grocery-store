@@ -1,4 +1,4 @@
-import { useState, useCallback, createContext, useContext, useEffect } from 'react';
+import { useState, useCallback, createContext, useContext, useEffect, useRef } from 'react';
 import { Snackbar, Alert, AlertTitle, Box, IconButton, Button, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TOAST_TYPES } from '../utils/toastConstants';
@@ -18,6 +18,14 @@ export const useToast = () => {
 // Toast provider component
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
+
+  const removeToast = useCallback(id => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
+  // Use ref to avoid circular dependency
+  const removeToastRef = useRef(removeToast);
+  removeToastRef.current = removeToast;
 
   const addToast = useCallback(
     (message, type = TOAST_TYPES.INFO, options = {}) => {
@@ -49,7 +57,7 @@ export const ToastProvider = ({ children }) => {
       // Auto remove non-persistent toasts
       if (!toast.persistent) {
         setTimeout(() => {
-          removeToast(id);
+          removeToastRef.current(id);
         }, toast.duration);
       }
 
@@ -57,10 +65,6 @@ export const ToastProvider = ({ children }) => {
     },
     []
   );
-
-  const removeToast = useCallback(id => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
 
   const clearAllToasts = useCallback(() => {
     setToasts([]);

@@ -103,8 +103,81 @@ class ApiService {
         console.warn('Global error handler failed:', handlerError);
       }
 
-      const message = error.response?.data?.error || 'Network error occurred';
-      throw new Error(message);
+      // Extract detailed error information from backend response
+      const errorData = error.response?.data;
+      const statusCode = error.response?.status;
+      let errorMessage = 'Network error occurred';
+      let errorType = 'network';
+
+      if (errorData) {
+        // Handle different error response formats from backend
+
+        // 1. Validation errors with details (from validation middleware)
+        if (errorData.details && Array.isArray(errorData.details)) {
+          errorType = 'validation';
+          const fieldErrors = errorData.details
+            .map(detail => `${detail.message}`)
+            .join('\n');
+          errorMessage = `${errorData.message || 'Validation failed'}\n${fieldErrors}`;
+        }
+        // 2. Authentication errors (with additional fields like lockUntil, reason)
+        else if (
+          statusCode === 401 ||
+          statusCode === 403 ||
+          statusCode === 423
+        ) {
+          errorType = 'authentication';
+          errorMessage =
+            errorData.error || errorData.message || 'Authentication failed';
+        }
+        // 3. Business logic errors (duplicate, not found, etc.)
+        else if (statusCode === 409 || statusCode === 404) {
+          errorType = 'business';
+          errorMessage =
+            errorData.error || errorData.message || 'Operation failed';
+        }
+        // 4. Simple error objects (most common in controllers)
+        else if (errorData.error) {
+          errorType = 'simple';
+          errorMessage = errorData.error;
+        }
+        // 5. Message-only errors
+        else if (errorData.message) {
+          errorType = 'message';
+          errorMessage = errorData.message;
+        }
+        // 6. Database errors (MongoDB specific)
+        else if (errorData.name === 'MongoError' || errorData.code === 11000) {
+          errorType = 'database';
+          errorMessage = errorData.message || 'Database operation failed';
+        }
+        // 7. Server errors (500+)
+        else if (statusCode >= 500) {
+          errorType = 'server';
+          errorMessage = errorData.message || 'Server error occurred';
+        }
+      }
+
+      // Create enhanced error object with comprehensive backend response
+      console.log('errorMessage', errorMessage);
+      console.log('errorData', errorData);
+      console.log('statusCode', statusCode);
+      console.log('errorType', errorType);
+
+      const enhancedError = new Error(errorMessage);
+      enhancedError.status = statusCode;
+      enhancedError.type = errorType;
+      enhancedError.details = errorData?.details;
+      enhancedError.originalError = errorData;
+      enhancedError.timestamp = errorData?.timestamp;
+      enhancedError.path = errorData?.path;
+      enhancedError.method = errorData?.method;
+
+      // Add authentication-specific fields if present
+      if (errorData?.lockUntil) enhancedError.lockUntil = errorData.lockUntil;
+      if (errorData?.reason) enhancedError.reason = errorData.reason;
+
+      throw enhancedError;
     }
   }
 
