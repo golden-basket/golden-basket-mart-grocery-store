@@ -33,6 +33,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { createAdminStyles } from './adminStyles';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { useToastNotifications } from '../../hooks/useToast';
+import PropTypes from 'prop-types';
 
 const UserManagement = ({ users, onUserUpdate }) => {
   const theme = useTheme();
@@ -507,3 +508,8 @@ const UserManagement = ({ users, onUserUpdate }) => {
 };
 
 export default UserManagement;
+
+UserManagement.propTypes = {
+  users: PropTypes.array.isRequired,
+  onUserUpdate: PropTypes.func.isRequired,
+};

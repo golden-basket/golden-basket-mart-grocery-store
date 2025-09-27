@@ -12,15 +12,11 @@ const {
   validateObjectId,
   registerValidation,
   loginValidation,
-  profileValidation,
-  changePasswordValidation,
   productValidation,
-  productUpdateValidation,
   cartValidation,
-  cartUpdateValidation,
   addressValidation,
   orderValidation,
-  searchValidation,
+  createUserValidation,
 } = require('../middleware/validation');
 const { cacheMiddleware, clearCache } = require('../middleware/cache');
 
@@ -1111,7 +1107,7 @@ router.post(
   '/users',
   auth,
   admin,
-  registerValidation,
+  createUserValidation,
   authController.createUser
 );
 
@@ -1166,7 +1162,13 @@ router.get('/users', auth, admin, authController.listUsers);
  *       403:
  *         description: Admin access required
  */
-router.put('/users/:id', auth, admin, authController.updateUser);
+router.put(
+  '/users/:id',
+  auth,
+  admin,
+  createUserValidation,
+  authController.updateUser
+);
 
 /**
  * @swagger

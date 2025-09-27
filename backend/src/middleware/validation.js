@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // Enhanced validation schemas
 const validationSchemas = {
@@ -52,6 +53,41 @@ const validationSchemas = {
         .messages({
           'string.pattern.base': 'Phone number must be 10 digits',
         }),
+    }),
+
+    createUser: Joi.object({
+      firstName: Joi.string()
+        .min(2)
+        .max(50)
+        .pattern(/^[a-zA-Z\s]+$/)
+        .required()
+        .messages({
+          'string.min': 'First name must be at least 2 characters long',
+          'string.max': 'First name cannot exceed 50 characters',
+          'string.pattern.base':
+            'First name can only contain letters and spaces',
+          'any.required': 'First name is required',
+        }),
+      lastName: Joi.string()
+        .min(2)
+        .max(50)
+        .pattern(/^[a-zA-Z\s]+$/)
+        .required()
+        .messages({
+          'string.min': 'Last name must be at least 2 characters long',
+          'string.max': 'Last name cannot exceed 50 characters',
+          'string.pattern.base':
+            'Last name can only contain letters and spaces',
+          'any.required': 'Last name is required',
+        }),
+      email: Joi.string().email().lowercase().required().messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required',
+      }),
+      role: Joi.string().valid('user', 'admin').required().messages({
+        'any.only': 'Invalid role',
+        'any.required': 'Role is required',
+      }),
     }),
 
     login: Joi.object({
@@ -391,6 +427,8 @@ const createValidationMiddleware = (schemaName, schemaType) => {
         type: detail.type,
       }));
 
+      logger.error('error', error);
+
       return res.status(400).json({
         error: 'Validation failed',
         details: errorDetails,
@@ -426,6 +464,7 @@ module.exports = {
 
   // Pre-configured validation middleware
   registerValidation: createValidationMiddleware('user', 'register'),
+  createUserValidation: createValidationMiddleware('user', 'createUser'),
   loginValidation: createValidationMiddleware('user', 'login'),
   profileValidation: createValidationMiddleware('user', 'profile'),
   changePasswordValidation: createValidationMiddleware(
