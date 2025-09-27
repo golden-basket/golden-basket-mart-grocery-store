@@ -1,19 +1,26 @@
 import React from 'react';
-import { Box, Typography, Button, Paper, useTheme } from '@mui/material';
-import { useMediaQuery } from '@mui/material';
+import PropTypes from 'prop-types';
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-const RateLimitError = ({ 
-  retryAfter = 15, 
-  message = 'Too many requests', 
-  onRetry, 
-  showRetryButton = true 
+const RateLimitError = ({
+  retryAfter = 15,
+  message = 'Too many requests',
+  onRetry,
+  showRetryButton = true,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  const formatTime = (seconds) => {
+
+  const formatTime = seconds => {
     if (seconds >= 60) {
       const minutes = Math.ceil(seconds / 60);
       return `${minutes} minute${minutes > 1 ? 's' : ''}`;
@@ -79,7 +86,7 @@ const RateLimitError = ({
 
         <Typography
           variant={isMobile ? 'h5' : 'h4'}
-          component="h1"
+          component='h1'
           gutterBottom
           sx={{
             fontWeight: 600,
@@ -91,7 +98,7 @@ const RateLimitError = ({
         </Typography>
 
         <Typography
-          variant="body1"
+          variant='body1'
           sx={{
             color: theme.palette.text.secondary,
             mb: 3,
@@ -112,22 +119,23 @@ const RateLimitError = ({
             }}
           >
             <Typography
-              variant="body2"
+              variant='body2'
               sx={{
                 color: theme.palette.warning.dark,
                 fontWeight: 500,
               }}
             >
-              Please wait <strong>{formatTime(retryAfter)}</strong> before trying again
+              Please wait <strong>{formatTime(retryAfter)}</strong> before
+              trying again
             </Typography>
           </Box>
         )}
 
         {showRetryButton && retryAfter <= 0 && (
           <Button
-            variant="contained"
-            color="primary"
-            size="large"
+            variant='contained'
+            color='primary'
+            size='large'
             onClick={handleRetry}
             startIcon={<RefreshIcon />}
             sx={{
@@ -159,20 +167,28 @@ const RateLimitError = ({
             }}
           >
             <Typography
-              variant="caption"
+              variant='caption'
               sx={{
                 color: theme.palette.info.dark,
                 display: 'block',
                 textAlign: 'center',
               }}
             >
-              This helps protect our service from abuse and ensures fair usage for all users.
+              This helps protect our service from abuse and ensures fair usage
+              for all users.
             </Typography>
           </Box>
         )}
       </Paper>
     </Box>
   );
+};
+
+RateLimitError.propTypes = {
+  retryAfter: PropTypes.number,
+  message: PropTypes.string,
+  onRetry: PropTypes.func,
+  showRetryButton: PropTypes.bool,
 };
 
 export default RateLimitError;

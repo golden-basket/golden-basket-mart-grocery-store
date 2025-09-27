@@ -92,6 +92,10 @@ const getUserAgent = req => {
   return req.get('User-Agent') || 'unknown';
 };
 
+// Email queue for background processing
+const emailQueue = [];
+let isProcessingQueue = false;
+
 // Helper function to send email
 const sendEmail = async (to, subject, html) => {
   try {
@@ -109,6 +113,72 @@ const sendEmail = async (to, subject, html) => {
     logger.error(`Failed to send email to ${to}:`, error);
     throw error;
   }
+};
+
+// Add email to queue for background processing
+const queueEmail = (to, subject, html, priority = 'normal') => {
+  const emailJob = {
+    to,
+    subject,
+    html,
+    priority,
+    timestamp: Date.now(),
+    attempts: 0,
+    maxAttempts: 3,
+  };
+
+  emailQueue.push(emailJob);
+  logger.info(`Email queued for ${to}: ${subject}`);
+
+  // Start processing if not already running
+  if (!isProcessingQueue) {
+    processEmailQueue();
+  }
+};
+
+// Process email queue in background
+const processEmailQueue = async () => {
+  if (isProcessingQueue || emailQueue.length === 0) {
+    return;
+  }
+
+  isProcessingQueue = true;
+  logger.info(`Processing email queue with ${emailQueue.length} emails`);
+
+  while (emailQueue.length > 0) {
+    const emailJob = emailQueue.shift();
+
+    try {
+      await sendEmail(emailJob.to, emailJob.subject, emailJob.html);
+      logger.info(`Background email sent successfully to ${emailJob.to}`);
+    } catch (error) {
+      // Handle email sending errors with retry logic
+      emailJob.attempts++;
+      logger.error(`Email sending failed for ${emailJob.to}:`, error);
+
+      if (emailJob.attempts < emailJob.maxAttempts) {
+        // Retry after delay
+        setTimeout(() => {
+          emailQueue.unshift(emailJob);
+          processEmailQueue();
+        }, 5000 * emailJob.attempts); // Exponential backoff
+        logger.warn(
+          `Email failed for ${emailJob.to}, retrying (attempt ${emailJob.attempts})`
+        );
+      } else {
+        logger.error(
+          `Email permanently failed for ${emailJob.to} after ${emailJob.maxAttempts} attempts`
+        );
+        // Could implement dead letter queue or notification system here
+      }
+    }
+
+    // Small delay between emails to avoid overwhelming the email service
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  isProcessingQueue = false;
+  logger.info('Email queue processing completed');
 };
 
 // Enhanced registration with email verification
@@ -138,36 +208,42 @@ exports.register = async (req, res) => {
     // Send verification email
     const verifyUrl = `${FRONTEND_URL}/#/auth/verify/${verificationToken}`;
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #a3824c; margin: 0;">Welcome to Golden Basket Mart!</h2>
-          <p style="color: #7d6033; font-size: 16px;">Your fresh grocery journey starts here</p>
+      <div style="font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%); padding: 24px; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 style="color: #15803D; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Welcome to Golden Basket Mart!</h2>
+          <p style="color: #166534; font-size: 16px; margin: 8px 0 0; font-weight: 500;">Your fresh grocery journey starts here</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(163,130,76,0.1);">
-          <h3 style="color: #a3824c; margin-top: 0;">Hi ${firstName},</h3>
-          <p style="color: #2e3a1b; line-height: 1.6;">Thank you for registering with Golden Basket Mart! To complete your registration and start shopping for fresh groceries, please verify your email address by clicking the button below:</p>
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12); border: 1px solid #E5E7EB;">
+          <h3 style="color: #15803D; margin-top: 0; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Hi ${firstName},</h3>
+          <p style="color: #374151; line-height: 1.625; font-size: 16px; margin-bottom: 24px;">Thank you for registering with Golden Basket Mart! To complete your registration and start shopping for fresh groceries, please verify your email address by clicking the button below:</p>
           
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verifyUrl}" style="background: linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(163,130,76,0.3);">Verify Email Address</a>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${verifyUrl}" style="background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); transition: all 0.25s ease; border: none; cursor: pointer;">Verify Email Address</a>
           </div>
           
-          <p style="color: #666; font-size: 14px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
-          <p style="color: #a3824c; font-size: 14px; word-break: break-all;">${verifyUrl}</p>
+          <p style="color: #6B7280; font-size: 14px; margin-bottom: 8px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
+          <p style="color: #22C55E; font-size: 14px; word-break: break-all; background: #F0FDF4; padding: 12px; border-radius: 6px; border: 1px solid #DCFCE7; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;">${verifyUrl}</p>
           
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #a3824c;">
-            <p style="margin: 0; color: #666; font-size: 14px;"><strong>Important:</strong> This verification link will expire in 24 hours for security reasons.</p>
+          <div style="background: #FFFBEB; padding: 16px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #F59E0B; border: 1px solid #FEF3C7;">
+            <p style="margin: 0; color: #92400E; font-size: 14px; font-weight: 500;"><strong>Important:</strong> This verification link will expire in 24 hours for security reasons.</p>
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; color: #7d6033; font-size: 14px;">
-          <p>Best regards,<br><strong>Golden Basket Mart Team</strong></p>
-          <p>Fresh groceries delivered to your doorstep</p>
+        <div style="text-align: center; margin-top: 32px; color: #166534; font-size: 14px;">
+          <p style="margin: 0 0 8px; font-weight: 500;">Best regards,<br><strong style="color: #15803D;">Golden Basket Mart Team</strong></p>
+          <p style="margin: 0; color: #6B7280;">Fresh groceries delivered to your doorstep</p>
         </div>
       </div>
     `;
 
-    await sendEmail(email, 'Verify your email - Golden Basket Mart', emailHtml);
+    // Queue email for background processing instead of waiting
+    queueEmail(
+      email,
+      'Verify your email - Golden Basket Mart',
+      emailHtml,
+      'high'
+    );
 
     logger.info(`New user registered: ${email}`);
     res.status(201).json({
@@ -385,26 +461,26 @@ exports.forgotPassword = async (req, res) => {
     // Send password reset email
     const resetUrl = `${FRONTEND_URL}/#/reset-password?token=${resetToken}`;
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #a3824c; margin: 0;">Password Reset Request</h2>
-          <p style="color: #7d6033; font-size: 16px;">Golden Basket Mart</p>
+      <div style="font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%); padding: 24px; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 style="color: #15803D; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Password Reset Request</h2>
+          <p style="color: #166534; font-size: 16px; margin: 8px 0 0; font-weight: 500;">Golden Basket Mart</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(163,130,76,0.1);">
-          <h3 style="color: #a3824c; margin-top: 0;">Hi ${user.firstName},</h3>
-          <p style="color: #2e3a1b; line-height: 1.6;">We received a request to reset your password for your Golden Basket Mart account. Click the button below to create a new password:</p>
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12); border: 1px solid #E5E7EB;">
+          <h3 style="color: #15803D; margin-top: 0; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Hi ${user.firstName},</h3>
+          <p style="color: #374151; line-height: 1.625; font-size: 16px; margin-bottom: 24px;">We received a request to reset your password for your Golden Basket Mart account. Click the button below to create a new password:</p>
           
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" style="background: linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(163,130,76,0.3);">Reset Password</a>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${resetUrl}" style="background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); transition: all 0.25s ease; border: none; cursor: pointer;">Reset Password</a>
           </div>
           
-          <p style="color: #666; font-size: 14px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
-          <p style="color: #a3824c; font-size: 14px; word-break: break-all;">${resetUrl}</p>
+          <p style="color: #6B7280; font-size: 14px; margin-bottom: 8px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
+          <p style="color: #22C55E; font-size: 14px; word-break: break-all; background: #F0FDF4; padding: 12px; border-radius: 6px; border: 1px solid #DCFCE7; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;">${resetUrl}</p>
           
-          <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Security Notice:</strong></p>
-            <ul style="margin: 10px 0; padding-left: 20px; color: #856404; font-size: 14px;">
+          <div style="background: #FEF2F2; padding: 16px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #EF4444; border: 1px solid #FECACA;">
+            <p style="margin: 0 0 12px; color: #B91C1C; font-size: 14px; font-weight: 600;"><strong>Security Notice:</strong></p>
+            <ul style="margin: 0; padding-left: 20px; color: #B91C1C; font-size: 14px; line-height: 1.5;">
               <li>This link will expire in 10 minutes</li>
               <li>If you didn't request this reset, please ignore this email</li>
               <li>Your password will only be changed if you click the link above</li>
@@ -412,19 +488,24 @@ exports.forgotPassword = async (req, res) => {
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; color: #7d6033; font-size: 14px;">
-          <p>Best regards,<br><strong>Golden Basket Mart Team</strong></p>
+        <div style="text-align: center; margin-top: 32px; color: #166534; font-size: 14px;">
+          <p style="margin: 0 0 8px; font-weight: 500;">Best regards,<br><strong style="color: #15803D;">Golden Basket Mart Team</strong></p>
+          <p style="margin: 0; color: #6B7280;">Fresh groceries delivered to your doorstep</p>
         </div>
       </div>
     `;
 
-    await sendEmail(
+    // Queue email for background processing instead of waiting
+    queueEmail(
       email,
       'Reset Your Password - Golden Basket Mart',
-      emailHtml
+      emailHtml,
+      'high'
     );
 
-    logger.info(`Password reset email sent to: ${email} from IP: ${clientIP}`);
+    logger.info(
+      `Password reset email queued for: ${email} from IP: ${clientIP}`
+    );
     res.json({
       message:
         'If an account with that email exists, a password reset link has been sent.',
@@ -547,37 +628,44 @@ exports.resendVerification = async (req, res) => {
     // Send verification email
     const verifyUrl = `${FRONTEND_URL}/auth/verify/${verificationToken}`;
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #a3824c; margin: 0;">Email Verification</h2>
-          <p style="color: #7d6033; font-size: 16px;">Golden Basket Mart</p>
+      <div style="font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%); padding: 24px; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 style="color: #15803D; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Email Verification</h2>
+          <p style="color: #166534; font-size: 16px; margin: 8px 0 0; font-weight: 500;">Golden Basket Mart</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(163,130,76,0.1);">
-          <h3 style="color: #a3824c; margin-top: 0;">Hi ${user.firstName},</h3>
-          <p style="color: #2e3a1b; line-height: 1.6;">You requested a new email verification link. Please click the button below to verify your email address:</p>
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12); border: 1px solid #E5E7EB;">
+          <h3 style="color: #15803D; margin-top: 0; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Hi ${user.firstName},</h3>
+          <p style="color: #374151; line-height: 1.625; font-size: 16px; margin-bottom: 24px;">You requested a new email verification link. Please click the button below to verify your email address:</p>
           
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verifyUrl}" style="background: linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(163,130,76,0.3);">Verify Email Address</a>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${verifyUrl}" style="background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); transition: all 0.25s ease; border: none; cursor: pointer;">Verify Email Address</a>
           </div>
           
-          <p style="color: #666; font-size: 14px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
-          <p style="color: #a3824c; font-size: 14px; word-break: break-all;">${verifyUrl}</p>
+          <p style="color: #6B7280; font-size: 14px; margin-bottom: 8px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
+          <p style="color: #22C55E; font-size: 14px; word-break: break-all; background: #F0FDF4; padding: 12px; border-radius: 6px; border: 1px solid #DCFCE7; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;">${verifyUrl}</p>
           
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #a3824c;">
-            <p style="margin: 0; color: #666; font-size: 14px;"><strong>Note:</strong> This verification link will expire in 24 hours.</p>
+          <div style="background: #F0FDF4; padding: 16px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #22C55E; border: 1px solid #DCFCE7;">
+            <p style="margin: 0; color: #15803D; font-size: 14px; font-weight: 500;"><strong>Note:</strong> This verification link will expire in 24 hours.</p>
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; color: #7d6033; font-size: 14px;">
-          <p>Best regards,<br><strong>Golden Basket Mart Team</strong></p>
+        <div style="text-align: center; margin-top: 32px; color: #166534; font-size: 14px;">
+          <p style="margin: 0 0 8px; font-weight: 500;">Best regards,<br><strong style="color: #15803D;">Golden Basket Mart Team</strong></p>
+          <p style="margin: 0; color: #6B7280;">Fresh groceries delivered to your doorstep</p>
         </div>
       </div>
     `;
 
-    await sendEmail(email, 'Verify your email - Golden Basket Mart', emailHtml);
+    // Queue email for background processing instead of waiting
+    queueEmail(
+      email,
+      'Verify your email - Golden Basket Mart',
+      emailHtml,
+      'high'
+    );
 
-    logger.info(`Verification email resent to: ${email} from IP: ${clientIP}`);
+    logger.info(`Verification email queued for: ${email} from IP: ${clientIP}`);
     res.json({
       message:
         'If an account with that email exists, a verification email has been sent.',
@@ -774,47 +862,54 @@ exports.sendInvitationEmail = async (req, res) => {
 
     // Send invitation email with new credentials
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #a3824c; margin: 0;">Welcome to Golden Basket Mart!</h2>
-          <p style="color: #7d6033; font-size: 16px;">Your account has been created</p>
+      <div style="font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%); padding: 24px; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 style="color: #15803D; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Welcome to Golden Basket Mart!</h2>
+          <p style="color: #166534; font-size: 16px; margin: 8px 0 0; font-weight: 500;">Your account has been created</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(163,130,76,0.1);">
-          <h3 style="color: #a3824c; margin-top: 0;">Hi ${user.firstName},</h3>
-          <p style="color: #2e3a1b; line-height: 1.6;">Your account has been created by an administrator. You can now log in to Golden Basket Mart using the credentials below:</p>
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12); border: 1px solid #E5E7EB;">
+          <h3 style="color: #15803D; margin-top: 0; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Hi ${user.firstName},</h3>
+          <p style="color: #374151; line-height: 1.625; font-size: 16px; margin-bottom: 24px;">Your account has been created by an administrator. You can now log in to Golden Basket Mart using the credentials below:</p>
           
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e6d897;">
-            <h4 style="color: #a3824c; margin-top: 0;">Your Login Details:</h4>
-            <p style="margin: 10px 0;"><strong>Email:</strong> ${user.email}</p>
-            <p style="margin: 10px 0;"><strong>Temporary Password:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 3px;">${systemGeneratedPassword}</code></p>
+          <div style="background: #F0FDF4; padding: 24px; border-radius: 12px; margin: 24px 0; border: 2px solid #DCFCE7;">
+            <h4 style="color: #15803D; margin-top: 0; font-size: 18px; font-weight: 600; margin-bottom: 16px;">Your Login Details:</h4>
+            <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #DCFCE7; margin-bottom: 12px;">
+              <p style="margin: 0; color: #374151; font-size: 14px; font-weight: 500;"><strong>Email:</strong> <span style="color: #22C55E; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;">${user.email}</span></p>
+            </div>
+            <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #DCFCE7;">
+              <p style="margin: 0; color: #374151; font-size: 14px; font-weight: 500;"><strong>Temporary Password:</strong> <code style="background: #FEF3C7; color: #B45309; padding: 4px 8px; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-weight: 600;">${systemGeneratedPassword}</code></p>
+            </div>
           </div>
           
-          <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Important:</strong> Please change your password after your first login for security purposes.</p>
+          <div style="background: #FEF2F2; padding: 16px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #EF4444; border: 1px solid #FECACA;">
+            <p style="margin: 0; color: #B91C1C; font-size: 14px; font-weight: 500;"><strong>Important:</strong> Please change your password after your first login for security purposes.</p>
           </div>
           
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${FRONTEND_URL}/login" style="background: linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(163,130,76,0.3);">Login Now</a>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${FRONTEND_URL}/login" style="background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); transition: all 0.25s ease; border: none; cursor: pointer;">Login Now</a>
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; color: #7d6033; font-size: 14px;">
-          <p>Best regards,<br><strong>Golden Basket Mart Team</strong></p>
+        <div style="text-align: center; margin-top: 32px; color: #166534; font-size: 14px;">
+          <p style="margin: 0 0 8px; font-weight: 500;">Best regards,<br><strong style="color: #15803D;">Golden Basket Mart Team</strong></p>
+          <p style="margin: 0; color: #6B7280;">Fresh groceries delivered to your doorstep</p>
         </div>
       </div>
     `;
 
-    await sendEmail(
+    // Queue email for background processing instead of waiting
+    queueEmail(
       user.email,
       'Welcome to Golden Basket Mart - Your Account Has Been Created',
-      emailHtml
+      emailHtml,
+      'high'
     );
 
     logger.info(
-      `Invitation email sent to user by admin ${req.user.userId}: ${user.email}`
+      `Invitation email queued for user by admin ${req.user.userId}: ${user.email}`
     );
-    res.json({ message: 'Invitation email sent successfully.' });
+    res.json({ message: 'Invitation email queued successfully.' });
   } catch (err) {
     logger.error('Send invitation email error:', err);
     res.status(500).json({ error: 'Failed to send invitation email.' });
@@ -824,7 +919,7 @@ exports.sendInvitationEmail = async (req, res) => {
 // Create user (admin only)
 exports.createUser = async (req, res) => {
   try {
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, role } = req.body;
     const inviterId = req.user.userId; // Get the admin who is creating the user
 
     const systemGeneratedPassword = `${
@@ -844,7 +939,7 @@ exports.createUser = async (req, res) => {
       lastName,
       email: email.toLowerCase(),
       password: await bcrypt.hash(systemGeneratedPassword, 12),
-      role: 'user',
+      role: role || 'user',
       isVerified: false,
       isDefaultPassword: true,
       inviter: inviterId,
@@ -853,41 +948,48 @@ exports.createUser = async (req, res) => {
 
     // Send invitation email with login credentials
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%); padding: 20px; border-radius: 10px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #a3824c; margin: 0;">Welcome to Golden Basket Mart!</h2>
-          <p style="color: #7d6033; font-size: 16px;">Your account has been created</p>
+      <div style="font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 50%, #BBF7D0 100%); padding: 24px; border-radius: 12px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 style="color: #15803D; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Welcome to Golden Basket Mart!</h2>
+          <p style="color: #166534; font-size: 16px; margin: 8px 0 0; font-weight: 500;">Your account has been created</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(163,130,76,0.1);">
-          <h3 style="color: #a3824c; margin-top: 0;">Hi ${firstName},</h3>
-          <p style="color: #2e3a1b; line-height: 1.6;">Your account has been created by an administrator. You can now log in to Golden Basket Mart using the credentials below:</p>
+        <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12); border: 1px solid #E5E7EB;">
+          <h3 style="color: #15803D; margin-top: 0; font-size: 20px; font-weight: 600; margin-bottom: 16px;">Hi ${firstName},</h3>
+          <p style="color: #374151; line-height: 1.625; font-size: 16px; margin-bottom: 24px;">Your account has been created by an administrator. You can now log in to Golden Basket Mart using the credentials below:</p>
           
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e6d897;">
-            <h4 style="color: #a3824c; margin-top: 0;">Your Login Details:</h4>
-            <p style="margin: 10px 0;"><strong>Email:</strong> ${email}</p>
-            <p style="margin: 10px 0;"><strong>Temporary Password:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 3px;">${systemGeneratedPassword}</code></p>
+          <div style="background: #F0FDF4; padding: 24px; border-radius: 12px; margin: 24px 0; border: 2px solid #DCFCE7;">
+            <h4 style="color: #15803D; margin-top: 0; font-size: 18px; font-weight: 600; margin-bottom: 16px;">Your Login Details:</h4>
+            <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #DCFCE7; margin-bottom: 12px;">
+              <p style="margin: 0; color: #374151; font-size: 14px; font-weight: 500;"><strong>Email:</strong> <span style="color: #22C55E; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;">${email}</span></p>
+            </div>
+            <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #DCFCE7;">
+              <p style="margin: 0; color: #374151; font-size: 14px; font-weight: 500;"><strong>Temporary Password:</strong> <code style="background: #FEF3C7; color: #B45309; padding: 4px 8px; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-weight: 600;">${systemGeneratedPassword}</code></p>
+            </div>
           </div>
           
-          <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <p style="margin: 0; color: #856404; font-size: 14px;"><strong>Important:</strong> Please change your password after your first login for security purposes.</p>
+          <div style="background: #FEF2F2; padding: 16px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #EF4444; border: 1px solid #FECACA;">
+            <p style="margin: 0; color: #B91C1C; font-size: 14px; font-weight: 500;"><strong>Important:</strong> Please change your password after your first login for security purposes.</p>
           </div>
           
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${FRONTEND_URL}/login" style="background: linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(163,130,76,0.3);">Login Now</a>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${FRONTEND_URL}/login" style="background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); transition: all 0.25s ease; border: none; cursor: pointer;">Login Now</a>
           </div>
         </div>
         
-        <div style="text-align: center; margin-top: 30px; color: #7d6033; font-size: 14px;">
-          <p>Best regards,<br><strong>Golden Basket Mart Team</strong></p>
+        <div style="text-align: center; margin-top: 32px; color: #166534; font-size: 14px;">
+          <p style="margin: 0 0 8px; font-weight: 500;">Best regards,<br><strong style="color: #15803D;">Golden Basket Mart Team</strong></p>
+          <p style="margin: 0; color: #6B7280;">Fresh groceries delivered to your doorstep</p>
         </div>
       </div>
     `;
 
-    await sendEmail(
+    // Queue email for background processing instead of waiting
+    queueEmail(
       email,
       'Welcome to Golden Basket Mart - Your Account Has Been Created',
-      emailHtml
+      emailHtml,
+      'high'
     );
 
     logger.info(`New user created by admin ${inviterId}: ${email}`);
@@ -895,5 +997,28 @@ exports.createUser = async (req, res) => {
   } catch (err) {
     logger.error('Create user error:', err);
     res.status(500).json({ error: 'Failed to create user.' });
+  }
+};
+
+// Get email queue status (admin only)
+exports.getEmailQueueStatus = async (req, res) => {
+  try {
+    const queueStatus = {
+      queueLength: emailQueue.length,
+      isProcessing: isProcessingQueue,
+      queueItems: emailQueue.map(job => ({
+        to: job.to,
+        subject: job.subject,
+        priority: job.priority,
+        timestamp: job.timestamp,
+        attempts: job.attempts,
+        maxAttempts: job.maxAttempts,
+      })),
+    };
+
+    res.json(queueStatus);
+  } catch (err) {
+    logger.error('Get email queue status error:', err);
+    res.status(500).json({ error: 'Failed to get email queue status.' });
   }
 };

@@ -1,5 +1,20 @@
-import { useState, useCallback, createContext, useContext, useEffect, useRef } from 'react';
-import { Snackbar, Alert, AlertTitle, Box, IconButton, Button, useTheme } from '@mui/material';
+import {
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react';
+import {
+  Snackbar,
+  Alert,
+  AlertTitle,
+  Box,
+  IconButton,
+  Button,
+  useTheme,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TOAST_TYPES } from '../utils/toastConstants';
 import globalErrorHandler from '../utils/globalErrorHandler';
@@ -34,12 +49,12 @@ export const ToastProvider = ({ children }) => {
         console.warn('Toast message is not a string:', message);
         message = 'An unexpected error occurred';
       }
-      
+
       if (options.title && typeof options.title !== 'string') {
         console.warn('Toast title is not a string:', options.title);
         options.title = 'Error';
       }
-      
+
       const id = Date.now() + Math.random();
       const toast = {
         id,
@@ -102,12 +117,15 @@ export const ToastProvider = ({ children }) => {
   // Initialize global error handler with toast methods
   useEffect(() => {
     const toastHandler = {
-      success: (message, options) => addToast(message, TOAST_TYPES.SUCCESS, options),
-      error: (message, options) => addToast(message, TOAST_TYPES.ERROR, options),
-      warning: (message, options) => addToast(message, TOAST_TYPES.WARNING, options),
+      success: (message, options) =>
+        addToast(message, TOAST_TYPES.SUCCESS, options),
+      error: (message, options) =>
+        addToast(message, TOAST_TYPES.ERROR, options),
+      warning: (message, options) =>
+        addToast(message, TOAST_TYPES.WARNING, options),
       info: (message, options) => addToast(message, TOAST_TYPES.INFO, options),
     };
-    
+
     globalErrorHandler.init(toastHandler);
   }, [addToast]);
 
@@ -167,22 +185,22 @@ const ToastContainer = () => {
           <Alert
             severity={toast.type}
             onClose={() => removeToast(toast.id)}
-                          action={
-                <IconButton
-                  aria-label='close'
-                  color='inherit'
-                  size='small'
-                  onClick={() => removeToast(toast.id)}
-                  sx={{ 
-                    color: theme.palette.text.secondary,
-                    '&:hover': {
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                  }}
-                >
-                  <CloseIcon fontSize='inherit' />
-                </IconButton>
-              }
+            action={
+              <IconButton
+                aria-label='close'
+                color='inherit'
+                size='small'
+                onClick={() => removeToast(toast.id)}
+                sx={{
+                  color: theme.palette.text.secondary,
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
+              >
+                <CloseIcon fontSize='inherit' />
+              </IconButton>
+            }
             sx={{
               width: '100%',
               minWidth: 300,
@@ -211,38 +229,45 @@ const ToastContainer = () => {
             }}
           >
             {toast.title && typeof toast.title === 'string' && (
-              <AlertTitle sx={{ 
-                fontWeight: 600, 
-                mb: 0.5,
-                color: theme.palette.text.primary,
-              }}>
+              <AlertTitle
+                sx={{
+                  fontWeight: 600,
+                  mb: 0.5,
+                  color: theme.palette.text.primary,
+                }}
+              >
                 {toast.title}
               </AlertTitle>
             )}
-            {typeof toast.message === 'string' ? toast.message : 'An unexpected error occurred'}
-            {toast.action && typeof toast.action === 'object' && toast.action.label && toast.action.onClick && (
-              <Box sx={{ mt: 1 }}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={toast.action.onClick}
-                  sx={{
-                    fontSize: '0.75rem',
-                    py: 0.5,
-                    px: 1.5,
-                    minWidth: 'auto',
-                    borderColor: getToastColor(toast.type),
-                    color: getToastColor(toast.type),
-                    '&:hover': {
+            {typeof toast.message === 'string'
+              ? toast.message
+              : 'An unexpected error occurred'}
+            {toast.action &&
+              typeof toast.action === 'object' &&
+              toast.action.label &&
+              toast.action.onClick && (
+                <Box sx={{ mt: 1 }}>
+                  <Button
+                    size='small'
+                    variant='outlined'
+                    onClick={toast.action.onClick}
+                    sx={{
+                      fontSize: '0.75rem',
+                      py: 0.5,
+                      px: 1.5,
+                      minWidth: 'auto',
                       borderColor: getToastColor(toast.type),
-                      backgroundColor: getToastColor(toast.type) + '10',
-                    },
-                  }}
-                >
-                  {toast.action.label}
-                </Button>
-              </Box>
-            )}
+                      color: getToastColor(toast.type),
+                      '&:hover': {
+                        borderColor: getToastColor(toast.type),
+                        backgroundColor: getToastColor(toast.type) + '10',
+                      },
+                    }}
+                  >
+                    {toast.action.label}
+                  </Button>
+                </Box>
+              )}
           </Alert>
         </Snackbar>
       ))}
