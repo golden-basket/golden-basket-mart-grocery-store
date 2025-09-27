@@ -43,12 +43,12 @@ const Logo = ({
     display: 'flex',
     alignItems: 'center',
     cursor: onClick ? 'pointer' : 'default',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     ...(onClick && {
       '&:hover': {
         transform: 'scale(1.02)',
         '& img': {
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 4px 16px rgba(33, 150, 243, 0.3)',
           border: '2px solid rgba(255, 255, 255, 0.4)',
         },
       },
@@ -61,9 +61,9 @@ const Logo = ({
     height: logoSizes,
     borderRadius: '50%',
     objectFit: 'cover',
-    border:
-      variant === 'navbar' ? '2px solid rgba(255, 255, 255, 0.2)' : 'none',
+    border: variant === 'navbar' ? '2px solid rgba(255, 255, 255, 0.2)' : 'none',
     boxShadow: variant === 'navbar' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : 'none',
+    transition: 'all 0.3s ease',
   };
 
   const textSx = {
@@ -75,6 +75,7 @@ const Logo = ({
     fontSize: textSizes,
     letterSpacing: '0.5px',
     lineHeight: 1.2,
+    transition: 'color 0.3s ease',
   };
 
   return (
@@ -90,16 +91,16 @@ const Logo = ({
           height: logoSizes.xs,
           borderRadius: '50%',
           objectFit: 'cover',
-          border:
-            variant === 'navbar'
-              ? '2px solid rgba(255, 255, 255, 0.2)'
-              : 'none',
-          boxShadow:
-            variant === 'navbar' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : 'none',
+          border: variant === 'navbar' ? '2px solid rgba(255, 255, 255, 0.2)' : 'none',
+          boxShadow: variant === 'navbar' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : 'none',
         }}
       />
       {showText && (
-        <Typography variant='h6' sx={textSx}>
+        <Typography 
+          variant='h6' 
+          sx={textSx}
+          className={variant === 'navbar' ? 'logo-text-navbar' : 'logo-text-footer'}
+        >
           {isSmall ? 'Golden Basket' : 'Golden Basket Mart'}
         </Typography>
       )}

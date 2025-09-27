@@ -10,8 +10,8 @@ import {
   Skeleton,
   Alert,
   CircularProgress,
+  useTheme,
 } from '@mui/material';
-import { COLORS, GRADIENTS, SHADOWS } from '../../styles/theme';
 
 // Page container with consistent spacing and responsive behavior
 export const PageContainer = ({
@@ -38,6 +38,8 @@ export const PageContainer = ({
 
 // Page header with title and optional subtitle
 export const PageHeader = ({ title, subtitle, action, sx = {}, ...props }) => {
+  const theme = useTheme();
+  
   return (
     <Box
       sx={{
@@ -57,7 +59,7 @@ export const PageHeader = ({ title, subtitle, action, sx = {}, ...props }) => {
           component='h1'
           sx={{
             fontWeight: 700,
-            background: GRADIENTS.primary,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             mb: subtitle ? 1 : 0,
@@ -89,6 +91,8 @@ export const Section = ({
   sx = {},
   ...props
 }) => {
+  const theme = useTheme();
+  
   return (
     <Box
       sx={{
@@ -112,7 +116,7 @@ export const Section = ({
                 variant='h6'
                 sx={{
                   fontWeight: 600,
-                  color: COLORS.text.primary,
+                  color: theme.palette.text.primary,
                   mb: subtitle ? 0.5 : 0,
                 }}
               >
@@ -147,13 +151,15 @@ export const ContentCard = ({
   sx = {},
   ...props
 }) => {
+  const theme = useTheme();
+  
   return (
     <Card
       elevation={elevation}
       sx={{
-        background: GRADIENTS.card,
-        boxShadow: SHADOWS.card,
-        borderRadius: 2,
+        background: theme.palette.background.paper,
+        boxShadow: theme.shadows[4],
+        borderRadius: 12,
         ...sx,
       }}
       {...props}
@@ -179,7 +185,7 @@ export const ContentCard = ({
                     variant='h6'
                     sx={{
                       fontWeight: 600,
-                      color: COLORS.text.primary,
+                      color: theme.palette.text.primary,
                       mb: subtitle ? 0.5 : 0,
                     }}
                   >

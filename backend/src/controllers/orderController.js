@@ -30,8 +30,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     // Validate that items have required product information
     for (const item of order.items) {
       if (
-        !item.product ||
-        !item.product.name ||
+        !item?.product.name ||
         typeof item.price !== 'number' ||
         typeof item.quantity !== 'number'
       ) {
@@ -116,7 +115,8 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
           .fill('#fff')
           .text('Golden Basket Mart', leftMargin + 10, currentY + 25);
       }
-    } catch (logoError) {
+    } catch (error) {
+      logger.error('Error loading logo:', error);
       // Create a placeholder rectangle if logo loading fails
       doc
         .rect(leftMargin, currentY, logoSize, logoSize)
@@ -242,7 +242,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     doc.fontSize(9).font('Helvetica').fill('#000000');
     doc.text(user.email || 'N/A', leftMargin, parallelY + 30);
 
-    if (shippingAddress && shippingAddress.addressLine1) {
+    if (shippingAddress?.addressLine1) {
       doc.text(shippingAddress.addressLine1, leftMargin, parallelY + 42);
 
       if (shippingAddress.addressLine2) {
@@ -294,9 +294,7 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     order.items.forEach((item, index) => {
       // Safety check for item structure
       if (
-        !item ||
-        !item.product ||
-        !item.product.name ||
+        !item?.product.name ||
         typeof item.price !== 'number' ||
         typeof item.quantity !== 'number'
       ) {
@@ -377,9 +375,9 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
 
     // Use stored values from invoice for consistency with frontend
     const subtotal = invoice.subtotal || calculatedSubtotal;
-    const gst = invoice.gst || (calculatedSubtotal * 0.18);
+    const gst = invoice.gst || calculatedSubtotal * 0.18;
     const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
-    const total = invoice.amount || (subtotal + deliveryCharge + gst); // Use stored total
+    const total = invoice.amount || subtotal + deliveryCharge + gst; // Use stored total
 
     // Summary rows
     doc.fontSize(9).font('Helvetica').fill('#ffffff');
@@ -399,7 +397,9 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
     currentY += 16;
     doc.fontSize(7).font('Helvetica').fill('#666666');
     doc.text(
-      subtotal >= 499 ? '(Free delivery for orders ≥ Rs.499)' : '(Rs.50 delivery charge for orders < Rs.499)',
+      subtotal >= 499
+        ? '(Free delivery for orders ≥ Rs.499)'
+        : '(Rs.50 delivery charge for orders < Rs.499)',
       summaryX,
       currentY
     );
@@ -421,22 +421,20 @@ function generateInvoicePDF(invoice, order, user, shippingAddress, cb) {
       .text('TOTAL:', summaryX, currentY);
     rightAlignText(`INR ${total.toFixed(2)}`, currentY, 12);
 
-    currentY += 150;
-
     // Delivery Charges Information Section
-    currentY += 20;
+    currentY += 50;
     drawFilledRect(leftMargin, currentY, pageWidth, 60, '#f8f9fa');
-    
+
     doc.fontSize(10).font('Helvetica-Bold').fill('#000000');
-    centerText('📦 DELIVERY CHARGES POLICY', currentY + 15, 10);
-    
+    centerText('Delivery charges policy', currentY + 15, 10);
+
     doc.fontSize(8).font('Helvetica').fill('#000000');
     centerText(
-      'Orders ≥ Rs.499: FREE delivery | Orders < Rs.499: Rs.50 delivery charge',
+      'Orders above Rs.499: FREE delivery | Orders below Rs.499: Rs.50 delivery charge',
       currentY + 30,
       8
     );
-    
+
     doc.fontSize(8).font('Helvetica').fill('#666666');
     centerText(
       'Delivery charges are calculated based on order subtotal before GST',
@@ -575,7 +573,7 @@ exports.placeOrder = async (req, res) => {
         price: item.product.price,
       };
     });
-    
+
     const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
     const gst = subtotal * 0.18; // 18% GST
     const totalAmount = subtotal + deliveryCharge + gst; // Total including delivery and GST

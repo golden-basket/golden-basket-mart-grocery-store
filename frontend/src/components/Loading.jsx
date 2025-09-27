@@ -1,13 +1,6 @@
-import {
-  Box,
-  keyframes,
-  LinearProgress,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, keyframes, LinearProgress, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { COLORS, GRADIENTS, SHADOWS } from '../styles/theme';
-import './Loading.css';
 
 // Optimized keyframes for better performance
 const spin = keyframes`
@@ -20,20 +13,13 @@ const bounce = keyframes`
   50% { transform: translateY(-6px); }
 `;
 
-// Not in use
-// const wave = keyframes`
-//   0% { transform: translateX(-100%); }
-//   50% { transform: translateX(100%); }
-//   100% { transform: translateX(100%); }
-// `;
-
 const pulse = keyframes`
   0%, 40%, 100% {
     transform: translateY(0) scale(1);
-    opacity: 0.7;
+    opacity: 0.8;
   }
   20% {
-    transform: translateY(-12px) scale(1.4);
+    transform: translateY(-15px) scale(1.5);
     opacity: 1;
   }
 `;
@@ -44,8 +30,6 @@ const fadeIn = keyframes`
 `;
 
 const Loading = ({
-  // eslint-disable-next-line
-  message = '', // Not in use
   size = 'medium',
   variant = 'default',
   showDots = true,
@@ -53,8 +37,16 @@ const Loading = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  // Simplified size configurations
+
+  // Direct theme color access - no fallbacks needed
+  const primaryMain = theme.palette.primary.main;
+  const primaryLight = theme.palette.primary.light;
+  const primaryDark = theme.palette.primary.dark;
+  const secondaryMain = theme.palette.secondary.main;
+  const secondaryDark = theme.palette.secondary.dark;
+  const shadow8 = theme.shadows[8];
+
+  // Size configurations
   const sizeConfigs = {
     small: {
       containerHeight: '15vh',
@@ -84,40 +76,39 @@ const Loading = ({
 
   const config = sizeConfigs[size];
 
-  // Variant configurations
+  // Variant configurations using theme colors directly
   const variantConfigs = {
     default: {
-      background: 'rgba(163, 130, 76, 0.05)',
-      iconGradient: GRADIENTS.button,
+      background: `${theme.palette.primary.main}0D`,
+      iconGradient: `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
       dotColors: [
-        COLORS.primary.light,
-        COLORS.primary.main,
-        COLORS.primary.dark,
-        COLORS.secondary.main,
-        COLORS.secondary.dark,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
+        `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
+        `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
       ],
     },
     subtle: {
-      background: 'rgba(163, 130, 76, 0.02)',
-      iconGradient: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
+      background: `${theme.palette.primary.main}05`,
+      iconGradient: `linear-gradient(135deg, ${secondaryMain} 0%, ${primaryMain} 100%)`,
       dotColors: [
-        COLORS.primary.light,
-        COLORS.primary.main,
-        COLORS.primary.dark,
-        COLORS.primary.light,
-        COLORS.primary.main,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
+        `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
+        `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
       ],
     },
     vibrant: {
-      background: 'rgba(163, 130, 76, 0.1)',
-      iconGradient:
-        'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #866422 100%)',
+      background: `${theme.palette.primary.main}1A`,
+      iconGradient: `linear-gradient(135deg, ${primaryMain} 0%, ${secondaryMain} 50%, ${primaryDark} 100%)`,
       dotColors: [
-        COLORS.warning.light,
-        COLORS.primary.main,
-        COLORS.success.main,
-        COLORS.info.main,
-        COLORS.secondary.main,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
+        `linear-gradient(135deg, ${secondaryMain} 0%, ${secondaryDark} 100%)`,
+        `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+        `linear-gradient(135deg, ${secondaryMain} 0%, ${secondaryDark} 100%)`,
+        `linear-gradient(135deg, ${primaryLight} 0%, ${primaryMain} 100%)`,
       ],
     },
   };
@@ -126,7 +117,7 @@ const Loading = ({
 
   return (
     <Box
-      role='status'
+      component='output'
       aria-live='polite'
       tabIndex={0}
       sx={{
@@ -137,31 +128,25 @@ const Loading = ({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 9999,
+        zIndex: 99,
         gap: config.gap,
         background: variantConfig.background,
         transition: 'all 0.3s ease',
         animation: `${fadeIn} 0.6s ease-out`,
         position: 'relative',
         overflow: 'hidden',
-
-        // Simplified responsive design
         px: { xs: 1, sm: 1.5, md: 2 },
         py: { xs: 1, sm: 1.5, md: 2 },
-
-        // Improved accessibility
         '&:focus': {
-          outline: '2px solid var(--color-primary)',
+          outline: `2px solid ${primaryMain}`,
           outlineOffset: '4px',
         },
-
-        // Performance optimizations
         willChange: 'transform, opacity',
         backfaceVisibility: 'hidden',
         transform: 'translateZ(0)',
       }}
     >
-      {/* Enhanced background pattern for visual interest */}
+      {/* Enhanced background pattern */}
       <Box
         sx={{
           position: 'absolute',
@@ -170,8 +155,8 @@ const Loading = ({
           right: 0,
           bottom: 0,
           opacity: 0.03,
-          background: `radial-gradient(circle at 20% 80%, ${COLORS.primary.main} 0%, transparent 50%),
-                      radial-gradient(circle at 80% 20%, ${COLORS.secondary.main} 0%, transparent 50%)`,
+          background: `radial-gradient(circle at 20% 80%, ${primaryMain} 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, ${secondaryMain} 0%, transparent 50%)`,
           pointerEvents: 'none',
         }}
       />
@@ -180,7 +165,7 @@ const Loading = ({
       {showIcon && (
         <Box
           sx={{
-            mb: config.gap * 2.5,
+            mb: config.gap * 1.5,
             p: config.iconPadding,
             background: variantConfig.iconGradient,
             borderRadius: '50%',
@@ -188,9 +173,8 @@ const Loading = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: SHADOWS.buttonHover,
+            boxShadow: shadow8,
             animation: `${fadeIn} 0.8s ease-out 0.2s both`,
-
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -200,13 +184,12 @@ const Loading = ({
               bottom: '-6px',
               borderRadius: '50%',
               border: '3px solid transparent',
-              borderTop: `3px solid ${COLORS.primary.light}`,
-              borderRight: `3px solid ${COLORS.primary.main}`,
-              borderBottom: `3px solid ${COLORS.primary.dark}`,
-              borderLeft: `3px solid ${COLORS.primary.main}`,
+              borderTop: `3px solid ${primaryLight}`,
+              borderRight: `3px solid ${primaryMain}`,
+              borderBottom: `3px solid ${primaryDark}`,
+              borderLeft: `3px solid ${primaryMain}`,
               animation: `${spin} 1.2s linear infinite`,
             },
-
             '&::after': {
               content: '""',
               position: 'absolute',
@@ -216,7 +199,7 @@ const Loading = ({
               bottom: '-2px',
               borderRadius: '50%',
               border: '2px solid transparent',
-              borderTop: `2px solid ${COLORS.primary.light}`,
+              borderTop: `2px solid ${primaryLight}`,
               animation: `${spin} 0.8s linear infinite reverse`,
             },
           }}
@@ -224,7 +207,7 @@ const Loading = ({
           <ShoppingCartIcon
             sx={{
               fontSize: config.iconSize,
-              color: COLORS.primary.contrastText,
+              color: theme.palette.common.white,
               filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
               animation: `${bounce} 2s ease-in-out infinite`,
               zIndex: 1,
@@ -232,34 +215,6 @@ const Loading = ({
           />
         </Box>
       )}
-
-      {/* Enhanced Loading Message */}
-      {/* <Typography
-        variant="h6"
-        sx={{
-          color: COLORS.text.primary,
-          fontSize: config.fontSize,
-          fontWeight: 600,
-          textAlign: 'center',
-          animation: `${fadeIn} 0.8s ease-out 0.4s both`,
-          position: 'relative',
-          overflow: 'hidden',
-
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%',
-            background: `linear-gradient(90deg, transparent, ${COLORS.primary.main}, transparent)`,
-            animation: `${wave} 2s ease-in-out infinite`,
-            opacity: 0.3,
-          },
-        }}
-      >
-        {message || 'Loading...'}
-      </Typography> */}
 
       {/* Enhanced Animated Dots */}
       {showDots && (
@@ -282,21 +237,15 @@ const Loading = ({
                 width: config.dotSize,
                 height: config.dotSize,
                 borderRadius: '50%',
-                background: `linear-gradient(135deg, 
-                    ${variantConfig.dotColors[index]} 0%, 
-                    ${
-                      variantConfig.dotColors[
-                        (index + 1) % variantConfig.dotColors.length
-                      ]
-                    } 100%)`,
+                background: variantConfig.dotColors[index],
                 animation: `${pulse} 1.5s ease-in-out infinite`,
                 animationDelay: `${index * 0.1}s`,
-                boxShadow: SHADOWS.button,
+                boxShadow: `0 2px 8px ${theme.palette.primary.main}40, 0 1px 3px rgba(0,0,0,0.12)`,
+                filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.3))',
                 transition: 'all 0.3s ease',
-
                 '&:hover': {
                   transform: 'scale(1.2)',
-                  boxShadow: SHADOWS.buttonHover,
+                  boxShadow: `0 4px 16px ${theme.palette.primary.main}60, 0 3px 6px rgba(0,0,0,0.16)`,
                 },
               }}
             />
@@ -304,16 +253,19 @@ const Loading = ({
         </Box>
       )}
 
-      {/* Optional Progress Indicator */}
+      {/* Progress Indicator */}
       <LinearProgress
         sx={{
           width: '100%',
-          maxWidth: isMobile ? '20%' : isTablet ? '13%' : '8%',
+          maxWidth: isMobile ? '20%' : isMobile ? '13%' : '8%',
           height: 3,
           borderRadius: 1,
           overflow: 'hidden',
           animation: `${fadeIn} 0.8s ease-out 0.8s both`,
           mt: 0.5,
+          '& .MuiLinearProgress-bar': {
+            background: variantConfig.iconGradient,
+          },
         }}
       />
     </Box>

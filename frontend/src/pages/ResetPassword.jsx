@@ -35,8 +35,10 @@ import { ROUTES } from '../utils/routeConstants';
 
 // Password strength indicator component (reused from Register)
 const PasswordStrengthIndicator = ({ password }) => {
+  const theme = useTheme();
+  
   const getPasswordStrength = password => {
-    if (!password) return { score: 0, label: '', color: '#e0e0e0' };
+    if (!password) return { score: 0, label: '', color: theme.palette.grey[300] };
 
     let score = 0;
     const feedback = [];
@@ -54,12 +56,12 @@ const PasswordStrengthIndicator = ({ password }) => {
     if (!/[!@#$%^&*]/.test(password)) feedback.push('Special character');
 
     const colors = [
-      '#e0e0e0',
-      '#ff4444',
-      '#ff8800',
-      '#ffaa00',
-      '#88cc00',
-      '#44aa44',
+      theme.palette.grey[300],
+      theme.palette.error.main,
+      theme.palette.warning.main,
+      theme.palette.warning.light,
+      theme.palette.success.light,
+      theme.palette.success.main,
     ];
     const labels = ['', 'Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
 
@@ -91,7 +93,7 @@ const PasswordStrengthIndicator = ({ password }) => {
         sx={{
           height: 4,
           borderRadius: 2,
-          backgroundColor: '#e0e0e0',
+          backgroundColor: theme.palette.grey[200],
           '& .MuiLinearProgress-bar': {
             backgroundColor: strength.color,
             borderRadius: 2,
@@ -99,12 +101,12 @@ const PasswordStrengthIndicator = ({ password }) => {
         }}
       />
       {strength.feedback && (
-        <Typography
-          variant='caption'
-          sx={{ color: '#666', mt: 0.5, display: 'block' }}
-        >
-          Missing: {strength.feedback.join(', ')}
-        </Typography>
+              <Typography
+        variant='caption'
+        sx={{ color: theme.palette.text.secondary, mt: 0.5, display: 'block' }}
+      >
+        Missing: {strength.feedback.join(', ')}
+      </Typography>
       )}
     </Box>
   );
@@ -255,8 +257,7 @@ const ResetPassword = () => {
           alignItems: 'center',
           minHeight: '100vh',
           p: { xs: 1, sm: 2, md: 3 },
-          background:
-            'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 50%, ${theme.palette.action.hover} 100%)`,
         }}
       >
         <Paper
@@ -266,14 +267,13 @@ const ResetPassword = () => {
             width: { xs: '100%', sm: '95%', md: '80%', lg: '60%', xl: '50%' },
             maxWidth: 600,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background:
-              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
-            border: '2px solid #e6d897',
-            boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 50%, ${theme.palette.action.selected} 100%)`,
+            border: `2px solid ${theme.palette.primary.light}`,
+            boxShadow: `0 20px 40px ${theme.palette.primary.main}30`,
             textAlign: 'center',
           }}
         >
-          <CircularProgress size={60} sx={{ color: '#a3824c', mb: 2 }} />
+          <CircularProgress size={60} sx={{ color: theme.palette.primary.main, mb: 2 }} />
           <Typography variant='h6' color='text.secondary'>
             Validating reset token...
           </Typography>
@@ -290,11 +290,10 @@ const ResetPassword = () => {
         alignItems: 'center',
         minHeight: '100vh',
         p: { xs: 1, sm: 2, md: 3 },
-        background:
-          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 50%, ${theme.palette.action.hover} 100%)`,
       }}
     >
-      <Slide direction='up' in={true} timeout={400}>
+      <Slide direction='right' in={true} timeout={400}>
         <Paper
           elevation={24}
           sx={{
@@ -302,10 +301,9 @@ const ResetPassword = () => {
             width: { xs: '100%', sm: '95%', md: '80%', lg: '60%', xl: '50%' },
             maxWidth: 600,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background:
-              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
-            border: '2px solid #e6d897',
-            boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 50%, ${theme.palette.action.selected} 100%)`,
+            border: `2px solid ${theme.palette.primary.light}`,
+            boxShadow: `0 20px 40px ${theme.palette.primary.main}30`,
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -315,8 +313,7 @@ const ResetPassword = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
             },
           }}
         >
@@ -329,8 +326,7 @@ const ResetPassword = () => {
               variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 1,
@@ -356,11 +352,14 @@ const ResetPassword = () => {
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
-                  color: '#c53030',
-                  border: '1px solid #feb2b2',
-                  '& .MuiAlert-icon': { color: '#c53030' },
+                  backgroundColor: theme.palette.error.light,
+                  color: theme.palette.error.dark,
+                  border: `1px solid ${theme.palette.error.main}`,
+                  '& .MuiAlert-icon': { color: theme.palette.error.dark },
+                  '& .MuiAlert-message': {
+                    color: theme.palette.error.dark,
+                    fontWeight: 500,
+                  },
                 }}
               >
                 {errors.submit}
@@ -376,11 +375,14 @@ const ResetPassword = () => {
                 sx={{
                   mb: 3,
                   borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
-                  color: '#22543d',
-                  border: '1px solid #9ae6b4',
-                  '& .MuiAlert-icon': { color: '#22543d' },
+                  backgroundColor: theme.palette.success.light,
+                  color: theme.palette.success.dark,
+                  border: `1px solid ${theme.palette.success.main}`,
+                  '& .MuiAlert-icon': { color: theme.palette.success.dark },
+                  '& .MuiAlert-message': {
+                    color: theme.palette.success.dark,
+                    fontWeight: 500,
+                  },
                 }}
               >
                 {success}
@@ -410,7 +412,7 @@ const ResetPassword = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <Lock sx={{ color: '#a3824c' }} />
+                    <Lock sx={{ color: theme.palette.primary.main }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -423,7 +425,7 @@ const ResetPassword = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         edge='end'
                         disabled={loading}
-                        sx={{ color: '#a3824c' }}
+                        sx={{ color: theme.palette.primary.main }}
                         aria-label={
                           showPassword ? 'Hide password' : 'Show password'
                         }
@@ -437,16 +439,19 @@ const ResetPassword = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
+                  '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                  '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                  '&.Mui-error fieldset': { 
+                    borderColor: theme.palette.error.main,
+                    borderWidth: '2px',
+                  },
                 },
                 '& .MuiInputLabel-root': {
-                  '&.Mui-focused': { color: '#a3824c' },
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.primary.main },
                 },
                 '& .MuiFormHelperText-root': {
-                  color: errors.password ? '#d32f2f' : '#a3824c',
+                  color: errors.password ? theme.palette.error.main : theme.palette.primary.main,
                   fontSize: '0.8rem',
                 },
               }}
@@ -474,7 +479,7 @@ const ResetPassword = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <Lock sx={{ color: '#a3824c' }} />
+                    <Lock sx={{ color: theme.palette.primary.main }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -491,7 +496,7 @@ const ResetPassword = () => {
                         }
                         edge='end'
                         disabled={loading}
-                        sx={{ color: '#a3824c' }}
+                        sx={{ color: theme.palette.primary.main }}
                         aria-label={
                           showConfirmPassword
                             ? 'Hide password'
@@ -511,16 +516,27 @@ const ResetPassword = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
+                  '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                  '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                  '&.Mui-error fieldset': { 
+                    borderColor: theme.palette.error.main,
+                    borderWidth: '2px',
+                  },
                 },
                 '& .MuiInputLabel-root': {
-                  '&.Mui-focused': { color: '#a3824c' },
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.primary.main },
                 },
                 '& .MuiFormHelperText-root': {
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-error': { 
+                    color: theme.palette.error.main,
+                    backgroundColor: `${theme.palette.error.main}10`,
+                    padding: '4px 8px',
+                    borderRadius: 1,
+                    marginTop: 0.5,
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                  },
                 },
               }}
             />
@@ -543,23 +559,20 @@ const ResetPassword = () => {
                 fontWeight: 700,
                 fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                color: '#fff',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                color: theme.palette.primary.contrastText,
                 textTransform: 'none',
-                boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
+                boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
                 '&:hover': {
-                  background:
-                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                  color: '#000',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                  color: theme.palette.primary.contrastText,
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
+                  boxShadow: `0 6px 20px ${theme.palette.primary.main}60`,
                 },
                 '&:disabled': {
-                  background:
-                    'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
-                  color: '#999',
-                  borderColor: '#ccc',
+                  background: `linear-gradient(90deg, ${theme.palette.grey[200]} 0%, ${theme.palette.grey[300]} 100%)`,
+                  color: theme.palette.grey[600],
+                  borderColor: theme.palette.grey[400],
                   transform: 'none',
                   boxShadow: 'none',
                 },
@@ -570,7 +583,7 @@ const ResetPassword = () => {
             </Button>
 
             <Divider
-              sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}
+              sx={{ my: 3, '&::before, &::after': { borderColor: theme.palette.primary.light } }}
             >
               <Typography variant='body2' color='text.secondary' sx={{ px: 2 }}>
                 Remember your password?
@@ -588,20 +601,20 @@ const ResetPassword = () => {
                 py: { xs: 1.5, sm: 2 },
                 fontWeight: 600,
                 borderRadius: 2,
-                borderColor: '#a3824c',
-                color: '#a3824c',
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 textTransform: 'none',
                 fontSize: { xs: '0.9rem', sm: '1rem' },
                 '&:hover': {
-                  color: '#a3824c',
-                  borderColor: '#e6d897',
-                  backgroundColor: 'rgba(163,130,76,0.05)',
+                  color: theme.palette.primary.main,
+                  borderColor: theme.palette.primary.light,
+                  backgroundColor: `${theme.palette.primary.main}10`,
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(163,130,76,0.2)',
+                  boxShadow: `0 4px 12px ${theme.palette.primary.main}30`,
                 },
                 '&:disabled': {
-                  borderColor: '#ccc',
-                  color: '#999',
+                  borderColor: theme.palette.grey[400],
+                  color: theme.palette.grey[500],
                   transform: 'none',
                   boxShadow: 'none',
                 },

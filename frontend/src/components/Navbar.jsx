@@ -18,6 +18,7 @@ import {
   Menu,
   MenuItem,
   ListItemAvatar,
+  useMediaQuery,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -33,22 +34,24 @@ import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useCart } from '../hooks/useCart';
-import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import { useState } from 'react';
 import DarkModeToggle from './DarkModeToggle';
-import { useThemeContext } from '../hooks/useTheme';
 import Logo from './Logo';
 import RoleBasedUI from './RoleBasedUI';
 import { useToastNotifications } from '../hooks/useToast';
+import { useTheme } from '@mui/material/styles';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: cart } = useCart();
-  const { isDarkMode, toggleTheme } = useThemeContext();
-  const { isMobile, isFoldable } = useFoldableDisplay();
   const { showSuccess } = useToastNotifications();
+  const { toggleTheme } = useThemeContext();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
 
@@ -56,59 +59,51 @@ const Navbar = () => {
   const cartItemCount =
     cart?.items?.reduce((total, item) => total + (item.quantity || 0), 0) || 0;
 
+  // Navigation links
   const navLinks = [
     { to: '/', label: 'Home', icon: <HomeIcon /> },
     { to: '/catalogue', label: 'Catalogue', icon: <InventoryIcon /> },
+    { to: '/cart', label: 'Cart', icon: <LocalGroceryStoreIcon /> },
   ];
 
-  // Admin-only navigation links
+  // Admin navigation links
   const adminLinks = [
     { to: '/admin', label: 'Admin', icon: <AdminPanelSettingsIcon /> },
   ];
 
+  // Authentication links
   const authLinks = [
     { to: '/login', label: 'Login', icon: <LoginIcon /> },
     { to: '/register', label: 'Register', icon: <PersonAddAltIcon /> },
   ];
 
-  // User-specific links for mobile drawer (desktop uses Profile dropdown)
+  // User profile links
   const userLinks = [
     { to: '/profile', label: 'Profile', icon: <PersonIcon /> },
     { to: '/orders', label: 'Orders', icon: <LocalOfferIcon /> },
     { to: '/addresses', label: 'Addresses', icon: <EmojiNatureIcon /> },
   ];
 
-  // Admin-specific links for mobile drawer
-  const adminUserLinks = [
-    {
-      to: '/admin',
-      label: 'Admin Dashboard',
-      icon: <AdminPanelSettingsIcon />,
-    },
-  ];
-
   const isActive = path => location.pathname === path;
 
   const navButtonSx = active => ({
-    fontWeight: 700,
+    fontWeight: 600,
     borderBottom: active
-      ? '4px solid var(--color-primary-light)'
-      : '4px solid transparent',
+      ? `2px solid ${theme.palette.primary.contrastText}`
+      : '2px solid transparent',
     textTransform: 'none',
-    minHeight: isFoldable ? '44px' : { xs: '48px', md: '40px' },
-    fontSize: isFoldable ? '0.75rem' : { xs: '0.75rem', md: '0.875rem' },
-    px: isFoldable ? 1.5 : { xs: 1, md: 1.5 },
-    borderRadius: isFoldable ? 2 : 1,
-    transition: 'all 0.3s ease',
+    minHeight: { xs: '48px', md: '40px' },
+    fontSize: { xs: '0.75rem', md: '0.875rem' },
+    px: { xs: 1, md: 1.5 },
+    borderRadius: 0,
+    transition: 'all 0.2s ease',
     '&:hover': {
-      color: '#ffffff',
-      background:
-        'linear-gradient(90deg, #8B7355 0%, #A0522D 50%, #8B4513 100%)',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 6px 20px rgba(139, 69, 19, 0.3)',
+      backgroundColor: `${theme.palette.primary.contrastText}15`,
+      borderBottom: `2px solid ${theme.palette.primary.contrastText}`,
     },
   });
 
+  // Event handlers
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -128,49 +123,15 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const handleProfileClick = () => {
-    handleProfileMenuClose();
-    navigate('/profile');
-  };
-
-  const handleOrdersClick = () => {
-    handleProfileMenuClose();
-    navigate('/orders');
-  };
-
-  const handleAddressesClick = () => {
-    handleProfileMenuClose();
-    navigate('/addresses');
-  };
-
-  const handleCartClick = () => {
-    navigate('/cart');
+  const handleNavigation = path => {
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+    navigate(path);
   };
 
   const handleLogoClick = () => {
     navigate('/');
-  };
-
-  const handleNavLinkClick = () => {
-    if (isMobile) {
-      setMobileOpen(false);
-    }
-  };
-
-  const handleAuthLinkClick = () => {
-    if (isMobile) {
-      setMobileOpen(false);
-    }
-  };
-
-  const handleUserLinkClick = () => {
-    if (isMobile) {
-      setMobileOpen(false);
-    }
-  };
-
-  const handleThemeToggle = () => {
-    toggleTheme();
   };
 
   return (
@@ -178,18 +139,15 @@ const Navbar = () => {
       <AppBar
         position='sticky'
         sx={{
-          background: isDarkMode
-            ? 'linear-gradient(90deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)'
-            : 'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #a3824c 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          background: theme.palette.primary.main,
+          boxShadow: theme.shadows[2],
           zIndex: 1200,
-          borderRadius: '0 !important',
         }}
       >
         <Toolbar
           sx={{
-            minHeight: isFoldable ? '56px' : { xs: '64px', md: '56px' },
-            px: isFoldable ? 1 : { xs: 1, md: 2 },
+            minHeight: { xs: '64px', md: '56px' },
+            px: { xs: 1, md: 2 },
           }}
         >
           {/* Logo */}
@@ -209,20 +167,26 @@ const Navbar = () => {
                 key={link.to}
                 component={Link}
                 to={link.to}
-                onClick={handleNavLinkClick}
+                onClick={() => handleNavigation(link.to)}
                 sx={{
                   ...navButtonSx(isActive(link.to)),
-                  color: '#ffffff',
+                  color: theme.palette.primary.contrastText,
                   '&:hover': {
-                    color: '#ffffff',
+                    color: theme.palette.primary.contrastText,
                   },
                 }}
               >
-                {link.icon}
+                {link.to === '/cart' ? (
+                  <Badge badgeContent={cartItemCount} color='error'>
+                    {link.icon}
+                  </Badge>
+                ) : (
+                  link.icon
+                )}
                 <Typography
                   sx={{
                     ml: 0.5,
-                    fontSize: isFoldable ? '0.75rem' : '0.875rem',
+                    fontSize: { xs: '0.75rem', md: '0.875rem' },
                   }}
                 >
                   {link.label}
@@ -237,12 +201,12 @@ const Navbar = () => {
                   key={link.to}
                   component={Link}
                   to={link.to}
-                  onClick={handleNavLinkClick}
+                  onClick={() => handleNavigation(link.to)}
                   sx={{
                     ...navButtonSx(isActive(link.to)),
-                    color: '#ffffff',
+                    color: theme.palette.primary.contrastText,
                     '&:hover': {
-                      color: '#ffffff',
+                      color: theme.palette.primary.contrastText,
                     },
                   }}
                 >
@@ -250,7 +214,7 @@ const Navbar = () => {
                   <Typography
                     sx={{
                       ml: 0.5,
-                      fontSize: isFoldable ? '0.75rem' : '0.875rem',
+                      fontSize: { xs: '0.75rem', md: '0.875rem' },
                     }}
                   >
                     {link.label}
@@ -269,150 +233,158 @@ const Navbar = () => {
               ml: 'auto',
             }}
           >
-            {/* Dark Mode Toggle */}
-            <DarkModeToggle onToggle={handleThemeToggle} />
+            {/* Dark Mode Toggle - Desktop Only */}
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <DarkModeToggle />
+            </Box>
 
-            {/* Cart Icon */}
-            <IconButton
-              onClick={handleCartClick}
-              sx={{
-                color: '#ffffff',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                  color: '#ffd700',
-                },
-              }}
-            >
-              <Badge badgeContent={cartItemCount} color='error'>
-                <LocalGroceryStoreIcon />
-              </Badge>
-            </IconButton>
-
-            {/* User Menu / Auth Links */}
-            {user ? (
-              <>
-                <IconButton
-                  onClick={handleProfileMenuOpen}
-                  sx={{
-                    color: '#ffffff',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                      color: '#ffd700',
-                    },
-                  }}
-                >
-                  <Avatar
+            {/* User Menu / Auth Links - Desktop Only */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+              {user ? (
+                <>
+                  <IconButton
+                    onClick={handleProfileMenuOpen}
                     sx={{
-                      width: isFoldable ? '32px' : { xs: '32px', md: '36px' },
-                      height: isFoldable ? '32px' : { xs: '32px', md: '36px' },
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      color: '#ffffff',
-                      fontSize: isFoldable ? '0.75rem' : '0.875rem',
-                    }}
-                  >
-                    {user.firstName?.charAt(0)?.toUpperCase() +
-                      user.lastName?.charAt(0)?.toUpperCase() || <PersonIcon />}
-                  </Avatar>
-                </IconButton>
-
-                <Menu
-                  anchorEl={profileMenuAnchor}
-                  open={Boolean(profileMenuAnchor)}
-                  onClose={handleProfileMenuClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  PaperProps={{
-                    sx: {
-                      mt: 1,
-                      minWidth: 200,
-                      borderRadius: 2,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    },
-                  }}
-                >
-                  <MenuItem onClick={handleProfileClick}>
-                    <ListItemIcon>
-                      <PersonIcon />
-                    </ListItemIcon>
-                    Profile
-                  </MenuItem>
-                  <MenuItem onClick={handleOrdersClick}>
-                    <ListItemIcon>
-                      <LocalOfferIcon />
-                    </ListItemIcon>
-                    Orders
-                  </MenuItem>
-                  <MenuItem onClick={handleAddressesClick}>
-                    <ListItemIcon>
-                      <EmojiNatureIcon />
-                    </ListItemIcon>
-                    Addresses
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem onClick={handleLogout}>
-                    <ListItemIcon>
-                      <LogoutIcon />
-                    </ListItemIcon>
-                    Logout
-                  </MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <Box
-                sx={{
-                  display: { xs: 'none', md: 'flex' },
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                {authLinks.map(link => (
-                  <Button
-                    key={link.to}
-                    component={Link}
-                    to={link.to}
-                    onClick={handleAuthLinkClick}
-                    variant='outlined'
-                    sx={{
-                      color: '#ffffff',
-                      borderColor: 'rgba(255,255,255,0.5)',
+                      color: theme.palette.primary.contrastText,
+                      transition: 'all 0.2s ease',
                       '&:hover': {
-                        borderColor: '#ffffff',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: `${theme.palette.primary.contrastText}15`,
+                        color: theme.palette.primary.contrastText,
                       },
                     }}
                   >
-                    {link.icon}
-                    <Typography
+                    <Avatar
                       sx={{
-                        ml: 0.5,
-                        fontSize: isFoldable ? '0.75rem' : '0.875rem',
+                        width: '36px',
+                        height: '36px',
+                        bgcolor: `${theme.palette.primary.contrastText}20`,
+                        color: theme.palette.primary.contrastText,
+                        fontSize: '0.875rem',
                       }}
                     >
-                      {link.label}
-                    </Typography>
-                  </Button>
-                ))}
-              </Box>
-            )}
+                      {user.firstName?.charAt(0)?.toUpperCase() +
+                        user.lastName?.charAt(0)?.toUpperCase() || (
+                        <PersonIcon />
+                      )}
+                    </Avatar>
+                  </IconButton>
+
+                  <Menu
+                    anchorEl={profileMenuAnchor}
+                    open={Boolean(profileMenuAnchor)}
+                    onClose={handleProfileMenuClose}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    slotProps={{
+                      paper: {
+                        sx: {
+                          mt: 1,
+                          minWidth: 200,
+                          borderRadius: 2,
+                          boxShadow: `0 8px 32px ${theme.palette.common.black}20`,
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        handleProfileMenuClose();
+                        handleNavigation('/profile');
+                      }}
+                    >
+                      <ListItemIcon>
+                        <PersonIcon />
+                      </ListItemIcon>
+                      Profile
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleProfileMenuClose();
+                        handleNavigation('/orders');
+                      }}
+                    >
+                      <ListItemIcon>
+                        <LocalOfferIcon />
+                      </ListItemIcon>
+                      Orders
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleProfileMenuClose();
+                        handleNavigation('/addresses');
+                      }}
+                    >
+                      <ListItemIcon>
+                        <EmojiNatureIcon />
+                      </ListItemIcon>
+                      Addresses
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem onClick={handleLogout}>
+                      <ListItemIcon>
+                        <LogoutIcon />
+                      </ListItemIcon>
+                      Logout
+                    </MenuItem>
+                  </Menu>
+                </>
+              ) : (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  {authLinks.map(link => (
+                    <Button
+                      key={link.to}
+                      component={Link}
+                      to={link.to}
+                      onClick={() => handleNavigation(link.to)}
+                      variant='outlined'
+                      sx={{
+                        color: theme.palette.primary.contrastText,
+                        borderColor: `${theme.palette.primary.contrastText}60`,
+                        borderRadius: 1.5,
+                        fontWeight: 500,
+                        '&:hover': {
+                          borderColor: theme.palette.primary.contrastText,
+                          backgroundColor: `${theme.palette.primary.contrastText}15`,
+                        },
+                      }}
+                    >
+                      {link.icon}
+                      <Typography
+                        sx={{
+                          ml: 0.5,
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        {link.label}
+                      </Typography>
+                    </Button>
+                  ))}
+                </Box>
+              )}
+            </Box>
 
             {/* Mobile Menu Button */}
             <IconButton
               onClick={handleDrawerToggle}
               sx={{
                 display: { xs: 'block', md: 'none' },
-                color: '#ffffff',
-                transition: 'all 0.3s ease',
+                color: theme.palette.primary.contrastText,
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                  transform: 'scale(1.1)',
-                  color: '#ffd700',
+                  backgroundColor: `${theme.palette.primary.contrastText}15`,
+                  color: theme.palette.primary.contrastText,
                 },
               }}
             >
@@ -431,11 +403,13 @@ const Navbar = () => {
         ModalProps={{
           keepMounted: true,
         }}
-        PaperProps={{
-          sx: {
-            width: 280,
-            backgroundColor: 'background.paper',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        slotProps={{
+          paper: {
+            sx: {
+              width: 280,
+              backgroundColor: theme.palette.background.paper,
+              boxShadow: `0 8px 32px ${theme.palette.common.black}20`,
+            },
           },
         }}
       >
@@ -463,17 +437,20 @@ const Navbar = () => {
                 <ListItemButton
                   component={Link}
                   to={link.to}
-                  onClick={handleNavLinkClick}
+                  onClick={() => handleNavigation(link.to)}
                   selected={isActive(link.to)}
                   sx={{
                     borderRadius: 1,
                     mb: 0.5,
                     '&.Mui-selected': {
-                      backgroundColor: 'primary.main',
-                      color: 'primary.contrastText',
+                      backgroundColor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
                       '&:hover': {
-                        backgroundColor: 'primary.dark',
+                        backgroundColor: theme.palette.primary.dark,
                       },
+                    },
+                    '&:hover': {
+                      backgroundColor: theme.palette.action.hover,
                     },
                   }}
                 >
@@ -483,12 +460,83 @@ const Navbar = () => {
                       minWidth: 40,
                     }}
                   >
-                    {link.icon}
+                    {link.to === '/cart' ? (
+                      <Badge badgeContent={cartItemCount} color='error'>
+                        {link.icon}
+                      </Badge>
+                    ) : (
+                      link.icon
+                    )}
                   </ListItemIcon>
                   <ListItemText primary={link.label} />
                 </ListItemButton>
               </ListItem>
             ))}
+
+            {/* Dark Mode Toggle */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={toggleTheme}
+                sx={{
+                  borderRadius: 1,
+                  mb: 0.5,
+                  
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: 'inherit',
+                    minWidth: 40,
+                  }}
+                >
+                  <DarkModeToggle />
+
+                  <ListItemText
+                    sx={{
+                      ml: 1.25,
+                    }}
+                    primary={`${theme.palette.mode.charAt(0).toUpperCase() + theme.palette.mode.slice(1)} Mode`}
+                  />
+                </ListItemIcon>
+              </ListItemButton>
+            </ListItem>
+
+            {/* Admin Navigation Links */}
+            <RoleBasedUI adminOnly fallback={null}>
+              <Divider sx={{ my: 2 }} />
+              <ListItem>
+                <Typography
+                  variant='subtitle2'
+                  sx={{ color: theme.palette.text.secondary, px: 2, mb: 1 }}
+                >
+                  Administration
+                </Typography>
+              </ListItem>
+              {adminLinks.map(link => (
+                <ListItem key={link.to} disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    to={link.to}
+                    onClick={() => handleNavigation(link.to)}
+                    sx={{
+                      borderRadius: 1,
+                      mb: 0.5,
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        color: theme.palette.primary.main,
+                        minWidth: 40,
+                      }}
+                    >
+                      {link.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={link.label} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+              <Divider sx={{ my: 2 }} />
+            </RoleBasedUI>
 
             <Divider sx={{ my: 2 }} />
 
@@ -499,7 +547,7 @@ const Navbar = () => {
                   <ListItemButton
                     component={Link}
                     to={link.to}
-                    onClick={handleAuthLinkClick}
+                    onClick={() => handleNavigation(link.to)}
                     sx={{
                       borderRadius: 1,
                       mb: 0.5,
@@ -507,7 +555,7 @@ const Navbar = () => {
                   >
                     <ListItemIcon
                       sx={{
-                        color: 'primary.main',
+                        color: theme.palette.primary.main,
                         minWidth: 40,
                       }}
                     >
@@ -524,8 +572,8 @@ const Navbar = () => {
                   <ListItemAvatar>
                     <Avatar
                       sx={{
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
+                        bgcolor: theme.palette.primary.main,
+                        color: theme.palette.primary.contrastText,
                       }}
                     >
                       {user.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -546,7 +594,7 @@ const Navbar = () => {
                     <ListItemButton
                       component={Link}
                       to={link.to}
-                      onClick={handleUserLinkClick}
+                      onClick={() => handleNavigation(link.to)}
                       sx={{
                         borderRadius: 1,
                         mb: 0.5,
@@ -554,7 +602,7 @@ const Navbar = () => {
                     >
                       <ListItemIcon
                         sx={{
-                          color: 'primary.main',
+                          color: theme.palette.primary.main,
                           minWidth: 40,
                         }}
                       >
@@ -565,43 +613,6 @@ const Navbar = () => {
                   </ListItem>
                 ))}
 
-                {/* Admin Links */}
-                <RoleBasedUI adminOnly fallback={null}>
-                  <Divider sx={{ my: 2 }} />
-                  <ListItem>
-                    <Typography
-                      variant='subtitle2'
-                      sx={{ color: 'text.secondary', px: 2, mb: 1 }}
-                    >
-                      Administration
-                    </Typography>
-                  </ListItem>
-                  {adminUserLinks.map(link => (
-                    <ListItem key={link.to} disablePadding>
-                      <ListItemButton
-                        component={Link}
-                        to={link.to}
-                        onClick={handleUserLinkClick}
-                        sx={{
-                          borderRadius: 1,
-                          mb: 0.5,
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            color: 'primary.main',
-                            minWidth: 40,
-                          }}
-                        >
-                          {link.icon}
-                        </ListItemIcon>
-                        <ListItemText primary={link.label} />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                  <Divider sx={{ my: 2 }} />
-                </RoleBasedUI>
-
                 <Divider sx={{ my: 2 }} />
 
                 {/* Logout */}
@@ -610,10 +621,10 @@ const Navbar = () => {
                     onClick={handleLogout}
                     sx={{
                       borderRadius: 1,
-                      color: 'error.main',
+                      color: theme.palette.error.main,
                       '&:hover': {
-                        backgroundColor: 'error.light',
-                        color: 'error.contrastText',
+                        backgroundColor: theme.palette.error.light,
+                        color: theme.palette.error.contrastText,
                       },
                     }}
                   >

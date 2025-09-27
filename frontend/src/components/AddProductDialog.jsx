@@ -13,11 +13,13 @@ import ApiService from '../services/api';
 import PropTypes from 'prop-types';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import { useToastNotifications } from '../hooks/useToast';
+import { useTheme } from '@mui/material/styles';
 
 const AddProductDialog = ({ open, onClose, onSuccess }) => {
   const { isFoldable, getFoldableClasses, getResponsiveValue } =
     useFoldableDisplay();
   const { showSuccess, showError } = useToastNotifications();
+  const theme = useTheme();
 
   const [form, setForm] = useState({
     name: '',
@@ -303,9 +305,8 @@ const AddProductDialog = ({ open, onClose, onSuccess }) => {
             disabled={loading}
             sx={{
               fontWeight: 600,
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              color: '#fff',
+              background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 50%, ${theme.palette.primary.dark} 100%)`,
+              color: theme.palette.primary.contrastText,
               textTransform: 'none',
               fontSize: getResponsiveValue(
                 '0.875rem',
@@ -317,12 +318,10 @@ const AddProductDialog = ({ open, onClose, onSuccess }) => {
               px: getResponsiveValue(2, 2.5, 3, isFoldable ? 2.25 : undefined),
               transition: 'all 0.2s ease',
               '&:hover': {
-                background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                color: '#000',
+                background: `linear-gradient(90deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`,
+                color: theme.palette.secondary.contrastText,
                 transform: isFoldable ? 'scale(1.02)' : 'none',
-                boxShadow: isFoldable
-                  ? '0 4px 12px rgba(163, 130, 76, 0.3)'
-                  : '0 4px 12px rgba(163, 130, 76, 0.3)',
+                boxShadow: theme.shadows[4],
               },
             }}
           >

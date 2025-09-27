@@ -73,7 +73,6 @@ frontend/
 │   │   ├── RoleBasedAccess.jsx # Role-based UI components
 │   │   ├── RoleBasedNavigation.jsx # Role-based navigation
 │   │   ├── RoleBasedUI.jsx # Role-based component rendering
-│   │   ├── TestComponent.jsx # Testing component
 │   │   ├── TestResetPassword.jsx # Password reset testing
 │   │   ├── TestVerification.jsx # Email verification testing
 │   │   └── admin/           # Admin-specific components

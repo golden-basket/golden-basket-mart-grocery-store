@@ -1,8 +1,10 @@
 import Avatar from '@mui/material/Avatar';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { useTheme } from '@mui/material/styles';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 
 const JumpingCartAvatar = () => {
+  const theme = useTheme();
   const { isFoldable, getFoldableClasses, getResponsiveValue } =
     useFoldableDisplay();
 
@@ -14,10 +16,10 @@ const JumpingCartAvatar = () => {
         height: getResponsiveValue(56, 60, 64, isFoldable ? 60 : undefined),
         mx: 'auto',
         mb: getResponsiveValue(1.5, 2, 2.5, isFoldable ? 1.75 : undefined),
-        background: 'linear-gradient(90deg, #fffbe6 0%, #e6d897 100%)',
+        background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary.light} 100%)`,
         boxShadow: isFoldable
-          ? '0 3px 12px rgba(163,130,76,0.15)'
-          : '0 2px 8px rgba(163,130,76,0.10)',
+          ? `0 3px 12px ${theme.palette.primary.main}25`
+          : `0 2px 8px ${theme.palette.primary.main}20`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -25,18 +27,18 @@ const JumpingCartAvatar = () => {
         '&:hover': {
           transform: isFoldable ? 'scale(1.05)' : 'none',
           boxShadow: isFoldable
-            ? '0 6px 20px rgba(163,130,76,0.25)'
-            : '0 4px 16px rgba(163,130,76,0.15)',
+            ? `0 6px 20px ${theme.palette.primary.main}40`
+            : `0 4px 16px ${theme.palette.primary.main}30`,
         },
       }}
     >
       <ShoppingCartIcon
         sx={{
           fontSize: getResponsiveValue(32, 34, 36, isFoldable ? 34 : undefined),
-          color: '#a3824c',
+          color: theme.palette.primary.main,
           textShadow: isFoldable
-            ? '0 3px 12px rgba(163,130,76,0.25)'
-            : '0 2px 8px rgba(163,130,76,0.18)',
+            ? `0 3px 12px ${theme.palette.primary.main}40`
+            : `0 2px 8px ${theme.palette.primary.main}30`,
           animation: 'bounce 2s ease-in-out infinite',
           transition: 'all 0.2s ease',
           '@keyframes bounce': {

@@ -1,296 +1,650 @@
 import { createTheme } from '@mui/material/styles';
 
-// Color palette constants
-export const COLORS = {
+// Design Tokens - CSS Variables for consistent theming
+export const CSS_VARIABLES = {
+  // Spacing Scale (8px base unit)
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    xxl: '48px',
+    xxxl: '64px',
+  },
+  
+  // Border Radius Scale
+  borderRadius: {
+    xs: '1px',
+    sm: '2px',
+    md: '3px',
+    lg: '4px',
+    xl: '6px',
+    round: '50%',
+  },
+  
+  // Shadows
+  shadows: {
+    sm: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
+    md: '0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12)',
+    lg: '0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10)',
+    xl: '0 15px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05)',
+    hover: '0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22)',
+  },
+  
+  // Transitions
+  transitions: {
+    fast: '150ms ease-in-out',
+    normal: '250ms ease-in-out',
+    slow: '350ms ease-in-out',
+    spring: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  },
+  
+  // Z-Index Scale
+  zIndex: {
+    dropdown: 1000,
+    sticky: 1020,
+    fixed: 1030,
+    modalBackdrop: 1040,
+    modal: 1050,
+    popover: 1060,
+    tooltip: 1070,
+    toast: 1080,
+  },
+};
+
+// Modern Color Palette - Inspired by BlinkIt
+const colors = {
+  // Primary Colors - Fresh Green (BlinkIt style)
   primary: {
-    main: '#a3824c',
-    light: '#e6d897',
-    dark: '#866422',
-    contrastText: '#fff',
+    50: '#F0FDF4',
+    100: '#DCFCE7',
+    200: '#BBF7D0',
+    300: '#86EFAC',
+    400: '#4ADE80',
+    500: '#22C55E', // Main primary - Fresh green
+    600: '#16A34A',
+    700: '#15803D',
+    800: '#166534',
+    900: '#14532D',
+    A100: '#86EFAC',
+    A200: '#4ADE80',
+    A400: '#22C55E',
+    A700: '#16A34A',
   },
+  
+  // Secondary Colors - Vibrant Orange (BlinkIt style)
   secondary: {
-    main: '#388e3c',
-    light: '#4caf50',
-    dark: '#1b5e20',
-    contrastText: '#fff',
+    50: '#FFF7ED',
+    100: '#FFEDD5',
+    200: '#FED7AA',
+    300: '#FDBA74',
+    400: '#FB923C',
+    500: '#F97316', // Main secondary - Vibrant orange
+    600: '#EA580C',
+    700: '#C2410C',
+    800: '#9A3412',
+    900: '#7C2D12',
+    A100: '#FDBA74',
+    A200: '#FB923C',
+    A400: '#F97316',
+    A700: '#EA580C',
   },
+  
+  // Success Colors - Modern Green
   success: {
-    main: '#388e3c',
-    light: '#4caf50',
-    dark: '#1b5e20',
+    50: '#F0FDF4',
+    100: '#DCFCE7',
+    200: '#BBF7D0',
+    300: '#86EFAC',
+    400: '#4ADE80',
+    500: '#22C55E', // Main success - Fresh green
+    600: '#16A34A',
+    700: '#15803D',
+    800: '#166534',
+    900: '#14532D',
+    A100: '#86EFAC',
+    A200: '#4ADE80',
+    A400: '#22C55E',
+    A700: '#16A34A',
   },
+  
+  // Warning Colors - Modern Amber
   warning: {
-    main: '#ffb300',
-    light: '#ffc107',
-    dark: '#f57c00',
+    50: '#FFFBEB',
+    100: '#FEF3C7',
+    200: '#FDE68A',
+    300: '#FCD34D',
+    400: '#FBBF24',
+    500: '#F59E0B', // Main warning - Modern amber
+    600: '#D97706',
+    700: '#B45309',
+    800: '#92400E',
+    900: '#78350F',
+    A100: '#FDE68A',
+    A200: '#FCD34D',
+    A400: '#F59E0B',
+    A700: '#D97706',
   },
+  
+  // Error Colors - Modern Red
   error: {
-    main: '#d32f2f',
-    light: '#f44336',
-    dark: '#b71c1c',
+    50: '#FEF2F2',
+    100: '#FEE2E2',
+    200: '#FECACA',
+    300: '#FCA5A5',
+    400: '#F87171',
+    500: '#EF4444', // Main error - Modern red
+    600: '#DC2626',
+    700: '#B91C1C',
+    800: '#991B1B',
+    900: '#7F1D1D',
+    A100: '#FCA5A5',
+    A200: '#F87171',
+    A400: '#EF4444',
+    A700: '#DC2626',
   },
+  
+  // Info Colors - Modern Blue
   info: {
-    main: '#0288d1',
-    light: '#29b6f6',
-    dark: '#01579b',
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    200: '#BFDBFE',
+    300: '#93C5FD',
+    400: '#60A5FA',
+    500: '#3B82F6', // Main info - Modern blue
+    600: '#2563EB',
+    700: '#1D4ED8',
+    800: '#1E40AF',
+    900: '#1E3A8A',
+    A100: '#93C5FD',
+    A200: '#60A5FA',
+    A400: '#3B82F6',
+    A700: '#2563EB',
   },
+  
+  // Neutral Colors - Modern Gray
+  neutral: {
+    50: '#F9FAFB',
+    100: '#F3F4F6',
+    200: '#E5E7EB',
+    300: '#D1D5DB',
+    400: '#9CA3AF',
+    500: '#6B7280',
+    600: '#4B5563',
+    700: '#374151',
+    800: '#1F2937',
+    900: '#111827',
+  },
+};
+
+// Light Theme Colors - Modern BlinkIt Style
+const lightColors = {
+  // Background Colors
   background: {
-    default: '#f7fbe8',
-    paper: '#fffbe6',
+    default: '#FFFFFF',
+    paper: '#F9FAFB',
+    elevated: '#FFFFFF',
+    subtle: '#F3F4F6',
+    overlay: 'rgba(0, 0, 0, 0.4)',
   },
+  
+  // Surface Colors
+  surface: {
+    primary: colors.primary[50],
+    secondary: colors.secondary[50],
+    success: colors.success[50],
+    warning: colors.warning[50],
+    error: colors.error[50],
+    info: colors.info[50],
+  },
+  
+  // Text Colors
   text: {
-    primary: '#2e3a1b',
-    secondary: '#7d6033',
+    primary: colors.neutral[900],
+    secondary: colors.neutral[600],
+    disabled: colors.neutral[400],
+    hint: colors.neutral[500],
+    inverse: colors.neutral[50],
+  },
+  
+  // Border Colors
+  border: {
+    light: colors.neutral[200],
+    medium: colors.neutral[300],
+    dark: colors.neutral[400],
+    focus: colors.primary[500],
+    error: colors.error[500],
+    success: colors.success[500],
+  },
+  
+  // Interactive Colors
+  interactive: {
+    hover: colors.primary[50],
+    active: colors.primary[100],
+    focus: colors.primary[100],
+    selected: colors.primary[100],
   },
 };
 
-// Dark mode colors
-export const DARK_COLORS = {
-  primary: {
-    main: '#e6d897',
-    light: '#f7f0d0',
-    dark: '#a3824c',
-    contrastText: '#1a1a1a',
-  },
-  secondary: {
-    main: '#4caf50',
-    light: '#66bb6a',
-    dark: '#388e3c',
-    contrastText: '#1a1a1a',
-  },
-  success: {
-    main: '#4caf50',
-    light: '#66bb6a',
-    dark: '#388e3c',
-  },
-  warning: {
-    main: '#ffc107',
-    light: '#ffd54f',
-    dark: '#ffb300',
-  },
-  error: {
-    main: '#f44336',
-    light: '#ef5350',
-    dark: '#d32f2f',
-  },
-  info: {
-    main: '#29b6f6',
-    light: '#42a5f5',
-    dark: '#0288d1',
-  },
+// Dark Theme Colors - Modern BlinkIt Style
+const darkColors = {
+  // Background Colors
   background: {
-    default: '#1a1a1a',
-    paper: '#2d2d2d',
+    default: '#0F172A',
+    paper: '#1E293B',
+    elevated: '#334155',
+    subtle: '#1E293B',
+    overlay: 'rgba(0, 0, 0, 0.6)',
   },
+  
+  // Surface Colors
+  surface: {
+    primary: colors.primary[900],
+    secondary: colors.secondary[900],
+    success: colors.success[900],
+    warning: colors.warning[900],
+    error: colors.error[900],
+    info: colors.info[900],
+  },
+  
+  // Text Colors
   text: {
-    primary: '#ffffff',
-    secondary: '#b0b0b0',
+    primary: colors.neutral[50],
+    secondary: colors.neutral[300],
+    disabled: colors.neutral[600],
+    hint: colors.neutral[400],
+    inverse: colors.neutral[900],
+  },
+  
+  // Border Colors
+  border: {
+    light: colors.neutral[700],
+    medium: colors.neutral[600],
+    dark: colors.neutral[500],
+    focus: colors.primary[400],
+    error: colors.error[400],
+    success: colors.success[400],
+  },
+  
+  // Interactive Colors
+  interactive: {
+    hover: colors.primary[800],
+    active: colors.primary[700],
+    focus: colors.primary[700],
+    selected: colors.primary[700],
   },
 };
 
-// Common gradient patterns
-export const GRADIENTS = {
-  primary: 'linear-gradient(135deg, #a3824c 0%, #866422 100%)',
-  primaryHover: 'linear-gradient(135deg, #866422 0%, #7d6033 100%)',
-  background: 'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 100%)',
-  card: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-  adminSection:
-    'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 50%, #fffbe6 100%)',
-  button: 'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-  buttonHover: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
-};
-
-// Dark mode gradients
-export const DARK_GRADIENTS = {
-  primary: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
-  primaryHover: 'linear-gradient(135deg, #a3824c 0%, #866422 100%)',
-  background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-  card: 'linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 100%)',
-  adminSection:
-    'linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 50%, #2d2d2d 100%)',
-  button: 'linear-gradient(135deg, #e6d897 0%, #a3824c 50%, #f7f0d0 100%)',
-  buttonHover: 'linear-gradient(135deg, #a3824c 0%, #e6d897 100%)',
-};
-
-// Common shadows
-export const SHADOWS = {
-  card: '0 6px 24px rgba(163, 130, 76, 0.12)',
-  button: '0 2px 8px rgba(163, 130, 76, 0.2)',
-  buttonHover: '0 4px 16px rgba(163, 130, 76, 0.3)',
-  adminSection: '0 6px 24px 0 rgba(163,130,76,0.15)',
-  table: '0 4px 20px 0 rgba(163,130,76,0.2)',
-};
-
-// Dark mode shadows
-export const DARK_SHADOWS = {
-  card: '0 6px 24px rgba(0, 0, 0, 0.3)',
-  button: '0 2px 8px rgba(0, 0, 0, 0.4)',
-  buttonHover: '0 4px 16px rgba(0, 0, 0, 0.5)',
-  adminSection: '0 6px 24px 0 rgba(0,0,0,0.4)',
-  table: '0 4px 20px 0 rgba(0,0,0,0.5)',
-};
-
-// Responsive breakpoints
-export const BREAKPOINTS = {
-  xs: 0,
-  sm: 600,
-  md: 960,
-  lg: 1280,
-  xl: 1920,
-};
-
-// Common component styles
-export const COMPONENT_STYLES = {
-  card: {
-    backgroundColor: COLORS.background.paper,
-    boxShadow: SHADOWS.card,
-    borderRadius: 16,
-    border: '1px solid rgba(163, 130, 76, 0.1)',
+// Typography Scale
+const typography = {
+  fontFamily: {
+    primary: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    secondary: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
+    mono: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
   },
-  button: {
-    borderRadius: 8,
-    textTransform: 'none',
-    fontWeight: 600,
-    boxShadow: SHADOWS.button,
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: SHADOWS.buttonHover,
-    },
+  
+  fontWeight: {
+    light: 300,
+    regular: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700,
+    extrabold: 800,
   },
-  input: {
-    '& .MuiOutlinedInput-root': {
-      background: GRADIENTS.card,
-      borderRadius: 1.5,
-      boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-      '&:hover fieldset': { borderColor: COLORS.primary.main },
-      '&.Mui-focused fieldset': { borderColor: COLORS.primary.main },
-    },
+  
+  fontSize: {
+    xs: '0.75rem',    // 12px
+    sm: '0.875rem',   // 14px
+    base: '1rem',     // 16px
+    lg: '1.125rem',   // 18px
+    xl: '1.25rem',    // 20px
+    '2xl': '1.5rem',  // 24px
+    '3xl': '1.875rem', // 30px
+    '4xl': '2.25rem',  // 36px
+    '5xl': '3rem',     // 48px
+    '6xl': '3.75rem',  // 60px
+  },
+  
+  lineHeight: {
+    tight: 1.25,
+    snug: 1.375,
+    normal: 1.5,
+    relaxed: 1.625,
+    loose: 2,
   },
 };
 
-// Dark mode component styles
-export const DARK_COMPONENT_STYLES = {
-  card: {
-    backgroundColor: DARK_COLORS.background.paper,
-    boxShadow: DARK_SHADOWS.card,
-    borderRadius: 16,
-    border: '1px solid rgba(230, 216, 151, 0.2)',
-  },
-  button: {
-    borderRadius: 8,
-    textTransform: 'none',
-    fontWeight: 600,
-    boxShadow: DARK_SHADOWS.button,
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: DARK_SHADOWS.buttonHover,
-    },
-  },
-  input: {
-    '& .MuiOutlinedInput-root': {
-      background: DARK_GRADIENTS.card,
-      borderRadius: 1.5,
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.3)',
-      '&:hover fieldset': { borderColor: DARK_COLORS.primary.main },
-      '&.Mui-focused fieldset': { borderColor: DARK_COLORS.primary.main },
-    },
-  },
-};
-
-// Create the main theme
-export const createAppTheme = (isDarkMode = false) => {
-  const colors = isDarkMode ? DARK_COLORS : COLORS;
-  const gradients = isDarkMode ? DARK_GRADIENTS : GRADIENTS;
-  const shadows = isDarkMode ? DARK_SHADOWS : SHADOWS;
-  const componentStyles = isDarkMode ? DARK_COMPONENT_STYLES : COMPONENT_STYLES;
-
+// Create Material-UI Theme
+export const createAppTheme = (mode = 'light') => {
+  const isLight = mode === 'light';
+  const themeColors = isLight ? lightColors : darkColors;
+  
   return createTheme({
     palette: {
-      mode: isDarkMode ? 'dark' : 'light',
-      ...colors,
+      mode,
+      primary: {
+        main: colors.primary[500],
+        light: colors.primary[400],
+        dark: colors.primary[700],
+        contrastText: '#FFFFFF',
+        // Add all required properties
+        50: colors.primary[50],
+        100: colors.primary[100],
+        200: colors.primary[200],
+        300: colors.primary[300],
+        400: colors.primary[400],
+        500: colors.primary[500],
+        600: colors.primary[600],
+        700: colors.primary[700],
+        800: colors.primary[800],
+        900: colors.primary[900],
+        A100: colors.primary.A100,
+        A200: colors.primary.A200,
+        A400: colors.primary.A400,
+        A700: colors.primary.A700,
+      },
+      secondary: {
+        main: colors.secondary[500],
+        light: colors.secondary[400],
+        dark: colors.secondary[700],
+        contrastText: '#FFFFFF',
+        // Add all required properties
+        50: colors.secondary[50],
+        100: colors.secondary[100],
+        200: colors.secondary[200],
+        300: colors.secondary[300],
+        400: colors.secondary[400],
+        500: colors.secondary[500],
+        600: colors.secondary[600],
+        700: colors.secondary[700],
+        800: colors.secondary[800],
+        900: colors.secondary[900],
+        A100: colors.secondary.A100,
+        A200: colors.secondary.A200,
+        A400: colors.secondary.A400,
+        A700: colors.secondary.A700,
+      },
+      success: {
+        main: colors.success[500],
+        light: colors.success[400],
+        dark: colors.success[700],
+        contrastText: '#FFFFFF',
+        // Add all required properties
+        50: colors.success[50],
+        100: colors.success[100],
+        200: colors.success[200],
+        300: colors.success[300],
+        400: colors.success[400],
+        500: colors.success[500],
+        600: colors.success[600],
+        700: colors.success[700],
+        800: colors.success[800],
+        900: colors.success[900],
+        A100: colors.success.A100,
+        A200: colors.success.A200,
+        A400: colors.success.A400,
+        A700: colors.success.A700,
+      },
+      warning: {
+        main: colors.warning[500],
+        light: colors.warning[400],
+        dark: colors.warning[700],
+        contrastText: '#FFFFFF',
+        // Add all required properties
+        50: colors.warning[50],
+        100: colors.warning[100],
+        200: colors.warning[200],
+        300: colors.warning[300],
+        400: colors.warning[400],
+        500: colors.warning[500],
+        600: colors.warning[600],
+        700: colors.warning[700],
+        800: colors.warning[800],
+        900: colors.warning[900],
+        A100: colors.warning.A100,
+        A200: colors.warning.A200,
+        A400: colors.warning.A400,
+        A700: colors.warning.A700,
+      },
+      error: {
+        main: colors.error[500],
+        light: colors.error[400],
+        dark: colors.error[700],
+        contrastText: '#FFFFFF',
+        // Add all required properties
+        50: colors.error[50],
+        100: colors.error[100],
+        200: colors.error[200],
+        300: colors.error[300],
+        400: colors.error[400],
+        500: colors.error[500],
+        600: colors.error[600],
+        700: colors.error[700],
+        800: colors.error[800],
+        900: colors.error[900],
+        A100: colors.error.A100,
+        A200: colors.error.A200,
+        A400: colors.error.A400,
+        A700: colors.error.A700,
+      },
+      info: {
+        main: colors.info[500],
+        light: colors.info[400],
+        dark: colors.info[700],
+        contrastText: '#FFFFFF',
+        // Add all required properties
+        50: colors.info[50],
+        100: colors.info[100],
+        200: colors.info[200],
+        300: colors.info[300],
+        400: colors.info[400],
+        500: colors.info[500],
+        600: colors.info[600],
+        700: colors.info[700],
+        800: colors.info[800],
+        900: colors.info[900],
+        A100: colors.info.A100,
+        A200: colors.info.A200,
+        A400: colors.info.A400,
+        A700: colors.info.A700,
+      },
       background: {
-        ...colors.background,
-        default: isDarkMode
-          ? DARK_COLORS.background.default
-          : COLORS.background.default,
-        paper: isDarkMode
-          ? DARK_COLORS.background.paper
-          : COLORS.background.paper,
+        default: themeColors.background.default,
+        paper: themeColors.background.paper,
       },
       text: {
-        ...colors.text,
-        primary: isDarkMode ? DARK_COLORS.text.primary : COLORS.text.primary,
-        secondary: isDarkMode
-          ? DARK_COLORS.text.secondary
-          : COLORS.text.secondary,
+        primary: themeColors.text.primary,
+        secondary: themeColors.text.secondary,
+        disabled: themeColors.text.disabled,
+      },
+      divider: themeColors.border.medium,
+      // Add common colors
+      common: {
+        black: '#000000',
+        white: '#FFFFFF',
+      },
+      grey: {
+        50: colors.neutral[50],
+        100: colors.neutral[100],
+        200: colors.neutral[200],
+        300: colors.neutral[300],
+        400: colors.neutral[400],
+        500: colors.neutral[500],
+        600: colors.neutral[600],
+        700: colors.neutral[700],
+        800: colors.neutral[800],
+        900: colors.neutral[900],
+        A100: colors.neutral[400],
+        A200: colors.neutral[500],
+        A400: colors.neutral[600],
+        A700: colors.neutral[700],
       },
     },
+    
     typography: {
-      fontFamily: 'Poppins, Roboto, sans-serif',
-      h1: { fontWeight: 700, color: colors.text.primary },
-      h2: { fontWeight: 600, color: colors.text.primary },
-      h3: { fontWeight: 600, color: colors.text.primary },
-      h4: { fontWeight: 600, color: colors.text.primary },
-      h5: { fontWeight: 600, color: colors.text.primary },
-      h6: { fontWeight: 600, color: colors.text.primary },
+      fontFamily: typography.fontFamily.primary,
+      h1: {
+        fontFamily: typography.fontFamily.secondary,
+        fontWeight: typography.fontWeight.bold,
+        fontSize: typography.fontSize['5xl'],
+        lineHeight: typography.lineHeight.tight,
+        letterSpacing: '-0.02em',
+      },
+      h2: {
+        fontFamily: typography.fontFamily.secondary,
+        fontWeight: typography.fontWeight.bold,
+        fontSize: typography.fontSize['4xl'],
+        lineHeight: typography.lineHeight.tight,
+        letterSpacing: '-0.01em',
+      },
+      h3: {
+        fontFamily: typography.fontFamily.secondary,
+        fontWeight: typography.fontWeight.semibold,
+        fontSize: typography.fontSize['3xl'],
+        lineHeight: typography.lineHeight.snug,
+      },
+      h4: {
+        fontFamily: typography.fontFamily.secondary,
+        fontWeight: typography.fontWeight.semibold,
+        fontSize: typography.fontSize['2xl'],
+        lineHeight: typography.lineHeight.snug,
+      },
+      h5: {
+        fontFamily: typography.fontFamily.secondary,
+        fontWeight: typography.fontWeight.medium,
+        fontSize: typography.fontSize.xl,
+        lineHeight: typography.lineHeight.normal,
+      },
+      h6: {
+        fontFamily: typography.fontFamily.secondary,
+        fontWeight: typography.fontWeight.medium,
+        fontSize: typography.fontSize.lg,
+        lineHeight: typography.lineHeight.normal,
+      },
+      body1: {
+        fontSize: typography.fontSize.base,
+        lineHeight: typography.lineHeight.relaxed,
+        fontWeight: typography.fontWeight.regular,
+      },
+      body2: {
+        fontSize: typography.fontSize.sm,
+        lineHeight: typography.lineHeight.relaxed,
+        fontWeight: typography.fontWeight.regular,
+      },
+      button: {
+        fontFamily: typography.fontFamily.primary,
+        fontWeight: typography.fontWeight.medium,
+        textTransform: 'none',
+        letterSpacing: '0.025em',
+      },
+      caption: {
+        fontSize: typography.fontSize.xs,
+        fontWeight: typography.fontWeight.medium,
+        letterSpacing: '0.05em',
+      },
+      overline: {
+        fontSize: typography.fontSize.xs,
+        fontWeight: typography.fontWeight.medium,
+        textTransform: 'uppercase',
+        letterSpacing: '0.1em',
+      },
     },
+    
+    shape: {
+      borderRadius: parseInt(CSS_VARIABLES.borderRadius.md),
+    },
+    
+    shadows: [
+      'none',
+      CSS_VARIABLES.shadows.sm,
+      CSS_VARIABLES.shadows.md,
+      CSS_VARIABLES.shadows.lg,
+      CSS_VARIABLES.shadows.xl,
+      ...Array(20).fill(CSS_VARIABLES.shadows.xl),
+    ],
+    
     components: {
-      MuiPaper: {
-        styleOverrides: {
-          root: {
-            backgroundColor: colors.background.paper,
-            boxShadow: shadows.card,
-            borderRadius: 12,
-          },
-        },
-      },
-      MuiCard: {
-        styleOverrides: {
-          root: componentStyles.card,
-        },
-      },
       MuiButton: {
         styleOverrides: {
-          root: componentStyles.button,
-          contained: {
-            background: gradients.primary,
+          root: {
+            borderRadius: CSS_VARIABLES.borderRadius.md,
+            padding: '12px 24px',
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.medium,
+            transition: CSS_VARIABLES.transitions.normal,
             '&:hover': {
-              background: gradients.primaryHover,
+              transform: 'translateY(-2px)',
+            },
+            '&:active': {
+              transform: 'translateY(0)',
+            },
+            '&:disabled': {
+              opacity: 0.6,
+              cursor: 'not-allowed',
+              transform: 'none !important',
+            },
+          },
+          contained: {
+            boxShadow: CSS_VARIABLES.shadows.md,
+            '&:hover': {
+              boxShadow: CSS_VARIABLES.shadows.lg,
             },
           },
           outlined: {
-            borderColor: colors.primary.main,
-            color: colors.primary.dark,
+            borderWidth: '2px',
             '&:hover': {
-              borderColor: colors.primary.dark,
-              backgroundColor: isDarkMode
-                ? 'rgba(230, 216, 151, 0.08)'
-                : 'rgba(163, 130, 76, 0.08)',
+              borderWidth: '2px',
             },
           },
         },
       },
-      MuiChip: {
+      
+      MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 16,
-            fontWeight: 600,
+            borderRadius: CSS_VARIABLES.borderRadius.md,
+            boxShadow: CSS_VARIABLES.shadows.sm,
+            transition: CSS_VARIABLES.transitions.normal,
+            '&:hover': {
+              boxShadow: CSS_VARIABLES.shadows.md,
+            },
           },
         },
       },
-      MuiCssBaseline: {
+      
+      MuiTextField: {
         styleOverrides: {
-          body: {
-            width: '100vw',
-            overflowX: 'hidden',
-            backgroundColor: colors.background.default,
-            backgroundImage: gradients.background,
-            transition: 'background-color 0.3s ease, color 0.3s ease',
+          root: {
+            '& .MuiOutlinedInput-root': {
+              borderRadius: CSS_VARIABLES.borderRadius.sm,
+              transition: CSS_VARIABLES.transitions.fast,
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: colors.primary[400],
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: colors.primary[500],
+                borderWidth: '2px',
+              },
+            },
           },
-          '#root': {
-            width: '100vw',
+        },
+      },
+      
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: CSS_VARIABLES.borderRadius.sm,
+            fontWeight: typography.fontWeight.medium,
+            fontSize: typography.fontSize.xs,
+          },
+        },
+      },
+      
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
           },
         },
       },
@@ -298,4 +652,25 @@ export const createAppTheme = (isDarkMode = false) => {
   });
 };
 
-export default createAppTheme;
+// Export the default light theme
+export const theme = createAppTheme('light');
+
+// Export all design tokens and utilities
+export const DESIGN_SYSTEM = {
+  colors,
+  lightColors,
+  darkColors,
+  typography,
+  CSS_VARIABLES,
+};
+
+// Legacy exports for backward compatibility
+export const COLORS = colors;
+export const GRADIENTS = {
+  primary: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+  secondary: `linear-gradient(135deg, ${colors.secondary[500]} 0%, ${colors.secondary[600]} 100%)`,
+  success: `linear-gradient(135deg, ${colors.success[500]} 0%, ${colors.success[600]} 100%)`,
+  warning: `linear-gradient(135deg, ${colors.warning[500]} 0%, ${colors.warning[600]} 100%)`,
+  error: `linear-gradient(135deg, ${colors.error[500]} 0%, ${colors.error[600]} 100%)`,
+};
+export const SHADOWS = CSS_VARIABLES.shadows;

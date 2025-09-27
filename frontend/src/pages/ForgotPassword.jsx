@@ -32,7 +32,6 @@ const ForgotPassword = () => {
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
 
@@ -62,7 +61,6 @@ const ForgotPassword = () => {
 
     setLoading(true);
     setError('');
-    setSuccess('');
 
     try {
       // Call the actual API endpoint for password reset
@@ -99,8 +97,7 @@ const ForgotPassword = () => {
         alignItems: 'center',
         minHeight: '100vh',
         p: { xs: 1, sm: 2, md: 3 },
-        background:
-          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 50%, ${theme.palette.action.hover} 100%)`,
       }}
     >
       <Slide direction='right' in={true} timeout={400}>
@@ -111,10 +108,9 @@ const ForgotPassword = () => {
             width: { xs: '100%', sm: '90%', md: '70%', lg: '50%', xl: '40%' },
             maxWidth: 500,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background:
-              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
-            border: '2px solid #e6d897',
-            boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 50%, ${theme.palette.action.selected} 100%)`,
+            border: `2px solid ${theme.palette.primary.light}`,
+            boxShadow: `0 20px 40px ${theme.palette.primary.main}30`,
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -124,8 +120,7 @@ const ForgotPassword = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
             },
           }}
         >
@@ -138,8 +133,7 @@ const ForgotPassword = () => {
               variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 1,
@@ -157,45 +151,6 @@ const ForgotPassword = () => {
               your password
             </Typography>
           </Box>
-
-          {/* Alerts */}
-          {error && (
-            <Fade in={true}>
-              <Alert
-                severity='error'
-                sx={{
-                  mb: 3,
-                  borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%)',
-                  color: '#c53030',
-                  border: '1px solid #feb2b2',
-                  '& .MuiAlert-icon': { color: '#c53030' },
-                }}
-              >
-                {error}
-              </Alert>
-            </Fade>
-          )}
-
-          {success && (
-            <Fade in={true}>
-              <Alert
-                severity='success'
-                sx={{
-                  mb: 3,
-                  borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #f0fff4 0%, #c6f6d5 100%)',
-                  color: '#22543d',
-                  border: '1px solid #9ae6b4',
-                  '& .MuiAlert-icon': { color: '#22543d' },
-                }}
-              >
-                {success}
-              </Alert>
-            </Fade>
-          )}
 
           {/* Form */}
           <Box component='form' onSubmit={handleSubmit} noValidate>
@@ -215,23 +170,31 @@ const ForgotPassword = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <EmailIcon sx={{ color: '#a3824c' }} />
+                    <EmailIcon sx={{ color: theme.palette.primary.main }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-error fieldset': {
+                    borderColor: theme.palette.error.main,
+                  },
                 },
                 '& .MuiInputLabel-root': {
-                  '&.Mui-focused': { color: '#a3824c' },
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.error.main },
                 },
                 '& .MuiFormHelperText-root': {
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-error': {
+                    color: theme.palette.error.main,
+                  },
                 },
               }}
             />
@@ -239,7 +202,7 @@ const ForgotPassword = () => {
             <Button
               type='submit'
               fullWidth
-              disabled={loading || !!error}
+              disabled={loading || !!error || !email.trim() || !validateEmail(email)}
               startIcon={
                 loading ? (
                   <CircularProgress size={20} color='inherit' />
@@ -254,21 +217,19 @@ const ForgotPassword = () => {
                 fontWeight: 700,
                 fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                color: '#fff',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                color: theme.palette.primary.contrastText,
                 textTransform: 'none',
-                boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
+                boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
                 '&:hover': {
-                  background:
-                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                  color: '#000',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                  color: theme.palette.primary.contrastText,
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
+                  boxShadow: `0 6px 20px ${theme.palette.primary.main}60`,
                 },
                 '&:disabled': {
-                  background: 'linear-gradient(90deg, #ccc 0%, #ddd 100%)',
-                  color: '#666',
+                  background: `linear-gradient(90deg, ${theme.palette.grey[300]} 0%, ${theme.palette.grey[400]} 100%)`,
+                  color: theme.palette.grey[600],
                   transform: 'none',
                   boxShadow: 'none',
                 },
@@ -279,7 +240,12 @@ const ForgotPassword = () => {
             </Button>
 
             <Divider
-              sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}
+              sx={{
+                my: 3,
+                '&::before, &::after': {
+                  borderColor: theme.palette.primary.light,
+                },
+              }}
             >
               <Typography variant='body2' color='text.secondary' sx={{ px: 2 }}>
                 Remember your password?
@@ -297,20 +263,20 @@ const ForgotPassword = () => {
                 py: { xs: 1.5, sm: 2 },
                 fontWeight: 600,
                 borderRadius: 2,
-                borderColor: '#a3824c',
-                color: '#a3824c',
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 textTransform: 'none',
                 fontSize: { xs: '0.9rem', sm: '1rem' },
                 '&:hover': {
-                  color: '#a3824c',
-                  borderColor: '#e6d897',
-                  backgroundColor: 'rgba(163,130,76,0.05)',
+                  color: theme.palette.primary.main,
+                  borderColor: theme.palette.primary.light,
+                  backgroundColor: `${theme.palette.primary.main}10`,
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(163,130,76,0.2)',
+                  boxShadow: `0 4px 12px ${theme.palette.primary.main}30`,
                 },
                 '&:disabled': {
-                  borderColor: '#ccc',
-                  color: '#999',
+                  borderColor: theme.palette.grey[400],
+                  color: theme.palette.grey[500],
                   transform: 'none',
                   boxShadow: 'none',
                 },

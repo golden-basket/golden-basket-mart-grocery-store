@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
 import { memo, useMemo, useCallback } from 'react';
 import Slider from 'react-slick';
-import { Box, Card, CardContent, Typography, Stack, Chip } from '@mui/material';
+import { Box, Card, CardContent, Typography, Stack, Chip, useTheme } from '@mui/material';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import ImageWithFallback from './ImageWithFallback';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 const ProductCarousel = memo(({ title, products, renderActions }) => {
+  const theme = useTheme();
   const {
     isMobile,
     isTablet,
@@ -126,15 +127,15 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
         px: getResponsiveSpacing(0.5, 0.75, 1, 1.5, 2, 2.5),
         py: getResponsiveSpacing(2, 2.5, 3, 3.5, 4, 4.5),
         minHeight: getResponsiveSpacing(300, 350, 400, 450, 500, 550),
-        background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-        borderRadius: getResponsiveSpacing(1, 1.5, 2, 2.5, 3, 3.5),
-        boxShadow: '0 4px 20px 0 rgba(163,130,76,0.12)',
+                 background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+         borderRadius: 1.5,
+         boxShadow: `0 4px 20px 0 ${theme.palette.primary.main}20`,
         mx: getResponsiveSpacing(0.5, 0.75, 1, 1.5, 2, 2.5),
         transition: 'all 0.3s ease',
         '&:hover': {
           boxShadow: isFoldable
-            ? '0 4px 20px 0 rgba(163,130,76,0.12)'
-            : '0 6px 24px 0 rgba(163,130,76,0.18)',
+            ? `0 4px 20px 0 ${theme.palette.primary.main}20`
+            : `0 6px 24px 0 ${theme.palette.primary.main}30`,
         },
       }}
     >
@@ -155,7 +156,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
           align='center'
           sx={{
             background:
-              'linear-gradient(90deg, #a3824c 0%, #e6d897 60%, #b59961 100%)',
+              `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 60%, ${theme.palette.primary.dark} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: getResponsiveValue(
@@ -167,10 +168,10 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
               '0.8px',
               isFoldable ? '0.35px' : undefined
             ),
-            textShadow: '0 2px 8px rgba(163,130,76,0.08)',
+            textShadow: `0 2px 8px ${theme.palette.primary.main}15`,
             px: getResponsiveSpacing(0.25, 0.4, 0.6, 0.8, 1, 1.2),
             py: getResponsiveSpacing(0.15, 0.15, 0.25, 0.35, 0.4, 0.45),
-            borderRadius: 2,
+            borderRadius: 1,
             display: 'inline-block',
             textAlign: 'center',
             width: '100% !important',
@@ -264,13 +265,13 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                 '10px',
                 '12px'
               ),
-              color: '#a3824c',
+              color: theme.palette.primary.main,
             },
             '& li.slick-active button:before': {
-              color: '#866422',
+              color: theme.palette.primary.dark,
             },
             '& li button:hover:before': {
-              color: '#a3824c',
+              color: theme.palette.primary.main,
             },
           },
           '& .slick-arrow': {
@@ -324,13 +325,12 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                     2.75, // ultra wide
                     isFoldable ? 1.5 : undefined
                   ),
-                  borderRadius: getResponsiveSpacing(1, 1.5, 2, 2.5, 3, 3.5),
+                  borderRadius: 1.5,
                   position: 'relative', // For absolute positioning of stock chip
                   overflow: 'visible', // Allow chip to overflow slightly
-                  background:
-                    'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
-                  border: '1px solid rgba(163,130,76,0.1)',
-                  boxShadow: '0 4px 12px rgba(163,130,76,0.08)',
+                  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  border: `1px solid ${theme.palette.primary.light}20`,
+                  boxShadow: `0 4px 12px ${theme.palette.primary.main}15`,
                   transition: 'all 0.3s ease',
                   display: 'flex',
                   flexDirection: 'column',
@@ -366,8 +366,8 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                   ),
                   '&:hover': {
                     boxShadow: isFoldable
-                      ? '0 8px 24px rgba(163,130,76,0.15)'
-                      : '0 8px 32px rgba(163,130,76,0.2)',
+                      ? `0 8px 24px ${theme.palette.primary.main}25`
+                      : `0 8px 32px ${theme.palette.primary.main}30`,
                     transform: 'translateY(-4px)',
                   },
                 }}
@@ -379,49 +379,29 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                       ? 'Out of Stock'
                       : product.stock <= 5
                         ? `${product.stock} left`
-                        : `Stock`
+                        : 'In Stock'
                   }
                   size='small'
+                  color={
+                    product.stock === 0
+                      ? 'error'
+                      : product.stock <= 5
+                        ? 'warning'
+                        : 'success'
+                  }
                   sx={{
-                    p: getResponsiveSpacing(0.5, 0.75, 1, 1.25, 1.5, 1.75),
                     position: 'absolute',
-                    top: getResponsiveSpacing(0.5, 0.75, 1, 1.25, 1.5, 1.75),
-                    right: getResponsiveSpacing(0.5, 0.75, 1, 1.25, 1.5, 1.75),
+                    top: 12,
+                    right: 12,
                     zIndex: 2,
-                    fontSize: getResponsiveValue(
-                      '0.55rem', // extra small
-                      '0.6rem', // small
-                      '0.65rem', // medium
-                      '0.7rem', // large
-                      '0.75rem', // extra large
-                      '0.8rem', // ultra wide
-                      isFoldable ? '0.6rem' : undefined
-                    ),
+                    fontSize: '0.75rem',
                     fontWeight: 600,
-                    height: getResponsiveValue(
-                      20, // extra small
-                      22, // small
-                      24, // medium
-                      26, // large
-                      28, // extra large
-                      30, // ultra wide
-                      isFoldable ? 22 : undefined
-                    ),
-                    m: getResponsiveSpacing(0.1, 0.25, 0.25, 0.5, 0.75, 1),
-                    px: getResponsiveSpacing(0.25, 0.5, 0.75, 1, 1.25, 1.5),
-                    background:
-                      product.stock === 0
-                        ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)'
-                        : product.stock <= 5
-                          ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
-                          : 'linear-gradient(135deg, #a3824c 0%, #e6d897 100%)',
-                    color: '#ffffff',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    height: 28,
+                    borderRadius: 2,
+                    boxShadow: theme.shadows[2],
                     '& .MuiChip-label': {
-                      px: 0.5,
-                      fontSize: 'inherit',
-                      fontWeight: 'inherit',
+                      px: 1.5,
+                      py: 0.5,
                     },
                   }}
                 />
@@ -429,8 +409,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                   className={getResponsiveImageSize()}
                   sx={{
                     p: getResponsiveSpacing(0.25, 0.5, 0.75, 1, 1.25, 1.5),
-                    background:
-                      'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
                     width: '100%',
                     height: getResponsiveValue(
                       isExtraSmall ? 60 : 70, // extra small
@@ -484,8 +463,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                   className={getResponsiveSpacingClasses()}
                   sx={{
                     p: getResponsiveSpacing(0.5, 0.75, 1, 1.25, 1.5, 1.75),
-                    background:
-                      'linear-gradient(135deg, #fffbe6 0%, #f7e7c1 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
                     borderRadius: getResponsiveSpacing(
                       0.5,
                       0.75,
@@ -526,7 +504,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                         fontWeight={700}
                         className={getResponsiveTextClasses()}
                         sx={{
-                          color: '#a3824c',
+                          color: theme.palette.primary.main,
                           width: '100%',
                           padding: '0 4px',
                           textAlign: 'center',
@@ -567,7 +545,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                         variant='body2'
                         className={getResponsiveTextClasses()}
                         sx={{
-                          color: '#7d6033',
+                          color: theme.palette.text.secondary,
                           fontWeight: 600,
                           letterSpacing: 0.5,
                           mb: getResponsiveSpacing(
@@ -600,7 +578,7 @@ const ProductCarousel = memo(({ title, products, renderActions }) => {
                         variant='body2'
                         className={getResponsiveTextClasses()}
                         sx={{
-                          color: '#866422',
+                          color: theme.palette.text.secondary,
                           fontSize: getResponsiveValue(
                             'clamp(0.6rem, 2vw, 0.7rem)', // extra small
                             'clamp(0.7rem, 2vw, 0.8rem)', // small

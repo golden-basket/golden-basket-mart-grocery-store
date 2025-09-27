@@ -189,30 +189,30 @@ const OrderHistory = () => {
   const getStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return '#ff9800';
+        return theme.palette.warning.main;
       case 'processing':
-        return '#2196f3';
+        return theme.palette.info.main;
       case 'shipped':
-        return '#4caf50';
+        return theme.palette.success.main;
       case 'delivered':
-        return '#4caf50';
+        return theme.palette.success.main;
       case 'cancelled':
-        return '#f44336';
+        return theme.palette.error.main;
       default:
-        return '#a3824c';
+        return theme.palette.primary.main;
     }
   };
 
   const getPaymentStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return '#ff9800';
+        return theme.palette.warning.main;
       case 'paid':
-        return '#4caf50';
+        return theme.palette.success.main;
       case 'failed':
-        return '#f44336';
+        return theme.palette.error.main;
       default:
-        return '#a3824c';
+        return theme.palette.primary.main;
     }
   };
 
@@ -238,19 +238,18 @@ const OrderHistory = () => {
           mb={3}
           align='center'
           sx={{
-            background:
-              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: 1,
-            textShadow: '0 2px 8px rgba(163,130,76,0.08)',
+            textShadow: `0 2px 8px ${theme.palette.primary.main}20`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 1,
           }}
         >
-          <ShoppingBagIcon sx={{ fontSize: 32, color: '#a3824c' }} />
+          <ShoppingBagIcon sx={{ fontSize: 32, color: theme.palette.primary.main }} />
           Orders
         </Typography>
 
@@ -401,10 +400,10 @@ const OrderHistory = () => {
           mt: 1,
           mb: 1,
           px: 2,
-          background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+          background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
           borderRadius: 3,
           py: 3,
-          boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+          boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}20`,
         }}
       >
         {error && (
@@ -412,12 +411,12 @@ const OrderHistory = () => {
             severity='error'
             sx={{
               mb: 3,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-              color: '#a3824c',
-              border: '1px solid #e6d897',
+              background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+              color: theme.palette.primary.main,
+              border: `1px solid ${theme.palette.primary.light}`,
               borderRadius: 2,
               '& .MuiAlert-icon': {
-                color: '#a3824c',
+                color: theme.palette.primary.main,
               },
             }}
           >
@@ -432,18 +431,18 @@ const OrderHistory = () => {
             sx={{
               textAlign: 'center',
               py: 2,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
+              background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
               borderRadius: 2,
-              border: '1px solid #e6d897',
+              border: `1px solid ${theme.palette.primary.light}`,
             }}
           >
-            <ShoppingBagIcon sx={{ fontSize: 64, color: '#a3824c', mb: 2 }} />
-            <Typography variant='h6' color='#a3824c' fontWeight={600} mb={1}>
+            <ShoppingBagIcon sx={{ fontSize: 64, color: theme.palette.primary.main, mb: 2 }} />
+            <Typography variant='h6' color={theme.palette.primary.main} fontWeight={600} mb={1}>
               {orders.length === 0
                 ? 'No Orders Found'
                 : 'No Orders Match Filters'}
             </Typography>
-            <Typography color='#b59961'>
+            <Typography color={theme.palette.text.secondary}>
               {orders.length === 0
                 ? 'Start shopping to see your order history here'
                 : 'Try adjusting your filters to see more orders'}
@@ -457,14 +456,13 @@ const OrderHistory = () => {
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                  border: '1px solid #e6d897',
-                  boxShadow: '0 1px 6px 0 rgba(163,130,76,0.10)',
+                  background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  border: `1px solid ${theme.palette.primary.light}`,
+                  boxShadow: `0 1px 6px 0 ${theme.palette.primary.main}20`,
                   transition: 'box-shadow 0.3s, border-color 0.3s',
                   '&:hover': {
-                    boxShadow: '0 4px 16px 0 rgba(163,130,76,0.18)',
-                    borderColor: '#a3824c',
+                    boxShadow: `0 4px 16px 0 ${theme.palette.primary.main}30`,
+                    borderColor: theme.palette.primary.main,
                   },
                 }}
               >
@@ -483,8 +481,7 @@ const OrderHistory = () => {
                           variant='h6'
                           fontWeight={700}
                           sx={{
-                            background:
-                              'linear-gradient(90deg, #a3824c 0%, #b59961 100%)',
+                            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             mb: 1,
@@ -508,13 +505,12 @@ const OrderHistory = () => {
                                 width: 28,
                                 height: 28,
                                 borderRadius: '4px',
-                                color: '#a3824c',
+                                color: theme.palette.primary.main,
                                 transition: 'all 0.3s ease',
                                 '&:disabled': {
-                                  background:
-                                    'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
-                                  color: '#999',
-                                  borderColor: '#ccc',
+                                  background: `linear-gradient(90deg, ${theme.palette.grey[100]} 0%, ${theme.palette.grey[300]} 100%)`,
+                                  color: theme.palette.grey[500],
+                                  borderColor: theme.palette.grey[400],
                                   transform: 'none',
                                   boxShadow: 'none',
                                 },
@@ -528,7 +524,7 @@ const OrderHistory = () => {
                               {downloadingInvoices.has(order.invoice._id) ? (
                                 <CircularProgress
                                   size={15}
-                                  sx={{ color: '#a3824c' }}
+                                  sx={{ color: theme.palette.primary.main }}
                                 />
                               ) : (
                                 <DownloadIcon sx={{ fontSize: 16 }} />
@@ -539,7 +535,7 @@ const OrderHistory = () => {
                           <Box sx={{ textAlign: 'center' }}>
                             <Typography
                               variant='body2'
-                              color='#b59961'
+                              color={theme.palette.text.secondary}
                               fontStyle='italic'
                             >
                               Invoice pending payment
@@ -550,9 +546,9 @@ const OrderHistory = () => {
 
                       <Stack direction='row' alignItems='center' gap={1} mb={1}>
                         <CalendarTodayIcon
-                          sx={{ fontSize: 16, color: '#a3824c' }}
+                          sx={{ fontSize: 16, color: theme.palette.primary.main }}
                         />
-                        <Typography variant='body2' color='#b59961'>
+                        <Typography variant='body2' color={theme.palette.text.secondary}>
                           {new Date(order.createdAt).toLocaleDateString(
                             'en-IN',
                             {
@@ -626,15 +622,14 @@ const OrderHistory = () => {
                     </Box>
 
                     <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant='caption' color='#b59961'>
+                      <Typography variant='caption' color={theme.palette.text.secondary}>
                         Total Amount
                       </Typography>
                       <Typography
                         variant='h5'
                         fontWeight={700}
                         sx={{
-                          background:
-                            'linear-gradient(90deg, #a3824c 0%, #b59961 100%)',
+                          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                         }}
@@ -652,7 +647,7 @@ const OrderHistory = () => {
                     fontWeight={600}
                     mb={2}
                     sx={{
-                      color: '#a3824c',
+                      color: theme.palette.primary.main,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'flex-start',
@@ -668,9 +663,8 @@ const OrderHistory = () => {
                         <Box
                           key={item.product?._id || index}
                           sx={{
-                            borderBottom: '1px solid #e6d897',
-                            background:
-                              'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
+                            borderBottom: `1px solid ${theme.palette.primary.light}`,
+                            background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
                             display: 'flex',
                             flexDirection: 'row',
                             justifyContent: 'space-between',
@@ -680,7 +674,7 @@ const OrderHistory = () => {
                           <Box sx={{ flex: 1 }}>
                             <Typography
                               fontWeight={500}
-                              color='#a3824c'
+                              color={theme.palette.primary.main}
                               sx={{
                                 fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               }}
@@ -689,7 +683,7 @@ const OrderHistory = () => {
                             </Typography>
                             <Typography
                               variant='body2'
-                              color='#b59961'
+                              color={theme.palette.text.secondary}
                               sx={{
                                 fontSize: { xs: '0.6875rem', sm: '0.75rem' },
                               }}
@@ -700,7 +694,7 @@ const OrderHistory = () => {
                           <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
                             <Typography
                               variant='body2'
-                              color='#b59961'
+                              color={theme.palette.text.secondary}
                               sx={{
                                 fontSize: { xs: '0.6875rem', sm: '0.75rem' },
                               }}
@@ -710,8 +704,7 @@ const OrderHistory = () => {
                             <Typography
                               fontWeight={600}
                               sx={{
-                                background:
-                                  'linear-gradient(90deg, #a3824c 0%, #b59961 100%)',
+                                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 fontSize: { xs: '0.75rem', sm: '0.875rem' },
@@ -724,7 +717,7 @@ const OrderHistory = () => {
                       ))
                     ) : (
                       <Typography
-                        color='#b59961'
+                        color={theme.palette.text.secondary}
                         textAlign='center'
                         py={{ xs: 1.5, sm: 2 }}
                         sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}

@@ -5,19 +5,27 @@ import {
   Typography,
   Button,
   TextField,
-  Paper,
   IconButton,
   Stack,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  useTheme,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Loading from '../components/Loading';
 import ApiService from '../services/api';
 import { useToastNotifications } from '../hooks/useToast';
 import EditIcon from '@mui/icons-material/Edit';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AddIcon from '@mui/icons-material/Add';
 
 const AddressBook = () => {
   const { token } = useAuth();
   const { showSuccess, showError } = useToastNotifications();
+  const theme = useTheme();
+
   const [addresses, setAddresses] = useState([]);
   const [form, setForm] = useState({
     addressLine1: '',
@@ -31,58 +39,16 @@ const AddressBook = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Reusable styles to eliminate duplications
-  const styles = {
-    gradientText: {
-      background:
-        'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-    },
-    textField: {
-      '& .MuiInputBase-root': { borderRadius: 2 },
-      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e6d897',
-        boxShadow: '0 0 0 2px #e6d89744',
-      },
-    },
-    iconButton: {
-      background: '#fffbe6',
-      borderRadius: 2,
-      width: { xs: 32, sm: 36 },
-      height: { xs: 32, sm: 36 },
-      '&:hover': {
-        background: '#e6d897',
-        transform: 'scale(1.05)',
-        boxShadow: '0 2px 4px rgba(163,130,76,0.3)',
-      },
-    },
-    submitButton: {
-      fontWeight: 600,
-      background:
-        'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-      color: '#fff',
-      textTransform: 'none',
-      borderRadius: 2,
-      px: 2,
-      '&:hover': {
-        background: 'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-        color: '#000',
-      },
-    },
-  };
-
-  const fetchAddresses = () => {
-    setLoading(true);
-    ApiService.getAddresses()
-      .then(data => setAddresses(data))
-      .catch(() => showError('Failed to load addresses. Please try again.'))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    if (token) fetchAddresses();
-  }, [token]); // Only depend on token
+    if (token) {
+      setLoading(true);
+      ApiService.getAddresses()
+        .then(data => setAddresses(data))
+        .catch(() => showError('Failed to load addresses. Please try again.'))
+        .finally(() => setLoading(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]); // Only depend on token, not showError (intentionally excluded to prevent infinite loops)
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -109,7 +75,10 @@ const AddressBook = () => {
           phoneNumber: '',
         });
         setEditingId(null);
-        fetchAddresses();
+        // Refresh addresses after successful add/update
+        ApiService.getAddresses()
+          .then(data => setAddresses(data))
+          .catch(() => showError('Failed to refresh addresses.'));
       })
       .catch(() => showError('Failed to save address. Please try again.'));
   };
@@ -123,242 +92,613 @@ const AddressBook = () => {
     ApiService.deleteAddress(id)
       .then(() => {
         showSuccess('Address deleted successfully!');
-        fetchAddresses();
+        // Refresh addresses after successful delete
+        ApiService.getAddresses()
+          .then(data => setAddresses(data))
+          .catch(() => showError('Failed to refresh addresses.'));
       })
       .catch(() => showError('Failed to delete address. Please try again.'));
   };
 
-  // Extracted ternary logic for clarity
-  let addressContent;
+  // Show loading state
   if (loading) {
-    addressContent = <Loading />;
-  } else if (addresses.length === 0) {
-    addressContent = (
-      <Typography
-        align='center'
-        sx={{
-          ...styles.gradientText,
-          fontWeight: 600,
-          mt: 2,
-          p: 3,
-        }}
-      >
-        No addresses found.
-      </Typography>
-    );
-  } else {
-    addressContent = addresses.map(addr => (
-      <Paper
-        key={addr._id}
-        sx={{
-          p: { xs: 2, sm: 3 },
-          my: 1,
-          mx: 2,
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'flex-start' },
-          justifyContent: 'space-between',
-          border: '2px solid #e6d897',
-          boxShadow: '0 2px 8px #a3824c22',
-          borderRadius: 3,
-          background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-          minHeight: { xs: 'auto', sm: 120 },
-          gap: { xs: 2, sm: 0 },
-        }}
-      >
-        <Box sx={{ flex: 1, pr: { xs: 0, sm: 2 } }}>
-          <Typography
-            fontWeight={700}
-            sx={{
-              color: '#a3824c',
-              mb: 1,
-              fontSize: '1.1rem',
-              lineHeight: 1.3,
-            }}
-          >
-            {addr.addressLine1}
-          </Typography>
-          {addr.addressLine2 && (
-            <Typography
-              sx={{
-                color: '#7d6033',
-                mb: 1,
-                fontSize: '0.95rem',
-                lineHeight: 1.3,
-              }}
-            >
-              {addr.addressLine2}
-            </Typography>
-          )}
-          <Typography
-            sx={{
-              color: '#866422',
-              mb: 1,
-              fontSize: '0.95rem',
-              lineHeight: 1.3,
-            }}
-          >
-            {addr.city}, {addr.state}, {addr.country} - {addr.pinCode}
-          </Typography>
-          <Typography
-            sx={{
-              color: '#866422',
-              fontSize: '0.95rem',
-              lineHeight: 1.3,
-              fontWeight: 500,
-            }}
-          >
-            📞 {addr.phoneNumber}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'row', sm: 'column' },
-            gap: 1,
-            alignItems: { xs: 'center', sm: 'flex-end' },
-            justifyContent: { xs: 'space-between', sm: 'flex-start' },
-            minWidth: { xs: '100%', sm: 'fit-content' },
-            pt: { xs: 1, sm: 0 },
-            borderTop: { xs: '1px solid #e6d897', sm: 'none' },
-            mt: { xs: 1, sm: 0 },
-          }}
-        >
-          <IconButton
-            color='secondary'
-            size='small'
-            onClick={() => handleEdit(addr)}
-            sx={styles.iconButton}
-          >
-            <EditIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />
-          </IconButton>
-          <IconButton
-            color='error'
-            onClick={() => handleDelete(addr._id)}
-            sx={styles.iconButton}
-          >
-            <DeleteIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />
-          </IconButton>
-        </Box>
-      </Paper>
-    ));
+    return <Loading />;
   }
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
-      <Typography
-        variant='h5'
-        fontWeight={700}
-        mb={2}
-        align='center'
-        sx={styles.gradientText}
-      >
-        My Shipping Addresses
-      </Typography>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background:
+          theme.palette.mode === 'dark'
+            ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary[900]}20 100%)`
+            : `linear-gradient(135deg, ${theme.palette.primary[50]} 0%, ${theme.palette.background.default} 100%)`,
+        py: { xs: 2, sm: 3, md: 4 },
+        px: { xs: 1, sm: 2, md: 3 },
+      }}
+    >
+      <Container maxWidth='xl' sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+        {/* Header Section */}
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Typography
+            variant='h3'
+            sx={{
+              fontWeight: 800,
+              color: theme.palette.primary.main,
+              mb: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' },
+            }}
+          >
+            <LocationOnIcon
+              sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}
+            />
+            Manage Shipping Addresses
+          </Typography>
+          <Typography
+            variant='h6'
+            sx={{
+              color: theme.palette.text.secondary,
+              fontWeight: 400,
+              maxWidth: 600,
+              mx: 'auto',
+              fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
+            }}
+          >
+            Manage your delivery addresses for faster checkout
+          </Typography>
+        </Box>
 
-      <Paper
-        sx={{
-          p: { xs: 3, md: 4 },
-          mx: 2,
-          borderRadius: 4,
-          background:
-            'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
-          border: '2px solid #e6d897',
-          boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background:
-              'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-          },
-        }}
-      >
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={2}>
-            <TextField
-              label='Address Line 1'
-              name='addressLine1'
-              value={form.addressLine1}
-              onChange={handleChange}
-              required
-              size='small'
-              fullWidth
-              sx={styles.textField}
-            />
-            <TextField
-              label='Address Line 2'
-              name='addressLine2'
-              value={form.addressLine2}
-              onChange={handleChange}
-              size='small'
-              fullWidth
-              sx={styles.textField}
-            />
-            <TextField
-              label='City'
-              name='city'
-              value={form.city}
-              onChange={handleChange}
-              required
-              size='small'
-              fullWidth
-              sx={styles.textField}
-            />
-            <TextField
-              label='State'
-              name='state'
-              value={form.state}
-              onChange={handleChange}
-              required
-              size='small'
-              fullWidth
-              sx={styles.textField}
-            />
-            <TextField
-              label='Country'
-              name='country'
-              value={form.country}
-              onChange={handleChange}
-              required
-              size='small'
-              fullWidth
-              sx={styles.textField}
-            />
-            <TextField
-              label='Pin Code'
-              name='pinCode'
-              value={form.pinCode}
-              onChange={handleChange}
-              required
-              size='small'
-              fullWidth
-              inputProps={{ maxLength: 6 }}
-              sx={styles.textField}
-            />
-            <TextField
-              label='Phone Number'
-              name='phoneNumber'
-              value={form.phoneNumber}
-              onChange={handleChange}
-              required
-              size='small'
-              fullWidth
-              inputProps={{ maxLength: 10 }}
-              sx={styles.textField}
-            />
-            <Button type='submit' fullWidth sx={styles.submitButton}>
-              {editingId ? 'Update Address' : 'Add Address'}
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
-      {addressContent}
+        {/* Main Content Grid */}
+        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+          {/* Address List - Takes 3/4 of the width */}
+          <Grid size={{ xs: 12, sm: 12, md: 6, lg: 8 }}>
+            <Card
+              elevation={12}
+              sx={{
+                borderRadius: 4,
+                border: `3px solid ${theme.palette.primary.main}`,
+                background:
+                  theme.palette.mode === 'dark'
+                    ? `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary[900]}30 100%)`
+                    : `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary[50]} 100%)`,
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: `0 20px 40px ${theme.palette.primary.main}20`,
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '6px',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                },
+              }}
+            >
+              <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: '50%',
+                      bgcolor: theme.palette.primary.main,
+                      mr: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <LocationOnIcon
+                      sx={{ color: 'white', fontSize: '1.5rem' }}
+                    />
+                  </Box>
+                  <Typography
+                    variant='h4'
+                    sx={{
+                      fontWeight: 700,
+                      color: theme.palette.primary.main,
+                      fontSize: { xs: '1.3rem', sm: '1.5rem', md: '1.7rem' },
+                    }}
+                  >
+                    Saved Addresses ({addresses.length})
+                  </Typography>
+                </Box>
+
+                {addresses.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 6 }}>
+                    <Box
+                      sx={{
+                        p: 3,
+                        borderRadius: '50%',
+                        bgcolor: theme.palette.primary[100],
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 3,
+                      }}
+                    >
+                      <LocationOnIcon
+                        sx={{
+                          fontSize: { xs: '3rem', sm: '4rem', md: '5rem' },
+                          color: theme.palette.primary.main,
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      variant='h5'
+                      sx={{
+                        color: theme.palette.text.primary,
+                        mb: 2,
+                        fontWeight: 600,
+                        fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.6rem' },
+                      }}
+                    >
+                      No addresses found
+                    </Typography>
+                    <Typography
+                      variant='body1'
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
+                      }}
+                    >
+                      Add your first address to get started
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Stack spacing={1}>
+                    {addresses.map(addr => (
+                      <Card
+                        key={addr._id}
+                        elevation={8}
+                        sx={{
+                          p: { xs: 2, sm: 2.5, md: 3 },
+                          width: '100%',
+                          minHeight: 'auto',
+                          border: `2px solid ${theme.palette.primary.light}`,
+                          borderRadius: { xs: 2, sm: 3, md: 4 },
+                          background:
+                            theme.palette.mode === 'dark'
+                              ? `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary[900]}20 100%)`
+                              : `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary[50]} 100%)`,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: `0 15px 35px ${theme.palette.primary.main}25`,
+                            borderColor: theme.palette.primary.main,
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            width: '100%',
+                            minHeight: 'auto',
+                            flexDirection: { xs: 'column', sm: 'row' },
+                            gap: { xs: 2, sm: 0 },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              flex: 1,
+                              pr: { xs: 0, sm: 2 },
+                              minWidth: 0,
+                              width: { xs: '100%', sm: 'auto' },
+                            }}
+                          >
+                            <Typography
+                              variant='h6'
+                              sx={{
+                                fontWeight: 700,
+                                color: theme.palette.primary.main,
+                                mb: 1.5,
+                                fontSize: {
+                                  xs: '1.1rem',
+                                  sm: '1.2rem',
+                                  md: '1.3rem',
+                                },
+                                wordBreak: 'break-word',
+                                whiteSpace: 'normal',
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {addr.addressLine1}
+                            </Typography>
+                            {addr.addressLine2 && (
+                              <Typography
+                                variant='body1'
+                                sx={{
+                                  color: theme.palette.text.secondary,
+                                  mb: 1.5,
+                                  fontSize: {
+                                    xs: '1rem',
+                                    sm: '1.1rem',
+                                    md: '1.2rem',
+                                  },
+                                  wordBreak: 'break-word',
+                                  whiteSpace: 'normal',
+                                  lineHeight: 1.4,
+                                }}
+                              >
+                                {addr.addressLine2}
+                              </Typography>
+                            )}
+                            <Typography
+                              variant='body1'
+                              sx={{
+                                color: theme.palette.text.secondary,
+                                mb: 1.5,
+                                fontSize: {
+                                  xs: '1rem',
+                                  sm: '1.1rem',
+                                  md: '1.2rem',
+                                },
+                                wordBreak: 'break-word',
+                                whiteSpace: 'normal',
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {addr.city}, {addr.state}, {addr.country} -{' '}
+                              {addr.pinCode}
+                            </Typography>
+                            <Typography
+                              variant='body1'
+                              sx={{
+                                color: theme.palette.text.secondary,
+                                fontSize: {
+                                  xs: '1rem',
+                                  sm: '1.1rem',
+                                  md: '1.2rem',
+                                },
+                                fontWeight: 600,
+                                wordBreak: 'break-word',
+                                whiteSpace: 'normal',
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              📞 {addr.phoneNumber}
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              gap: { xs: 1, sm: 1.5 },
+                              justifyContent: {
+                                xs: 'flex-end',
+                                sm: 'flex-start',
+                              },
+                              width: { xs: '100%', sm: 'auto' },
+                              mt: { xs: 1, sm: 0 },
+                            }}
+                          >
+                            <IconButton
+                              onClick={() => handleEdit(addr)}
+                              sx={{
+                                bgcolor: theme.palette.primary.main,
+                                color: 'white',
+                                width: { xs: 40, sm: 48 },
+                                height: { xs: 40, sm: 48 },
+                                '&:hover': {
+                                  bgcolor: theme.palette.primary.dark,
+                                  transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.3s ease',
+                                boxShadow: `0 4px 12px ${theme.palette.primary.main}30`,
+                              }}
+                            >
+                              <EditIcon
+                                sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}
+                              />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => handleDelete(addr._id)}
+                              sx={{
+                                bgcolor: theme.palette.error.main,
+                                color: 'white',
+                                width: { xs: 40, sm: 48 },
+                                height: { xs: 40, sm: 48 },
+                                '&:hover': {
+                                  bgcolor: theme.palette.error.dark,
+                                  transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.3s ease',
+                                boxShadow: `0 4px 12px ${theme.palette.error.main}30`,
+                              }}
+                            >
+                              <DeleteIcon
+                                sx={{ fontSize: { xs: '1rem', sm: '1.2rem' } }}
+                              />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Add Address Form - Takes 1/4 of the width */}
+          <Grid size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
+            <Card
+              elevation={12}
+              sx={{
+                borderRadius: 4,
+                border: `3px solid ${theme.palette.primary.main}`,
+                background:
+                  theme.palette.mode === 'dark'
+                    ? `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary[900]}30 100%)`
+                    : `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary[50]} 100%)`,
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: `0 20px 40px ${theme.palette.primary.main}20`,
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '6px',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                },
+              }}
+            >
+              <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: '50%',
+                      bgcolor: theme.palette.primary.main,
+                      mr: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <AddIcon sx={{ color: 'white', fontSize: '1.5rem' }} />
+                  </Box>
+                  <Typography
+                    variant='h4'
+                    sx={{
+                      fontWeight: 700,
+                      color: theme.palette.primary.main,
+                      fontSize: { xs: '1.3rem', sm: '1.5rem', md: '1.7rem' },
+                    }}
+                  >
+                    {editingId ? 'Edit Address' : 'Add New Address'}
+                  </Typography>
+                </Box>
+
+                <form onSubmit={handleSubmit}>
+                  <Stack spacing={2}>
+                    <TextField
+                      label='Address Line 1'
+                      name='addressLine1'
+                      value={form.addressLine1}
+                      onChange={handleChange}
+                      required
+                      fullWidth
+                      margin='normal'
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          '&.Mui-focused': {
+                            color: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                    <TextField
+                      label='Address Line 2'
+                      name='addressLine2'
+                      value={form.addressLine2}
+                      onChange={handleChange}
+                      fullWidth
+                      margin='normal'
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          '&.Mui-focused': {
+                            color: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          label='City'
+                          name='city'
+                          value={form.city}
+                          onChange={handleChange}
+                          required
+                          fullWidth
+                          margin='normal'
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              '&:hover fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                            },
+                            '& .MuiInputLabel-root': {
+                              '&.Mui-focused': {
+                                color: theme.palette.primary.main,
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          label='State'
+                          name='state'
+                          value={form.state}
+                          onChange={handleChange}
+                          required
+                          fullWidth
+                          margin='normal'
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              '&:hover fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                            },
+                            '& .MuiInputLabel-root': {
+                              '&.Mui-focused': {
+                                color: theme.palette.primary.main,
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          label='Country'
+                          name='country'
+                          value={form.country}
+                          onChange={handleChange}
+                          required
+                          fullWidth
+                          margin='normal'
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              '&:hover fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                            },
+                            '& .MuiInputLabel-root': {
+                              '&.Mui-focused': {
+                                color: theme.palette.primary.main,
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          label='Pin Code'
+                          name='pinCode'
+                          value={form.pinCode}
+                          onChange={handleChange}
+                          required
+                          fullWidth
+                          margin='normal'
+                          slotProps={{ input: { maxLength: 6 } }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              '&:hover fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                            },
+                            '& .MuiInputLabel-root': {
+                              '&.Mui-focused': {
+                                color: theme.palette.primary.main,
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                    <TextField
+                      label='Phone Number'
+                      name='phoneNumber'
+                      value={form.phoneNumber}
+                      onChange={handleChange}
+                      required
+                      fullWidth
+                      margin='normal'
+                      slotProps={{ input: { maxLength: 10 } }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          '&.Mui-focused': {
+                            color: theme.palette.primary.main,
+                          },
+                        },
+                      }}
+                    />
+                    <Button
+                      type='submit'
+                      fullWidth
+                      startIcon={<AddIcon />}
+                      sx={{
+                        mt: 3,
+                        mb: 2,
+                        fontWeight: 700,
+                        fontSize: { xs: '1rem', sm: '1.1rem' },
+                        borderRadius: 2,
+                        background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                        color: theme.palette.primary.contrastText,
+                        textTransform: 'none',
+                        boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
+                        '&:hover': {
+                          background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: theme.palette.primary.contrastText,
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 6px 20px ${theme.palette.primary.main}60`,
+                        },
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      {editingId ? 'Update Address' : 'Add Address'}
+                    </Button>
+                  </Stack>
+                </form>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
     </Box>
   );
 };

@@ -1,0 +1,1357 @@
+/* Global Responsive CSS - Centralized Media Queries */
+/* This replaces scattered responsive styles throughout components */
+
+/* Base Mobile First Approach */
+:root {
+  --container-padding: 16px;
+  --section-spacing: 24px;
+  --card-spacing: 16px;
+}
+
+/* Extra Small Devices (phones, 0px and up) */
+@media (min-width: 0px) {
+  :root {
+    --container-padding: 16px;
+    --section-spacing: 24px;
+    --card-spacing: 16px;
+  }
+  
+  .container {
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+  
+  .section {
+    margin-bottom: var(--section-spacing);
+  }
+  
+  .card {
+    margin-bottom: var(--card-spacing);
+  }
+}
+
+/* Small Devices (tablets, 600px and up) */
+@media (min-width: 600px) {
+  :root {
+    --container-padding: 24px;
+    --section-spacing: 32px;
+    --card-spacing: 20px;
+  }
+  
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Medium Devices (desktops, 900px and up) */
+@media (min-width: 900px) {
+  :root {
+    --container-padding: 32px;
+    --section-spacing: 40px;
+    --card-spacing: 24px;
+  }
+  
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .sidebar-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 32px;
+  }
+}
+
+/* Large Devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  :root {
+    --container-padding: 40px;
+    --section-spacing: 48px;
+    --card-spacing: 32px;
+  }
+  
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+  }
+  
+  .sidebar-layout {
+    grid-template-columns: 1fr 360px;
+    gap: 40px;
+  }
+}
+
+/* Extra Large Devices (extra large desktops, 1536px and up) */
+@media (min-width: 1536px) {
+  :root {
+    --container-padding: 48px;
+    --section-spacing: 56px;
+    --card-spacing: 40px;
+  }
+  
+  .grid-5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 40px;
+  }
+  
+  .sidebar-layout {
+    grid-template-columns: 1fr 400px;
+    gap: 48px;
+  }
+}
+
+/* Utility Classes for Responsive Display */
+.hidden-xs { display: none; }
+.hidden-sm { display: none; }
+.hidden-md { display: none; }
+.hidden-lg { display: none; }
+.hidden-xl { display: none; }
+
+.visible-xs { display: block; }
+.visible-sm { display: block; }
+.visible-md { display: block; }
+.visible-lg { display: block; }
+.visible-xl { display: block; }
+
+/* ===== RESPONSIVE COMPONENT SIZING ===== */
+
+/* Responsive Typography - Mobile First Approach */
+/* Base sizes for mobile (xs) */
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+.text-4xl { font-size: 2.25rem; }
+
+/* ===== RESPONSIVE BUTTON SIZES ===== */
+/* Button Heights - Mobile First */
+.btn-xs { height: 32px; min-height: 32px; padding: 6px 12px; font-size: 0.75rem; }
+.btn-sm { height: 36px; min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+.btn-md { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+.btn-lg { height: 48px; min-height: 48px; padding: 12px 24px; font-size: 1.125rem; }
+.btn-xl { height: 56px; min-height: 56px; padding: 16px 32px; font-size: 1.25rem; }
+
+/* Responsive Button Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .btn-xs { height: 36px; min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+  .btn-sm { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+  .btn-md { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .btn-lg { height: 52px; min-height: 52px; padding: 14px 28px; font-size: 1.25rem; }
+  .btn-xl { height: 60px; min-height: 60px; padding: 18px 36px; font-size: 1.375rem; }
+}
+
+@media (min-width: 900px) {
+  .btn-xs { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+  .btn-sm { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .btn-md { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .btn-lg { height: 56px; min-height: 56px; padding: 16px 32px; font-size: 1.375rem; }
+  .btn-xl { height: 64px; min-height: 64px; padding: 20px 40px; font-size: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .btn-xs { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .btn-sm { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .btn-md { height: 52px; min-height: 52px; padding: 16px 32px; font-size: 1.375rem; }
+  .btn-lg { height: 60px; min-height: 60px; padding: 18px 36px; font-size: 1.5rem; }
+  .btn-xl { height: 68px; min-height: 68px; padding: 22px 44px; font-size: 1.625rem; }
+}
+
+@media (min-width: 1536px) {
+  .btn-xs { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .btn-sm { height: 52px; min-height: 52px; padding: 16px 32px; font-size: 1.375rem; }
+  .btn-md { height: 56px; min-height: 56px; padding: 18px 36px; font-size: 1.5rem; }
+  .btn-lg { height: 64px; min-height: 64px; padding: 20px 40px; font-size: 1.625rem; }
+  .btn-xl { height: 72px; min-height: 72px; padding: 24px 48px; font-size: 1.75rem; }
+}
+
+/* ===== RESPONSIVE TEXT FIELD SIZES ===== */
+/* TextField Heights - Mobile First */
+.input-xs { height: 32px; min-height: 32px; padding: 6px 12px; font-size: 0.75rem; }
+.input-sm { height: 36px; min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+.input-md { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+.input-lg { height: 48px; min-height: 48px; padding: 12px 24px; font-size: 1.125rem; }
+.input-xl { height: 56px; min-height: 56px; padding: 16px 32px; font-size: 1.25rem; }
+
+/* Responsive TextField Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .input-xs { height: 36px; min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+  .input-sm { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+  .input-md { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .input-lg { height: 52px; min-height: 52px; padding: 14px 28px; font-size: 1.25rem; }
+  .input-xl { height: 60px; min-height: 60px; padding: 18px 36px; font-size: 1.375rem; }
+}
+
+@media (min-width: 900px) {
+  .input-xs { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+  .input-sm { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .input-md { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .input-lg { height: 56px; min-height: 56px; padding: 16px 32px; font-size: 1.375rem; }
+  .input-xl { height: 64px; min-height: 64px; padding: 20px 40px; font-size: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .input-xs { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .input-sm { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .input-md { height: 52px; min-height: 52px; padding: 16px 32px; font-size: 1.375rem; }
+  .input-lg { height: 60px; min-height: 60px; padding: 18px 36px; font-size: 1.5rem; }
+  .input-xl { height: 68px; min-height: 68px; padding: 22px 44px; font-size: 1.625rem; }
+}
+
+@media (min-width: 1536px) {
+  .input-xs { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .input-sm { height: 52px; min-height: 52px; padding: 16px 32px; font-size: 1.375rem; }
+  .input-md { height: 56px; min-height: 56px; padding: 18px 36px; font-size: 1.5rem; }
+  .input-lg { height: 64px; min-height: 64px; padding: 20px 40px; font-size: 1.625rem; }
+  .input-xl { height: 72px; min-height: 72px; padding: 24px 48px; font-size: 1.75rem; }
+}
+
+/* ===== RESPONSIVE ICON SIZES ===== */
+/* Icon Sizes - Mobile First */
+.icon-xs { font-size: 0.75rem; width: 16px; height: 16px; }
+.icon-sm { font-size: 1rem; width: 20px; height: 20px; }
+.icon-md { font-size: 1.25rem; width: 24px; height: 24px; }
+.icon-lg { font-size: 1.5rem; width: 32px; height: 32px; }
+.icon-xl { font-size: 2rem; width: 40px; height: 40px; }
+
+/* Responsive Icon Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .icon-xs { font-size: 0.875rem; width: 18px; height: 18px; }
+  .icon-sm { font-size: 1.125rem; width: 22px; height: 22px; }
+  .icon-md { font-size: 1.375rem; width: 26px; height: 26px; }
+  .icon-lg { font-size: 1.625rem; width: 34px; height: 34px; }
+  .icon-xl { font-size: 2.125rem; width: 42px; height: 42px; }
+}
+
+@media (min-width: 900px) {
+  .icon-xs { font-size: 1rem; width: 20px; height: 20px; }
+  .icon-sm { font-size: 1.25rem; width: 24px; height: 24px; }
+  .icon-md { font-size: 1.5rem; width: 28px; height: 28px; }
+  .icon-lg { font-size: 1.75rem; width: 36px; height: 36px; }
+  .icon-xl { font-size: 2.25rem; width: 44px; height: 44px; }
+}
+
+@media (min-width: 1200px) {
+  .icon-xs { font-size: 1.125rem; width: 22px; height: 22px; }
+  .icon-sm { font-size: 1.375rem; width: 26px; height: 26px; }
+  .icon-md { font-size: 1.625rem; width: 30px; height: 30px; }
+  .icon-lg { font-size: 1.875rem; width: 38px; height: 38px; }
+  .icon-xl { font-size: 2.375rem; width: 46px; height: 46px; }
+}
+
+@media (min-width: 1536px) {
+  .icon-xs { font-size: 1.25rem; width: 24px; height: 24px; }
+  .icon-sm { font-size: 1.5rem; width: 28px; height: 28px; }
+  .icon-md { font-size: 1.75rem; width: 32px; height: 32px; }
+  .icon-lg { font-size: 2rem; width: 40px; height: 40px; }
+  .icon-xl { font-size: 2.5rem; width: 48px; height: 48px; }
+}
+
+/* Small devices (600px and up) - Typography scales up */
+@media (min-width: 600px) {
+  .text-xs { font-size: 0.875rem; }
+  .text-sm { font-size: 1rem; }
+  .text-base { font-size: 1.125rem; }
+  .text-lg { font-size: 1.25rem; }
+  .text-xl { font-size: 1.5rem; }
+  .text-2xl { font-size: 1.75rem; }
+  .text-3xl { font-size: 2rem; }
+  .text-4xl { font-size: 2.5rem; }
+}
+
+/* Medium devices (900px and up) - Typography scales up further */
+@media (min-width: 900px) {
+  .text-xs { font-size: 1rem; }
+  .text-sm { font-size: 1.125rem; }
+  .text-base { font-size: 1.25rem; }
+  .text-lg { font-size: 1.5rem; }
+  .text-xl { font-size: 1.75rem; }
+  .text-2xl { font-size: 2rem; }
+  .text-3xl { font-size: 2.25rem; }
+  .text-4xl { font-size: 3rem; }
+}
+
+/* Large devices (1200px and up) - Typography scales up more */
+@media (min-width: 1200px) {
+  .text-xs { font-size: 1.125rem; }
+  .text-sm { font-size: 1.25rem; }
+  .text-base { font-size: 1.375rem; }
+  .text-lg { font-size: 1.625rem; }
+  .text-xl { font-size: 2rem; }
+  .text-2xl { font-size: 2.25rem; }
+  .text-3xl { font-size: 2.5rem; }
+  .text-4xl { font-size: 3.5rem; }
+}
+
+/* Extra large devices (1536px and up) - Typography scales up maximum */
+@media (min-width: 1536px) {
+  .text-xs { font-size: 1.25rem; }
+  .text-sm { font-size: 1.375rem; }
+  .text-base { font-size: 1.5rem; }
+  .text-lg { font-size: 1.75rem; }
+  .text-xl { font-size: 2.25rem; }
+  .text-2xl { font-size: 2.5rem; }
+  .text-3xl { font-size: 2.75rem; }
+  .text-4xl { font-size: 4rem; }
+}
+
+/* Responsive Spacing - Mobile First Approach */
+/* Base sizes for mobile (xs) */
+.space-xs { margin-bottom: 8px; }
+.space-sm { margin-bottom: 16px; }
+.space-md { margin-bottom: 24px; }
+.space-lg { margin-bottom: 32px; }
+.space-xl { margin-bottom: 48px; }
+
+/* Responsive Padding - All Directions */
+.p-xs { padding: 8px; }
+.p-sm { padding: 16px; }
+.p-md { padding: 24px; }
+.p-lg { padding: 32px; }
+.p-xl { padding: 48px; }
+
+/* Responsive Padding - Horizontal */
+.px-xs { padding-left: 8px; padding-right: 8px; }
+.px-sm { padding-left: 16px; padding-right: 16px; }
+.px-md { padding-left: 24px; padding-right: 24px; }
+.px-lg { padding-left: 32px; padding-right: 32px; }
+.px-xl { padding-left: 48px; padding-right: 48px; }
+
+/* Responsive Padding - Vertical */
+.py-xs { padding-top: 8px; padding-bottom: 8px; }
+.py-sm { padding-top: 16px; padding-bottom: 16px; }
+.py-md { padding-top: 24px; padding-bottom: 24px; }
+.py-lg { padding-top: 32px; padding-bottom: 32px; }
+.py-xl { padding-top: 48px; padding-bottom: 48px; }
+
+/* Responsive Margins - All Directions */
+.m-xs { margin: 8px; }
+.m-sm { margin: 16px; }
+.m-md { margin: 24px; }
+.m-lg { margin: 32px; }
+.m-xl { margin: 48px; }
+
+/* Responsive Margins - Horizontal */
+.mx-xs { margin-left: 8px; margin-right: 8px; }
+.mx-sm { margin-left: 16px; margin-right: 16px; }
+.mx-md { margin-left: 24px; margin-right: 24px; }
+.mx-lg { margin-left: 32px; margin-right: 32px; }
+.mx-xl { margin-left: 48px; margin-right: 48px; }
+
+/* Responsive Margins - Vertical */
+.my-xs { margin-top: 8px; margin-bottom: 8px; }
+.my-sm { margin-top: 16px; margin-bottom: 16px; }
+.my-md { margin-top: 24px; margin-bottom: 24px; }
+.my-lg { margin-top: 32px; margin-bottom: 32px; }
+.my-xl { margin-top: 48px; margin-bottom: 48px; }
+
+/* Responsive Margins - Individual Sides */
+.mt-xs { margin-top: 8px; }
+.mt-sm { margin-top: 16px; }
+.mt-md { margin-top: 24px; }
+.mt-lg { margin-top: 32px; }
+.mt-xl { margin-top: 48px; }
+
+.mb-xs { margin-bottom: 8px; }
+.mb-sm { margin-bottom: 16px; }
+.mb-md { margin-bottom: 24px; }
+.mb-lg { margin-bottom: 32px; }
+.mb-xl { margin-bottom: 48px; }
+
+.ml-xs { margin-left: 8px; }
+.ml-sm { margin-left: 16px; }
+.ml-md { margin-left: 24px; }
+.ml-lg { margin-left: 32px; }
+.ml-xl { margin-left: 48px; }
+
+.mr-xs { margin-right: 8px; }
+.mr-sm { margin-right: 16px; }
+.mr-md { margin-right: 24px; }
+.mr-lg { margin-right: 32px; }
+.mr-xl { margin-right: 48px; }
+
+/* Responsive Spacing with Breakpoints */
+/* Small devices (600px and up) - Spacing scales up */
+@media (min-width: 600px) {
+  .space-xs { margin-bottom: 12px; }
+  .space-sm { margin-bottom: 20px; }
+  .space-md { margin-bottom: 28px; }
+  .space-lg { margin-bottom: 36px; }
+  .space-xl { margin-bottom: 56px; }
+  
+  .p-xs { padding: 12px; }
+  .p-sm { padding: 20px; }
+  .p-md { padding: 28px; }
+  .p-lg { padding: 36px; }
+  .p-xl { padding: 56px; }
+  
+  .px-xs { padding-left: 12px; padding-right: 12px; }
+  .px-sm { padding-left: 20px; padding-right: 20px; }
+  .px-md { padding-left: 28px; padding-right: 28px; }
+  .px-lg { padding-left: 36px; padding-right: 36px; }
+  .px-xl { padding-left: 56px; padding-right: 56px; }
+  
+  .py-xs { padding-top: 12px; padding-bottom: 12px; }
+  .py-sm { padding-top: 20px; padding-bottom: 20px; }
+  .py-md { padding-top: 28px; padding-bottom: 28px; }
+  .py-lg { padding-top: 36px; padding-bottom: 36px; }
+  .py-xl { padding-top: 56px; padding-bottom: 56px; }
+}
+
+/* Medium devices (900px and up) - Spacing scales up further */
+@media (min-width: 900px) {
+  .space-xs { margin-bottom: 16px; }
+  .space-sm { margin-bottom: 24px; }
+  .space-md { margin-bottom: 32px; }
+  .space-lg { margin-bottom: 40px; }
+  .space-xl { margin-bottom: 64px; }
+  
+  .p-xs { padding: 16px; }
+  .p-sm { padding: 24px; }
+  .p-md { padding: 32px; }
+  .p-lg { padding: 40px; }
+  .p-xl { padding: 64px; }
+  
+  .px-xs { padding-left: 16px; padding-right: 16px; }
+  .px-sm { padding-left: 24px; padding-right: 24px; }
+  .px-md { padding-left: 32px; padding-right: 32px; }
+  .px-lg { padding-left: 40px; padding-right: 40px; }
+  .px-xl { padding-left: 64px; padding-right: 64px; }
+  
+  .py-xs { padding-top: 16px; padding-bottom: 16px; }
+  .py-sm { padding-top: 24px; padding-bottom: 24px; }
+  .py-md { padding-top: 32px; padding-bottom: 32px; }
+  .py-lg { padding-top: 40px; padding-bottom: 40px; }
+  .py-xl { padding-top: 64px; padding-bottom: 64px; }
+}
+
+/* Large devices (1200px and up) - Spacing scales up more */
+@media (min-width: 1200px) {
+  .space-xs { margin-bottom: 20px; }
+  .space-sm { margin-bottom: 28px; }
+  .space-md { margin-bottom: 36px; }
+  .space-lg { margin-bottom: 48px; }
+  .space-xl { margin-bottom: 72px; }
+  
+  .p-xs { padding: 20px; }
+  .p-sm { padding: 28px; }
+  .p-md { padding: 36px; }
+  .p-lg { padding: 48px; }
+  .p-xl { padding: 72px; }
+  
+  .px-xs { padding-left: 20px; padding-right: 20px; }
+  .px-sm { padding-left: 28px; padding-right: 28px; }
+  .px-md { padding-left: 36px; padding-right: 36px; }
+  .px-lg { padding-left: 48px; padding-right: 48px; }
+  .px-xl { padding-left: 72px; padding-right: 72px; }
+  
+  .py-xs { padding-top: 20px; padding-bottom: 20px; }
+  .py-sm { padding-top: 28px; padding-bottom: 28px; }
+  .py-md { padding-top: 36px; padding-bottom: 36px; }
+  .py-lg { padding-top: 48px; padding-bottom: 48px; }
+  .py-xl { padding-top: 72px; padding-bottom: 72px; }
+}
+
+/* Extra large devices (1536px and up) - Spacing scales up maximum */
+@media (min-width: 1536px) {
+  .space-xs { margin-bottom: 24px; }
+  .space-sm { margin-bottom: 32px; }
+  .space-md { margin-bottom: 40px; }
+  .space-lg { margin-bottom: 56px; }
+  .space-xl { margin-bottom: 80px; }
+  
+  .p-xs { padding: 24px; }
+  .p-sm { padding: 32px; }
+  .p-md { padding: 40px; }
+  .p-lg { padding: 56px; }
+  .p-xl { padding: 80px; }
+  
+  .px-xs { padding-left: 24px; padding-right: 24px; }
+  .px-sm { padding-left: 32px; padding-right: 32px; }
+  .px-md { padding-left: 40px; padding-right: 40px; }
+  .px-lg { padding-left: 56px; padding-right: 56px; }
+  .px-xl { padding-left: 80px; padding-right: 80px; }
+  
+  .py-xs { padding-top: 24px; padding-bottom: 24px; }
+  .py-sm { padding-top: 32px; padding-bottom: 32px; }
+  .py-md { padding-top: 40px; padding-bottom: 40px; }
+  .py-lg { padding-top: 56px; padding-bottom: 56px; }
+  .py-xl { padding-top: 80px; padding-bottom: 80px; }
+}
+
+/* Mobile First Responsive Utilities */
+@media (min-width: 600px) {
+  .hidden-sm { display: block; }
+  .visible-sm { display: none; }
+  
+  /* Responsive spacing for small screens and up */
+  .sm\:p-sm { padding: 16px; }
+  .sm\:p-md { padding: 24px; }
+  .sm\:m-sm { margin: 16px; }
+  .sm\:m-md { margin: 24px; }
+  
+  /* Responsive typography for small screens and up */
+  .sm\:text-base { font-size: 1rem; }
+  .sm\:text-lg { font-size: 1.125rem; }
+  .sm\:text-xl { font-size: 1.25rem; }
+}
+
+@media (min-width: 900px) {
+  .hidden-md { display: block; }
+  .visible-md { display: none; }
+  
+  /* Responsive spacing for medium screens and up */
+  .md\:p-md { padding: 24px; }
+  .md\:p-lg { padding: 32px; }
+  .md\:m-md { margin: 24px; }
+  .md\:m-lg { margin: 32px; }
+  
+  /* Responsive typography for medium screens and up */
+  .md\:text-lg { font-size: 1.125rem; }
+  .md\:text-xl { font-size: 1.25rem; }
+  .md\:text-2xl { font-size: 1.5rem; }
+  
+  /* Responsive layout for medium screens and up */
+  .md\:flex-row { flex-direction: row; }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1200px) {
+  .hidden-lg { display: block; }
+  .visible-lg { display: none; }
+  
+  /* Responsive spacing for large screens and up */
+  .lg\:p-lg { padding: 32px; }
+  .lg\:p-xl { padding: 48px; }
+  .lg\:m-lg { margin: 32px; }
+  .lg\:m-xl { margin: 48px; }
+  
+  /* Responsive typography for large screens and up */
+  .lg\:text-xl { font-size: 1.25rem; }
+  .lg\:text-2xl { font-size: 1.5rem; }
+  .lg\:text-3xl { font-size: 1.875rem; }
+  
+  /* Responsive layout for large screens and up */
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg\:gap-lg { gap: 32px; }
+}
+
+@media (min-width: 1536px) {
+  .hidden-xl { display: block; }
+  .visible-xl { display: none; }
+  
+  /* Responsive spacing for extra large screens and up */
+  .xl\:p-xl { padding: 48px; }
+  .xl\:m-xl { margin: 48px; }
+  
+  /* Responsive typography for extra large screens and up */
+  .xl\:text-2xl { font-size: 1.5rem; }
+  .xl\:text-3xl { font-size: 1.875rem; }
+  .xl\:text-4xl { font-size: 2.25rem; }
+  
+  /* Responsive layout for extra large screens and up */
+  .xl\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .xl\:gap-xl { gap: 48px; }
+}
+
+/* Responsive Flexbox Utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-evenly { justify-content: space-evenly; }
+
+/* Responsive Grid Utilities */
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+/* Responsive Gaps - Mobile First Approach */
+.gap-xs { gap: 8px; }
+.gap-sm { gap: 16px; }
+.gap-md { gap: 24px; }
+.gap-lg { gap: 32px; }
+.gap-xl { gap: 48px; }
+
+/* Responsive Gaps with Breakpoints */
+@media (min-width: 600px) {
+  .gap-xs { gap: 12px; }
+  .gap-sm { gap: 20px; }
+  .gap-md { gap: 28px; }
+  .gap-lg { gap: 36px; }
+  .gap-xl { gap: 56px; }
+}
+
+@media (min-width: 900px) {
+  .gap-xs { gap: 16px; }
+  .gap-sm { gap: 24px; }
+  .gap-md { gap: 32px; }
+  .gap-lg { gap: 40px; }
+  .gap-xl { gap: 64px; }
+}
+
+@media (min-width: 1200px) {
+  .gap-xs { gap: 20px; }
+  .gap-sm { gap: 28px; }
+  .gap-md { gap: 36px; }
+  .gap-lg { gap: 48px; }
+  .gap-xl { gap: 72px; }
+}
+
+@media (min-width: 1536px) {
+  .gap-xs { gap: 24px; }
+  .gap-sm { gap: 32px; }
+  .gap-md { gap: 40px; }
+  .gap-lg { gap: 56px; }
+  .gap-xl { gap: 80px; }
+}
+
+/* ===== CENTRALIZED BORDER & RADIUS SYSTEM ===== */
+
+/* Responsive Border Radius - Mobile First Approach */
+/* Base sizes for mobile (xs) */
+.rounded-xs { border-radius: 4px; }
+.rounded-sm { border-radius: 8px; }
+.rounded-md { border-radius: 12px; }
+.rounded-lg { border-radius: 16px; }
+.rounded-xl { border-radius: 24px; }
+.rounded-full { border-radius: 9999px; }
+.rounded-none { border-radius: 0; }
+
+/* Responsive Border Radius with Breakpoints */
+/* Small devices (600px and up) - Radius scales up */
+@media (min-width: 600px) {
+  .rounded-xs { border-radius: 6px; }
+  .rounded-sm { border-radius: 10px; }
+  .rounded-md { border-radius: 14px; }
+  .rounded-lg { border-radius: 18px; }
+  .rounded-xl { border-radius: 28px; }
+}
+
+/* Medium devices (900px and up) - Radius scales up further */
+@media (min-width: 900px) {
+  .rounded-xs { border-radius: 8px; }
+  .rounded-sm { border-radius: 12px; }
+  .rounded-md { border-radius: 16px; }
+  .rounded-lg { border-radius: 20px; }
+  .rounded-xl { border-radius: 32px; }
+}
+
+/* Large devices (1200px and up) - Radius scales up more */
+@media (min-width: 1200px) {
+  .rounded-xs { border-radius: 10px; }
+  .rounded-sm { border-radius: 14px; }
+  .rounded-md { border-radius: 18px; }
+  .rounded-lg { border-radius: 24px; }
+  .rounded-xl { border-radius: 36px; }
+}
+
+/* Extra large devices (1536px and up) - Radius scales up maximum */
+@media (min-width: 1536px) {
+  .rounded-xs { border-radius: 12px; }
+  .rounded-sm { border-radius: 16px; }
+  .rounded-md { border-radius: 20px; }
+  .rounded-lg { border-radius: 28px; }
+  .rounded-xl { border-radius: 40px; }
+}
+
+/* ===== CENTRALIZED BORDER SYSTEM ===== */
+
+/* Border Widths - Consistent across all devices */
+.border-none { border: none; }
+.border-xs { border-width: 1px; }
+.border-sm { border-width: 2px; }
+.border-md { border-width: 3px; }
+.border-lg { border-width: 4px; }
+.border-xl { border-width: 6px; }
+
+/* Border Styles */
+.border-solid { border-style: solid; }
+.border-dashed { border-style: dashed; }
+.border-dotted { border-style: dotted; }
+.border-double { border-style: double; }
+
+/* Border Colors - Theme-based */
+.border-primary { border-color: var(--color-primary); }
+.border-primary-light { border-color: var(--color-primary-light); }
+.border-primary-dark { border-color: var(--color-primary-dark); }
+.border-secondary { border-color: var(--color-secondary); }
+.border-success { border-color: var(--color-success); }
+.border-warning { border-color: var(--color-warning); }
+.border-error { border-color: var(--color-error); }
+.border-divider { border-color: var(--color-divider); }
+.border-text { border-color: var(--color-text); }
+
+/* Complete Border Utilities */
+.border-primary-xs { border: 1px solid var(--color-primary); }
+.border-primary-sm { border: 2px solid var(--color-primary); }
+.border-primary-md { border: 3px solid var(--color-primary); }
+.border-primary-lg { border: 4px solid var(--color-primary); }
+
+.border-primary-light-xs { border: 1px solid var(--color-primary-light); }
+.border-primary-light-sm { border: 2px solid var(--color-primary-light); }
+.border-primary-light-md { border: 3px solid var(--color-primary-light); }
+
+.border-success-xs { border: 1px solid var(--color-success); }
+.border-success-sm { border: 2px solid var(--color-success); }
+.border-success-md { border: 3px solid var(--color-success); }
+
+.border-error-xs { border: 1px solid var(--color-error); }
+.border-error-sm { border: 2px solid var(--color-error); }
+.border-error-md { border: 3px solid var(--color-error); }
+
+.border-divider-xs { border: 1px solid var(--color-divider); }
+.border-divider-sm { border: 2px solid var(--color-divider); }
+
+/* Border Radius + Border Combinations */
+.rounded-border-primary-sm { 
+  border-radius: 8px; 
+  border: 2px solid var(--color-primary); 
+}
+
+.rounded-border-primary-light-sm { 
+  border-radius: 8px; 
+  border: 2px solid var(--color-primary-light); 
+}
+
+.rounded-border-success-sm { 
+  border-radius: 8px; 
+  border: 2px solid var(--color-success); 
+}
+
+.rounded-border-error-sm { 
+  border-radius: 8px; 
+  border: 2px solid var(--color-error); 
+}
+
+.rounded-border-divider-xs { 
+  border-radius: 8px; 
+  border: 1px solid var(--color-divider); 
+}
+
+/* Responsive Border Radius + Border Combinations */
+@media (min-width: 600px) {
+  .rounded-border-primary-sm { 
+    border-radius: 10px; 
+    border: 2px solid var(--color-primary); 
+  }
+  
+  .rounded-border-primary-light-sm { 
+    border-radius: 10px; 
+    border: 2px solid var(--color-primary-light); 
+  }
+  
+  .rounded-border-success-sm { 
+    border-radius: 10px; 
+    border: 2px solid var(--color-success); 
+  }
+  
+  .rounded-border-error-sm { 
+    border-radius: 10px; 
+    border: 2px solid var(--color-error); 
+  }
+  
+  .rounded-border-divider-xs { 
+    border-radius: 10px; 
+    border: 1px solid var(--color-divider); 
+  }
+}
+
+@media (min-width: 900px) {
+  .rounded-border-primary-sm { 
+    border-radius: 12px; 
+    border: 2px solid var(--color-primary); 
+  }
+  
+  .rounded-border-primary-light-sm { 
+    border-radius: 12px; 
+    border: 2px solid var(--color-primary-light); 
+  }
+  
+  .rounded-border-success-sm { 
+    border-radius: 12px; 
+    border: 2px solid var(--color-success); 
+  }
+  
+  .rounded-border-error-sm { 
+    border-radius: 12px; 
+    border: 2px solid var(--color-error); 
+  }
+  
+  .rounded-border-divider-xs { 
+    border-radius: 12px; 
+    border: 1px solid var(--color-divider); 
+  }
+}
+
+@media (min-width: 1200px) {
+  .rounded-border-primary-sm { 
+    border-radius: 14px; 
+    border: 2px solid var(--color-primary); 
+  }
+  
+  .rounded-border-primary-light-sm { 
+    border-radius: 14px; 
+    border: 2px solid var(--color-primary-light); 
+  }
+  
+  .rounded-border-success-sm { 
+    border-radius: 14px; 
+    border: 2px solid var(--color-success); }
+  
+  .rounded-border-error-sm { 
+    border-radius: 14px; 
+    border: 2px solid var(--color-error); 
+  }
+  
+  .rounded-border-divider-xs { 
+    border-radius: 14px; 
+    border: 1px solid var(--color-divider); 
+  }
+}
+
+@media (min-width: 1536px) {
+  .rounded-border-primary-sm { 
+    border-radius: 16px; 
+    border: 2px solid var(--color-primary); 
+  }
+  
+  .rounded-border-primary-light-sm { 
+    border-radius: 16px; 
+    border: 2px solid var(--color-primary-light); 
+  }
+  
+  .rounded-border-success-sm { 
+    border-radius: 16px; 
+    border: 2px solid var(--color-success); }
+  
+  .rounded-border-error-sm { 
+    border-radius: 16px; 
+    border: 2px solid var(--color-error); 
+  }
+  
+  .rounded-border-divider-xs { 
+    border-radius: 16px; 
+    border: 1px solid var(--color-divider); 
+  }
+}
+
+/* Responsive Shadows */
+.shadow-xs { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.shadow-sm { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.shadow-md { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+.shadow-lg { box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); }
+.shadow-xl { box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1); }
+
+/* Responsive Width and Height */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.w-xs { width: 8px; }
+.w-sm { width: 16px; }
+.w-md { width: 24px; }
+.w-lg { width: 32px; }
+.w-xl { width: 48px; }
+
+.h-full { height: 100%; }
+.h-auto { height: auto; }
+.h-xs { height: 8px; }
+.h-sm { height: 16px; }
+.h-md { height: 24px; }
+.h-lg { height: 32px; }
+.h-xl { height: 48px; }
+
+/* Responsive Position */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+/* Responsive Z-Index */
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-30 { z-index: 30; }
+.z-40 { z-index: 40; }
+.z-50 { z-index: 50; }
+
+/* Responsive Overflow */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-scroll { overflow: scroll; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* Responsive Cursor */
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* Responsive Text Alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-justify { text-align: justify; }
+
+/* Responsive Font Weight */
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+
+/* Responsive Line Height */
+.leading-tight { line-height: 1.25; }
+.leading-snug { line-height: 1.375; }
+.leading-normal { line-height: 1.5; }
+.leading-relaxed { line-height: 1.625; }
+.leading-loose { line-height: 2; }
+
+/* ===== RESPONSIVE FORM COMPONENTS ===== */
+
+/* Responsive Form Field Heights - Mobile First */
+.form-xs { height: 32px; min-height: 32px; padding: 6px 12px; font-size: 0.75rem; }
+.form-sm { height: 36px; min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+.form-md { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+.form-lg { height: 48px; min-height: 48px; padding: 12px 24px; font-size: 1.125rem; }
+.form-xl { height: 56px; min-height: 56px; padding: 16px 32px; font-size: 1.25rem; }
+
+/* Responsive Form Field Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .form-xs { height: 36px; min-height: 36px; padding: 8px 16px; font-size: 0.875rem; }
+  .form-sm { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+  .form-md { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .form-lg { height: 52px; min-height: 52px; padding: 14px 28px; font-size: 1.25rem; }
+  .form-xl { height: 60px; min-height: 60px; padding: 18px 36px; font-size: 1.375rem; }
+}
+
+@media (min-width: 900px) {
+  .form-xs { height: 40px; min-height: 40px; padding: 10px 20px; font-size: 1rem; }
+  .form-sm { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .form-md { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .form-lg { height: 56px; min-height: 56px; padding: 16px 32px; font-size: 1.375rem; }
+  .form-xl { height: 64px; min-height: 64px; padding: 20px 40px; font-size: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .form-xs { height: 44px; min-height: 44px; padding: 12px 24px; font-size: 1.125rem; }
+  .form-sm { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .form-md { height: 52px; min-height: 52px; padding: 16px 32px; font-size: 1.375rem; }
+  .form-lg { height: 60px; min-height: 60px; padding: 18px 36px; font-size: 1.5rem; }
+  .form-xl { height: 68px; min-height: 68px; padding: 22px 44px; font-size: 1.625rem; }
+}
+
+@media (min-width: 1536px) {
+  .form-xs { height: 48px; min-height: 48px; padding: 14px 28px; font-size: 1.25rem; }
+  .form-sm { height: 52px; min-height: 52px; padding: 16px 32px; font-size: 1.375rem; }
+  .form-md { height: 56px; min-height: 56px; padding: 18px 36px; font-size: 1.5rem; }
+  .form-lg { height: 64px; min-height: 64px; padding: 20px 40px; font-size: 1.625rem; }
+  .form-xl { height: 72px; min-height: 72px; padding: 24px 48px; font-size: 1.75rem; }
+}
+
+/* ===== RESPONSIVE CARD COMPONENTS ===== */
+
+/* Responsive Card Heights - Mobile First */
+.card-xs { min-height: 120px; padding: 12px; }
+.card-sm { min-height: 160px; padding: 16px; }
+.card-md { min-height: 200px; padding: 20px; }
+.card-lg { min-height: 240px; padding: 24px; }
+.card-xl { min-height: 280px; padding: 28px; }
+
+/* Responsive Card Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .card-xs { min-height: 140px; padding: 16px; }
+  .card-sm { min-height: 180px; padding: 20px; }
+  .card-md { min-height: 220px; padding: 24px; }
+  .card-lg { min-height: 260px; padding: 28px; }
+  .card-xl { min-height: 300px; padding: 32px; }
+}
+
+@media (min-width: 900px) {
+  .card-xs { min-height: 160px; padding: 20px; }
+  .card-sm { min-height: 200px; padding: 24px; }
+  .card-md { min-height: 240px; padding: 28px; }
+  .card-lg { min-height: 280px; padding: 32px; }
+  .card-xl { min-height: 320px; padding: 36px; }
+}
+
+@media (min-width: 1200px) {
+  .card-xs { min-height: 180px; padding: 24px; }
+  .card-sm { min-height: 220px; padding: 28px; }
+  .card-md { min-height: 260px; padding: 32px; }
+  .card-lg { min-height: 300px; padding: 36px; }
+  .card-xl { min-height: 340px; padding: 40px; }
+}
+
+@media (min-width: 1536px) {
+  .card-xs { min-height: 200px; padding: 28px; }
+  .card-sm { min-height: 240px; padding: 32px; }
+  .card-md { min-height: 280px; padding: 36px; }
+  .card-lg { min-height: 320px; padding: 40px; }
+  .card-xl { min-height: 360px; padding: 44px; }
+}
+
+/* ===== RESPONSIVE NAVIGATION COMPONENTS ===== */
+
+/* Responsive Navbar Heights - Mobile First */
+.nav-xs { height: 48px; min-height: 48px; padding: 8px 16px; }
+.nav-sm { height: 56px; min-height: 56px; padding: 12px 20px; }
+.nav-md { height: 64px; min-height: 64px; padding: 16px 24px; }
+.nav-lg { height: 72px; min-height: 72px; padding: 20px 28px; }
+.nav-xl { height: 80px; min-height: 80px; padding: 24px 32px; }
+
+/* Responsive Navbar Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .nav-xs { height: 52px; min-height: 52px; padding: 10px 18px; }
+  .nav-sm { height: 60px; min-height: 60px; padding: 14px 22px; }
+  .nav-md { height: 68px; min-height: 68px; padding: 18px 26px; }
+  .nav-lg { height: 76px; min-height: 76px; padding: 22px 30px; }
+  .nav-xl { height: 84px; min-height: 84px; padding: 26px 34px; }
+}
+
+@media (min-width: 900px) {
+  .nav-xs { height: 56px; min-height: 56px; padding: 12px 20px; }
+  .nav-sm { height: 64px; min-height: 64px; padding: 16px 24px; }
+  .nav-md { height: 72px; min-height: 72px; padding: 20px 28px; }
+  .nav-lg { height: 80px; min-height: 80px; padding: 24px 32px; }
+  .nav-xl { height: 88px; min-height: 88px; padding: 28px 36px; }
+}
+
+@media (min-width: 1200px) {
+  .nav-xs { height: 60px; min-height: 60px; padding: 14px 22px; }
+  .nav-sm { height: 68px; min-height: 68px; padding: 18px 26px; }
+  .nav-md { height: 76px; min-height: 76px; padding: 22px 30px; }
+  .nav-lg { height: 84px; min-height: 84px; padding: 26px 34px; }
+  .nav-xl { height: 92px; min-height: 92px; padding: 30px 38px; }
+}
+
+@media (min-width: 1536px) {
+  .nav-xs { height: 64px; min-height: 64px; padding: 16px 24px; }
+  .nav-sm { height: 72px; min-height: 72px; padding: 20px 28px; }
+  .nav-md { height: 80px; min-height: 80px; padding: 24px 32px; }
+  .nav-lg { height: 88px; min-height: 88px; padding: 28px 36px; }
+  .nav-xl { height: 96px; min-height: 96px; padding: 32px 40px; }
+}
+
+/* ===== RESPONSIVE MODAL/DIALOG COMPONENTS ===== */
+
+/* Responsive Modal Sizes - Mobile First */
+.modal-xs { max-width: 320px; padding: 16px; }
+.modal-sm { max-width: 480px; padding: 20px; }
+.modal-md { max-width: 640px; padding: 24px; }
+.modal-lg { max-width: 800px; padding: 28px; }
+.modal-xl { max-width: 1024px; padding: 32px; }
+
+/* Responsive Modal Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .modal-xs { max-width: 360px; padding: 20px; }
+  .modal-sm { max-width: 520px; padding: 24px; }
+  .modal-md { max-width: 680px; padding: 28px; }
+  .modal-lg { max-width: 840px; padding: 32px; }
+  .modal-xl { max-width: 1088px; padding: 36px; }
+}
+
+@media (min-width: 900px) {
+  .modal-xs { max-width: 400px; padding: 24px; }
+  .modal-sm { max-width: 560px; padding: 28px; }
+  .modal-md { max-width: 720px; padding: 32px; }
+  .modal-lg { max-width: 880px; padding: 36px; }
+  .modal-xl { max-width: 1152px; padding: 40px; }
+}
+
+@media (min-width: 1200px) {
+  .modal-xs { max-width: 440px; padding: 28px; }
+  .modal-sm { max-width: 600px; padding: 32px; }
+  .modal-md { max-width: 760px; padding: 36px; }
+  .modal-lg { max-width: 920px; padding: 40px; }
+  .modal-xl { max-width: 1216px; padding: 44px; }
+}
+
+@media (min-width: 1536px) {
+  .modal-xs { max-width: 480px; padding: 32px; }
+  .modal-sm { max-width: 640px; padding: 36px; }
+  .modal-md { max-width: 800px; padding: 40px; }
+  .modal-lg { max-width: 960px; padding: 44px; }
+  .modal-xl { max-width: 1280px; padding: 48px; }
+}
+
+/* ===== RESPONSIVE TABLE COMPONENTS ===== */
+
+/* Responsive Table Sizes - Mobile First */
+.table-xs { font-size: 0.75rem; padding: 8px; }
+.table-sm { font-size: 0.875rem; padding: 10px; }
+.table-md { font-size: 1rem; padding: 12px; }
+.table-lg { font-size: 1.125rem; padding: 14px; }
+.table-xl { font-size: 1.25rem; padding: 16px; }
+
+/* Responsive Table Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .table-xs { font-size: 0.875rem; padding: 10px; }
+  .table-sm { font-size: 1rem; padding: 12px; }
+  .table-md { font-size: 1.125rem; padding: 14px; }
+  .table-lg { font-size: 1.25rem; padding: 16px; }
+  .table-xl { font-size: 1.375rem; padding: 18px; }
+}
+
+@media (min-width: 900px) {
+  .table-xs { font-size: 1rem; padding: 12px; }
+  .table-sm { font-size: 1.125rem; padding: 14px; }
+  .table-md { font-size: 1.25rem; padding: 16px; }
+  .table-lg { font-size: 1.375rem; padding: 18px; }
+  .table-xl { font-size: 1.5rem; padding: 20px; }
+}
+
+@media (min-width: 1200px) {
+  .table-xs { font-size: 1.125rem; padding: 14px; }
+  .table-sm { font-size: 1.25rem; padding: 16px; }
+  .table-md { font-size: 1.375rem; padding: 18px; }
+  .table-lg { font-size: 1.5rem; padding: 20px; }
+  .table-xl { font-size: 1.625rem; padding: 22px; }
+}
+
+@media (min-width: 1536px) {
+  .table-xs { font-size: 1.25rem; padding: 16px; }
+  .table-sm { font-size: 1.375rem; padding: 18px; }
+  .table-md { font-size: 1.5rem; padding: 20px; }
+  .table-lg { font-size: 1.625rem; padding: 22px; }
+  .table-xl { font-size: 1.75rem; padding: 24px; }
+}
+
+/* ===== RESPONSIVE CHIP/TAG COMPONENTS ===== */
+
+/* Responsive Chip Sizes - Mobile First */
+.chip-xs { height: 20px; padding: 4px 8px; font-size: 0.625rem; }
+.chip-sm { height: 24px; padding: 6px 10px; font-size: 0.75rem; }
+.chip-md { height: 28px; padding: 8px 12px; font-size: 0.875rem; }
+.chip-lg { height: 32px; padding: 10px 14px; font-size: 1rem; }
+.chip-xl { height: 36px; padding: 12px 16px; font-size: 1.125rem; }
+
+/* Responsive Chip Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .chip-xs { height: 22px; padding: 5px 9px; font-size: 0.75rem; }
+  .chip-sm { height: 26px; padding: 7px 11px; font-size: 0.875rem; }
+  .chip-md { height: 30px; padding: 9px 13px; font-size: 1rem; }
+  .chip-lg { height: 34px; padding: 11px 15px; font-size: 1.125rem; }
+  .chip-xl { height: 38px; padding: 13px 17px; font-size: 1.25rem; }
+}
+
+@media (min-width: 900px) {
+  .chip-xs { height: 24px; padding: 6px 10px; font-size: 0.875rem; }
+  .chip-sm { height: 28px; padding: 8px 12px; font-size: 1rem; }
+  .chip-md { height: 32px; padding: 10px 14px; font-size: 1.125rem; }
+  .chip-lg { height: 36px; padding: 12px 16px; font-size: 1.25rem; }
+  .chip-xl { height: 40px; padding: 14px 18px; font-size: 1.375rem; }
+}
+
+@media (min-width: 1200px) {
+  .chip-xs { height: 26px; padding: 7px 11px; font-size: 1rem; }
+  .chip-sm { height: 30px; padding: 9px 13px; font-size: 1.125rem; }
+  .chip-md { height: 34px; padding: 11px 15px; font-size: 1.25rem; }
+  .chip-lg { height: 38px; padding: 13px 17px; font-size: 1.375rem; }
+  .chip-xl { height: 42px; padding: 15px 19px; font-size: 1.5rem; }
+}
+
+@media (min-width: 1536px) {
+  .chip-xs { height: 28px; padding: 8px 12px; font-size: 1.125rem; }
+  .chip-sm { height: 32px; padding: 10px 14px; font-size: 1.25rem; }
+  .chip-md { height: 36px; padding: 12px 16px; font-size: 1.375rem; }
+  .chip-lg { height: 40px; padding: 14px 18px; font-size: 1.5rem; }
+  .chip-xl { height: 44px; padding: 16px 20px; font-size: 1.625rem; }
+}
+
+/* ===== RESPONSIVE ALERT/TOAST COMPONENTS ===== */
+
+/* Responsive Alert Sizes - Mobile First */
+.alert-xs { padding: 8px 12px; font-size: 0.75rem; }
+.alert-sm { padding: 10px 16px; font-size: 0.875rem; }
+.alert-md { padding: 12px 20px; font-size: 1rem; }
+.alert-lg { padding: 14px 24px; font-size: 1.125rem; }
+.alert-xl { padding: 16px 28px; font-size: 1.25rem; }
+
+/* Responsive Alert Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .alert-xs { padding: 10px 14px; font-size: 0.875rem; }
+  .alert-sm { padding: 12px 18px; font-size: 1rem; }
+  .alert-md { padding: 14px 22px; font-size: 1.125rem; }
+  .alert-lg { padding: 16px 26px; font-size: 1.25rem; }
+  .alert-xl { padding: 18px 30px; font-size: 1.375rem; }
+}
+
+@media (min-width: 900px) {
+  .alert-xs { padding: 12px 16px; font-size: 1rem; }
+  .alert-sm { padding: 14px 20px; font-size: 1.125rem; }
+  .alert-md { padding: 16px 24px; font-size: 1.25rem; }
+  .alert-lg { padding: 18px 28px; font-size: 1.375rem; }
+  .alert-xl { padding: 20px 32px; font-size: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .alert-xs { padding: 14px 18px; font-size: 1.125rem; }
+  .alert-sm { padding: 16px 22px; font-size: 1.25rem; }
+  .alert-md { padding: 18px 26px; font-size: 1.375rem; }
+  .alert-lg { padding: 20px 30px; font-size: 1.5rem; }
+  .alert-xl { padding: 22px 34px; font-size: 1.625rem; }
+}
+
+@media (min-width: 1536px) {
+  .alert-xs { padding: 16px 20px; font-size: 1.25rem; }
+  .alert-sm { padding: 18px 24px; font-size: 1.375rem; }
+  .alert-md { padding: 20px 28px; font-size: 1.5rem; }
+  .alert-lg { padding: 22px 32px; font-size: 1.625rem; }
+  .alert-xl { padding: 24px 36px; font-size: 1.75rem; }
+}
+
+/* ===== RESPONSIVE BREADCRUMB COMPONENTS ===== */
+
+/* Responsive Breadcrumb Sizes - Mobile First */
+.breadcrumb-xs { font-size: 0.75rem; padding: 4px 8px; }
+.breadcrumb-sm { font-size: 0.875rem; padding: 6px 10px; }
+.breadcrumb-md { font-size: 1rem; padding: 8px 12px; }
+.breadcrumb-lg { font-size: 1.125rem; padding: 10px 14px; }
+.breadcrumb-xl { font-size: 1.25rem; padding: 12px 16px; }
+
+/* Responsive Breadcrumb Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .breadcrumb-xs { font-size: 0.875rem; padding: 6px 10px; }
+  .breadcrumb-sm { font-size: 1rem; padding: 8px 12px; }
+  .breadcrumb-md { font-size: 1.125rem; padding: 10px 14px; }
+  .breadcrumb-lg { font-size: 1.25rem; padding: 12px 16px; }
+  .breadcrumb-xl { font-size: 1.375rem; padding: 14px 18px; }
+}
+
+@media (min-width: 900px) {
+  .breadcrumb-xs { font-size: 1rem; padding: 8px 12px; }
+  .breadcrumb-sm { font-size: 1.125rem; padding: 10px 14px; }
+  .breadcrumb-md { font-size: 1.25rem; padding: 12px 16px; }
+  .breadcrumb-lg { font-size: 1.375rem; padding: 14px 18px; }
+  .breadcrumb-xl { font-size: 1.5rem; padding: 16px 20px; }
+}
+
+@media (min-width: 1200px) {
+  .breadcrumb-xs { font-size: 1.125rem; padding: 10px 14px; }
+  .breadcrumb-sm { font-size: 1.25rem; padding: 12px 16px; }
+  .breadcrumb-md { font-size: 1.375rem; padding: 14px 18px; }
+  .breadcrumb-lg { font-size: 1.5rem; padding: 16px 20px; }
+  .breadcrumb-xl { font-size: 1.625rem; padding: 18px 22px; }
+}
+
+@media (min-width: 1536px) {
+  .breadcrumb-xs { font-size: 1.25rem; padding: 12px 16px; }
+  .breadcrumb-sm { font-size: 1.375rem; padding: 14px 18px; }
+  .breadcrumb-md { font-size: 1.5rem; padding: 16px 20px; }
+  .breadcrumb-lg { font-size: 1.625rem; padding: 18px 22px; }
+  .breadcrumb-xl { font-size: 1.75rem; padding: 20px 24px; }
+}
+
+/* ===== RESPONSIVE PAGINATION COMPONENTS ===== */
+
+/* Responsive Pagination Sizes - Mobile First */
+.pagination-xs { height: 28px; padding: 4px 8px; font-size: 0.75rem; }
+.pagination-sm { height: 32px; padding: 6px 10px; font-size: 0.875rem; }
+.pagination-md { height: 36px; padding: 8px 12px; font-size: 1rem; }
+.pagination-lg { height: 40px; padding: 10px 14px; font-size: 1.125rem; }
+.pagination-xl { height: 44px; padding: 12px 16px; font-size: 1.25rem; }
+
+/* Responsive Pagination Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .pagination-xs { height: 30px; padding: 5px 9px; font-size: 0.875rem; }
+  .pagination-sm { height: 34px; padding: 7px 11px; font-size: 1rem; }
+  .pagination-md { height: 38px; padding: 9px 13px; font-size: 1.125rem; }
+  .pagination-lg { height: 42px; padding: 11px 15px; font-size: 1.25rem; }
+  .pagination-xl { height: 46px; padding: 13px 17px; font-size: 1.375rem; }
+}
+
+@media (min-width: 900px) {
+  .pagination-xs { height: 32px; padding: 6px 10px; font-size: 1rem; }
+  .pagination-sm { height: 36px; padding: 8px 12px; font-size: 1.125rem; }
+  .pagination-md { height: 40px; padding: 10px 14px; font-size: 1.25rem; }
+  .pagination-lg { height: 44px; padding: 12px 16px; font-size: 1.375rem; }
+  .pagination-xl { height: 48px; padding: 14px 18px; font-size: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .pagination-xs { height: 34px; padding: 7px 11px; font-size: 1.125rem; }
+  .pagination-sm { height: 38px; padding: 9px 13px; font-size: 1.25rem; }
+  .pagination-md { height: 42px; padding: 11px 15px; font-size: 1.375rem; }
+  .pagination-lg { height: 46px; padding: 13px 17px; font-size: 1.5rem; }
+  .pagination-xl { height: 50px; padding: 15px 19px; font-size: 1.625rem; }
+}
+
+@media (min-width: 1536px) {
+  .pagination-xs { height: 36px; padding: 8px 12px; font-size: 1.25rem; }
+  .pagination-sm { height: 40px; padding: 10px 14px; font-size: 1.375rem; }
+  .pagination-md { height: 44px; padding: 12px 16px; font-size: 1.5rem; }
+  .pagination-lg { height: 48px; padding: 14px 18px; font-size: 1.625rem; }
+  .pagination-xl { height: 52px; padding: 16px 20px; font-size: 1.75rem; }
+}
+
+/* ===== RESPONSIVE TOOLTIP COMPONENTS ===== */
+
+/* Responsive Tooltip Sizes - Mobile First */
+.tooltip-xs { font-size: 0.625rem; padding: 4px 6px; }
+.tooltip-sm { font-size: 0.75rem; padding: 6px 8px; }
+.tooltip-md { font-size: 0.875rem; padding: 8px 10px; }
+.tooltip-lg { font-size: 1rem; padding: 10px 12px; }
+.tooltip-xl { font-size: 1.125rem; padding: 12px 14px; }
+
+/* Responsive Tooltip Sizes with Breakpoints */
+@media (min-width: 600px) {
+  .tooltip-xs { font-size: 0.75rem; padding: 5px 7px; }
+  .tooltip-sm { font-size: 0.875rem; padding: 7px 9px; }
+  .tooltip-md { font-size: 1rem; padding: 9px 11px; }
+  .tooltip-lg { font-size: 1.125rem; padding: 11px 13px; }
+  .tooltip-xl { font-size: 1.25rem; padding: 13px 15px; }
+}
+
+@media (min-width: 900px) {
+  .tooltip-xs { font-size: 0.875rem; padding: 6px 8px; }
+  .tooltip-sm { font-size: 1rem; padding: 8px 10px; }
+  .tooltip-md { font-size: 1.125rem; padding: 10px 12px; }
+  .tooltip-lg { font-size: 1.25rem; padding: 12px 14px; }
+  .tooltip-xl { font-size: 1.375rem; padding: 14px 16px; }
+}
+
+@media (min-width: 1200px) {
+  .tooltip-xs { font-size: 1rem; padding: 7px 9px; }
+  .tooltip-sm { font-size: 1.125rem; padding: 9px 11px; }
+  .tooltip-md { font-size: 1.25rem; padding: 11px 13px; }
+  .tooltip-lg { font-size: 1.375rem; padding: 13px 15px; }
+  .tooltip-xl { font-size: 1.5rem; padding: 15px 17px; }
+}
+
+@media (min-width: 1536px) {
+  .tooltip-xs { font-size: 1.125rem; padding: 8px 10px; }
+  .tooltip-sm { font-size: 1.25rem; padding: 10px 12px; }
+  .tooltip-md { font-size: 1.375rem; padding: 12px 14px; }
+  .tooltip-lg { font-size: 1.5rem; padding: 14px 16px; }
+  .tooltip-xl { font-size: 1.625rem; padding: 16px 18px; }
+}
+
+/* Print Styles */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+}

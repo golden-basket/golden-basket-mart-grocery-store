@@ -58,7 +58,7 @@ const PaymentMethodSelector = ({
       label: 'Cash on Delivery',
       icon: <CodIcon />,
       description: 'Pay when you receive your order',
-      color: '#4caf50',
+      color: theme.palette.success.main,
       fields: [],
     },
     // {
@@ -66,7 +66,7 @@ const PaymentMethodSelector = ({
     //   label: 'UPI Payment',
     //   icon: <QrCodeIcon />,
     //   description: 'Pay using UPI ID and upload payment screenshot',
-    //   color: '#9c27b0',
+          //   color: theme.palette.secondary.main,
     //   fields: [
     //     { name: 'upiId', label: 'UPI ID', type: 'text', placeholder: 'username@upi' },
     //   ],
@@ -142,7 +142,7 @@ const PaymentMethodSelector = ({
         gutterBottom
         sx={{
           fontWeight: 700,
-          color: 'var(--color-primary)',
+          color: theme.palette.primary.main,
           mb: getResponsiveSpacing(),
           textAlign: isMobile ? 'center' : 'left',
           fontSize: getResponsiveSpacing() === 1 ? '0.9rem' : getResponsiveSpacing() === 2 ? '1rem' : '1.1rem',
@@ -157,10 +157,10 @@ const PaymentMethodSelector = ({
         severity='info'
         sx={{
           mb: getResponsiveSpacing(),
-          background: 'rgba(163,130,76,0.1)',
-          border: '1px solid var(--color-primary-light)',
+          background: `${theme.palette.primary.main}1A`,
+          border: `1px solid ${theme.palette.primary.light}`,
           '& .MuiAlert-icon': {
-            color: 'var(--color-primary)',
+            color: theme.palette.primary.main,
           },
         }}
         className={getResponsiveAlertSize()}
@@ -190,20 +190,20 @@ const PaymentMethodSelector = ({
                   cursor: 'pointer',
                   border:
                     selectedMethod === method.value
-                      ? '2px solid var(--color-primary)'
-                      : '1px solid var(--color-primary-light)',
-                  borderRadius: getResponsiveSpacing() * 0.5,
+                      ? `2px solid ${theme.palette.primary.main}`
+                      : `1px solid ${theme.palette.primary.light}`,
+                  borderRadius: theme.shape.borderRadius * 0.17,
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    borderColor: 'var(--color-primary)',
-                    boxShadow: '0 4px 12px rgba(163,130,76,0.15)',
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,
                     transform: 'translateY(-1px)',
                   },
                   background:
                     selectedMethod === method.value
-                      ? 'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)'
-                      : 'white',
-                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                      ? `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`
+                      : theme.palette.background.paper,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}1A`,
                   ...getResponsiveCardSize(),
                 }}
                 onClick={() => onMethodChange(method.value)}
@@ -226,12 +226,12 @@ const PaymentMethodSelector = ({
                     </Box>
                     <FormControlLabel
                       value={method.value}
-                      control={<Radio sx={{ color: 'var(--color-primary)' }} />}
+                      control={<Radio sx={{ color: theme.palette.primary.main }} />}
                       label={
                         <Typography
                           variant={isMobile ? 'body2' : 'body1'}
                           fontWeight={600}
-                          color='var(--color-primary)'
+                          color={theme.palette.primary.main}
                         >
                           {method.label}
                         </Typography>
@@ -240,7 +240,7 @@ const PaymentMethodSelector = ({
                         margin: 0,
                         '& .MuiFormControlLabel-label': {
                           fontWeight: 600,
-                          color: 'var(--color-primary)',
+                          color: theme.palette.primary.main,
                         },
                       }}
                     />
@@ -268,11 +268,11 @@ const PaymentMethodSelector = ({
             sx={{
               p: getResponsiveSpacing() * 0.75,
               background:
-                'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-              border: '1px solid var(--color-primary-light)',
-              borderRadius: getResponsiveSpacing() * 0.5,
+                `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+              border: `1px solid ${theme.palette.primary.light}`,
+              borderRadius: theme.shape.borderRadius * 0.17,
               mb: getResponsiveSpacing(),
-              boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+              boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}1A`,
             }}
             className='card-golden'
           >
@@ -281,7 +281,7 @@ const PaymentMethodSelector = ({
               gutterBottom
               sx={{
                 fontWeight: 600,
-                color: 'var(--color-primary)',
+                color: theme.palette.primary.main,
                 mb: getResponsiveSpacing(),
                 textAlign: isMobile ? 'center' : 'left',
                 fontSize: getResponsiveSpacing() === 1 ? '0.85rem' : getResponsiveSpacing() === 2 ? '0.9rem' : '1rem',
@@ -307,19 +307,19 @@ const PaymentMethodSelector = ({
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         background: 'white',
-                        borderRadius: getResponsiveSpacing() * 0.25,
+                        borderRadius: theme.shape.borderRadius * 0.08,
                         '&:hover fieldset': {
-                          borderColor: 'var(--color-primary)',
+                          borderColor: theme.palette.primary.main,
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: 'var(--color-primary)',
+                          borderColor: theme.palette.primary.main,
                         },
                       },
                       '& .MuiInputLabel-root': {
-                        color: 'var(--color-primary)',
+                        color: theme.palette.primary.main,
                         fontWeight: 500,
                         '&.Mui-focused': {
-                          color: 'var(--color-primary)',
+                          color: theme.palette.primary.main,
                         },
                       },
                     }}
@@ -332,24 +332,24 @@ const PaymentMethodSelector = ({
 
       {/* UPI QR Code and Payment Screenshot Section */}
       {selectedMethod === 'upi' && (
-        <Paper
-          sx={{
-            p: getResponsiveSpacing() * 0.75,
-            background:
-              'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-            border: '1px solid var(--color-primary-light)',
-            borderRadius: getResponsiveSpacing() * 0.5,
-            mb: getResponsiveSpacing(),
-            boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
-          }}
-          className='card-golden'
-        >
+                  <Paper
+            sx={{
+              p: getResponsiveSpacing() * 0.75,
+              background:
+                `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+              border: `1px solid ${theme.palette.primary.light}`,
+              borderRadius: theme.shape.borderRadius * 0.17,
+              mb: getResponsiveSpacing(),
+              boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}1A`,
+            }}
+            className='card-golden'
+          >
           <Typography
             variant={getResponsiveTypography('h6')}
             gutterBottom
             sx={{
               fontWeight: 600,
-              color: 'var(--color-primary)',
+              color: theme.palette.primary.main,
               mb: getResponsiveSpacing(),
               textAlign: 'center',
               fontSize: getResponsiveSpacing() === 1 ? '0.85rem' : getResponsiveSpacing() === 2 ? '0.9rem' : '1rem',
@@ -369,20 +369,20 @@ const PaymentMethodSelector = ({
                 width: isMobile ? 150 : 200,
                 height: isMobile ? 150 : 200,
                 margin: '0 auto',
-                background: 'white',
-                border: '2px solid var(--color-primary-light)',
-                borderRadius: getResponsiveSpacing() * 0.5,
+                background: theme.palette.background.paper,
+                border: `2px solid ${theme.palette.primary.light}`,
+                borderRadius: theme.shape.borderRadius * 0.17,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 p: getResponsiveSpacing() * 0.75,
-                boxShadow: '0 2px 8px rgba(163,130,76,0.1)',
+                boxShadow: `0 2px 8px ${theme.palette.primary.main}1A`,
               }}
             >
               <QrCodeIcon
                 sx={{
                   fontSize: isMobile ? 100 : 150,
-                  color: 'var(--color-primary)',
+                  color: theme.palette.primary.main,
                 }}
               />
             </Box>
@@ -407,16 +407,16 @@ const PaymentMethodSelector = ({
                 component='label'
                 startIcon={<UploadIcon />}
                 sx={{
-                  borderColor: 'var(--color-primary)',
-                  color: 'var(--color-primary)',
-                  borderRadius: getResponsiveSpacing() * 0.5,
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
+                  borderRadius: theme.shape.borderRadius * 0.17,
                   fontWeight: 600,
                   textTransform: 'none',
                   '&:hover': {
-                    borderColor: 'var(--color-primary-dark)',
-                    backgroundColor: 'rgba(163,130,76,0.1)',
+                    borderColor: theme.palette.primary.dark,
+                    backgroundColor: `${theme.palette.primary.main}1A`,
                     transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(163,130,76,0.15)',
+                    boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,
                   },
                   transition: 'all 0.3s ease',
                 }}
@@ -445,16 +445,16 @@ const PaymentMethodSelector = ({
                     onClick={removeScreenshot}
                     startIcon={<DeleteIcon />}
                     sx={{
-                      borderColor: '#d32f2f',
-                      color: '#d32f2f',
-                      borderRadius: getResponsiveSpacing() * 0.25,
+                      borderColor: theme.palette.error.main,
+                      color: theme.palette.error.main,
+                      borderRadius: theme.shape.borderRadius * 0.08,
                       fontWeight: 600,
                       textTransform: 'none',
                       '&:hover': {
-                        borderColor: '#d32f2f',
-                        backgroundColor: 'rgba(211,47,47,0.1)',
+                        borderColor: theme.palette.error.main,
+                        backgroundColor: `${theme.palette.error.main}1A`,
                         transform: 'translateY(-1px)',
-                        boxShadow: '0 2px 8px rgba(211,47,47,0.15)',
+                        boxShadow: `0 2px 8px ${theme.palette.error.main}40`,
                       },
                       transition: 'all 0.3s ease',
                     }}
@@ -473,10 +473,10 @@ const PaymentMethodSelector = ({
         <Alert
           severity='info'
           sx={{
-            background: 'rgba(163,130,76,0.1)',
-            border: '1px solid var(--color-primary-light)',
+            background: `${theme.palette.primary.light}40`,
+            border: `1px solid ${theme.palette.primary.light}`,
             '& .MuiAlert-icon': {
-              color: 'var(--color-primary)',
+              color: theme.palette.primary.main,
             },
           }}
           className={getResponsiveAlertSize()}
@@ -493,10 +493,10 @@ const PaymentMethodSelector = ({
         severity='info'
         sx={{
           mt: getResponsiveSpacing(),
-          background: 'rgba(163,130,76,0.1)',
-          border: '1px solid var(--color-primary-light)',
+          background: `${theme.palette.primary.light}40`,
+          border: `1px solid ${theme.palette.primary.light}`,
           '& .MuiAlert-icon': {
-            color: 'var(--color-primary)',
+            color: theme.palette.primary.main,
           },
         }}
         className={getResponsiveAlertSize()}

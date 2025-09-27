@@ -15,6 +15,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import Loading from '../components/Loading';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { useToastNotifications } from '../hooks/useToast';
 import { useCart } from '../hooks/useCart';
 
 const OrderCheckout = () => {
+  const theme = useTheme();
   const { token } = useAuth();
   const { showSuccess, showError } = useToastNotifications();
   const showErrorRef = useRef();
@@ -212,17 +214,7 @@ const OrderCheckout = () => {
         mt: getResponsiveMargin(),
         px: getResponsivePadding(),
         pb: getResponsivePadding() * 2,
-        // Enhanced mobile responsiveness
-        '@media (max-width: 600px)': {
-          px: 1,
-          mt: 2,
-          pb: 3,
-        },
-        '@media (max-width: 480px)': {
-          px: 0.5,
-          mt: 1,
-          pb: 2,
-        },
+        // Enhanced mobile responsiveness - now using responsive system
       }}
       className={`${getResponsiveSpacingClasses()} ${getResponsiveContainer()} responsive-container`}
     >
@@ -231,7 +223,7 @@ const OrderCheckout = () => {
         fontWeight={700}
         align='center'
         sx={{
-          background: 'var(--color-background-light-gradient)',
+          background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           mb: getResponsiveSpacing(),
@@ -256,11 +248,10 @@ const OrderCheckout = () => {
         sx={{
           mb: getResponsiveSpacing(),
           p: getResponsiveValue(1, 1.5, 2, 2.5, 3, 3.5, 2),
-          background:
-            'linear-gradient(135deg, rgba(163,130,76,0.08) 0%, rgba(230,216,151,0.15) 100%)',
-          borderRadius: getResponsiveValue(1.5, 2, 2.5, 3, 3.5, 4, 2.5),
-          border: '2px solid rgba(163,130,76,0.25)',
-          boxShadow: '0 4px 20px rgba(163,130,76,0.08)',
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}26 0%, ${theme.palette.primary.light}40 100%)`,
+          borderRadius: theme.shape.borderRadius * 0.33,
+          border: `2px solid ${theme.palette.primary.main}66`,
+          boxShadow: `0 4px 20px ${theme.palette.primary.main}33`,
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -270,8 +261,7 @@ const OrderCheckout = () => {
             left: 0,
             right: 0,
             height: '3px',
-            background:
-              'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%)',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
           },
         }}
       >
@@ -279,7 +269,7 @@ const OrderCheckout = () => {
           variant='h6'
           sx={{
             fontWeight: 800,
-            color: 'var(--color-primary)',
+            color: theme.palette.primary.main,
             fontSize: getResponsiveValue(
               '0.85rem',
               '0.9rem',
@@ -291,7 +281,7 @@ const OrderCheckout = () => {
             ),
             mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
             textAlign: 'center',
-            textShadow: '0 1px 2px rgba(163,130,76,0.1)',
+            textShadow: `0 1px 2px ${theme.palette.primary.main}33`,
             letterSpacing: '0.5px',
           }}
           className={getResponsiveTextClasses()}
@@ -313,23 +303,15 @@ const OrderCheckout = () => {
             sx={{
               flex: { xs: '1 1 100%', sm: '1 1 50%' },
               p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-              background: 'rgba(163,130,76,0.05)',
-              borderRadius: getResponsiveValue(
-                0.5,
-                0.75,
-                1,
-                1.25,
-                1.5,
-                1.75,
-                1
-              ),
-              border: '1px solid rgba(163,130,76,0.15)',
+              background: `${theme.palette.primary.main}1A`,
+              borderRadius: theme.shape.borderRadius * 0.17,
+              border: `1px solid ${theme.palette.primary.main}4D`,
               transition: 'all 0.3s ease',
               '&:hover': {
-                background: 'rgba(163,130,76,0.08)',
-                borderColor: 'rgba(163,130,76,0.25)',
+                background: `${theme.palette.primary.main}33`,
+                borderColor: `${theme.palette.primary.main}66`,
                 transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(163,130,76,0.1)',
+                boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
               },
             }}
           >
@@ -337,7 +319,7 @@ const OrderCheckout = () => {
               variant='body2'
               sx={{
                 fontWeight: 700,
-                color: 'var(--color-primary)',
+                color: theme.palette.primary.main,
                 fontSize: getResponsiveValue(
                   '0.55rem',
                   '0.6rem',
@@ -386,21 +368,13 @@ const OrderCheckout = () => {
                   alignItems: 'flex-start',
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.1)',
+                  background: `${theme.palette.background.paper}99`,
+                  borderRadius: theme.shape.borderRadius * 0.125,
+                  border: `1px solid ${theme.palette.primary.main}33`,
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: 'rgba(255,255,255,0.6)',
-                    borderColor: 'rgba(163,130,76,0.2)',
+                    background: `${theme.palette.background.paper}F2`,
+                    borderColor: `${theme.palette.primary.main}66`,
                     transform: 'translateX(1px)',
                   },
                 }}
@@ -417,7 +391,7 @@ const OrderCheckout = () => {
                       '0.9rem',
                       '0.75rem'
                     ),
-                    color: 'var(--color-secondary)',
+                    color: theme.palette.secondary.main,
                   }}
                 >
                   🏠
@@ -426,7 +400,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.5rem',
                         '0.55rem',
@@ -447,7 +421,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-secondary)',
+                      color: theme.palette.secondary.main,
                       fontSize: getResponsiveValue(
                         '0.45rem',
                         '0.5rem',
@@ -472,21 +446,13 @@ const OrderCheckout = () => {
                   alignItems: 'flex-start',
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.1)',
+                  background: `${theme.palette.background.paper}60`,
+                  borderRadius: 0.75,
+                  border: `1px solid ${theme.palette.primary.main}20`,
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: 'rgba(255,255,255,0.6)',
-                    borderColor: 'rgba(163,130,76,0.2)',
+                    background: `${theme.palette.background.paper}90`,
+                    borderColor: `${theme.palette.primary.main}40`,
                     transform: 'translateX(1px)',
                   },
                 }}
@@ -503,7 +469,7 @@ const OrderCheckout = () => {
                       '0.9rem',
                       '0.75rem'
                     ),
-                    color: 'var(--color-secondary)',
+                    color: theme.palette.secondary.main,
                   }}
                 >
                   🎯
@@ -512,7 +478,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.5rem',
                         '0.55rem',
@@ -533,7 +499,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-secondary)',
+                      color: theme.palette.secondary.main,
                       fontSize: getResponsiveValue(
                         '0.45rem',
                         '0.5rem',
@@ -555,24 +521,16 @@ const OrderCheckout = () => {
               <Box
                 sx={{
                   p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                  background: 'rgba(163,130,76,0.08)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.2)',
-                  borderLeft: '2px solid var(--color-primary)',
+                  background: `${theme.palette.primary.main}20`,
+                  borderRadius: 1,
+                  border: `1px solid ${theme.palette.primary.main}40`,
+                  borderLeft: `2px solid ${theme.palette.primary.main}`,
                 }}
               >
                 <Typography
                   variant='body2'
                   sx={{
-                    color: 'var(--color-primary-dark)',
+                    color: theme.palette.text.secondary,
                     fontSize: getResponsiveValue(
                       '0.5rem',
                       '0.55rem',
@@ -603,7 +561,7 @@ const OrderCheckout = () => {
                         '0.85rem',
                         '0.7rem'
                       ),
-                      color: 'var(--color-primary)',
+                      color: theme.palette.primary.main,
                     }}
                   >
                     📍
@@ -616,7 +574,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.45rem',
                         '0.5rem',
@@ -645,7 +603,7 @@ const OrderCheckout = () => {
                           '0.65rem',
                           '0.5rem'
                         ),
-                        color: 'var(--color-primary)',
+                        color: theme.palette.primary.main,
                       }}
                     >
                       •
@@ -655,7 +613,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.45rem',
                         '0.5rem',
@@ -684,7 +642,7 @@ const OrderCheckout = () => {
                           '0.65rem',
                           '0.5rem'
                         ),
-                        color: 'var(--color-primary)',
+                        color: theme.palette.primary.main,
                       }}
                     >
                       •
@@ -700,23 +658,15 @@ const OrderCheckout = () => {
             sx={{
               flex: { xs: '1 1 100%', sm: '1 1 50%' },
               p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-              background: 'rgba(163,130,76,0.05)',
-              borderRadius: getResponsiveValue(
-                0.5,
-                0.75,
-                1,
-                1.25,
-                1.5,
-                1.75,
-                1
-              ),
-              border: '1px solid rgba(163,130,76,0.15)',
+              background: `${theme.palette.primary.main}1A`,
+              borderRadius: theme.shape.borderRadius * 0.17,
+              border: `1px solid ${theme.palette.primary.main}4D`,
               transition: 'all 0.3s ease',
               '&:hover': {
-                background: 'rgba(163,130,76,0.08)',
-                borderColor: 'rgba(163,130,76,0.25)',
+                background: `${theme.palette.primary.main}33`,
+                borderColor: `${theme.palette.primary.main}66`,
                 transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(163,130,76,0.1)',
+                boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
               },
             }}
           >
@@ -724,7 +674,7 @@ const OrderCheckout = () => {
               variant='body2'
               sx={{
                 fontWeight: 700,
-                color: 'var(--color-primary)',
+                color: theme.palette.primary.main,
                 fontSize: getResponsiveValue(
                   '0.55rem',
                   '0.6rem',
@@ -773,21 +723,13 @@ const OrderCheckout = () => {
                   alignItems: 'flex-start',
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.1)',
+                  background: `${theme.palette.background.paper}60`,
+                  borderRadius: 0.75,
+                  border: `1px solid ${theme.palette.primary.main}20`,
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: 'rgba(255,255,255,0.6)',
-                    borderColor: 'rgba(163,130,76,0.2)',
+                    background: `${theme.palette.background.paper}90`,
+                    borderColor: `${theme.palette.primary.main}40`,
                     transform: 'translateX(1px)',
                   },
                 }}
@@ -804,7 +746,7 @@ const OrderCheckout = () => {
                       '0.9rem',
                       '0.75rem'
                     ),
-                    color: 'var(--color-secondary)',
+                    color: theme.palette.secondary.main,
                   }}
                 >
                   💳
@@ -813,7 +755,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.5rem',
                         '0.55rem',
@@ -834,7 +776,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.45rem',
                         '0.5rem',
@@ -859,21 +801,13 @@ const OrderCheckout = () => {
                   alignItems: 'flex-start',
                   gap: 0.5,
                   p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: 'rgba(255,255,255,0.4)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.1)',
+                  background: `${theme.palette.background.paper}60`,
+                  borderRadius: 0.75,
+                  border: `1px solid ${theme.palette.primary.main}20`,
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: 'rgba(255,255,255,0.6)',
-                    borderColor: 'rgba(163,130,76,0.2)',
+                    background: `${theme.palette.background.paper}90`,
+                    borderColor: `${theme.palette.primary.main}40`,
                     transform: 'translateX(1px)',
                   },
                 }}
@@ -890,7 +824,7 @@ const OrderCheckout = () => {
                       '0.9rem',
                       '0.75rem'
                     ),
-                    color: 'var(--color-secondary)',
+                    color: theme.palette.secondary.main,
                   }}
                 >
                   📱
@@ -899,7 +833,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.5rem',
                         '0.55rem',
@@ -920,7 +854,7 @@ const OrderCheckout = () => {
                   <Typography
                     variant='body2'
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.45rem',
                         '0.5rem',
@@ -942,24 +876,16 @@ const OrderCheckout = () => {
               <Box
                 sx={{
                   p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                  background: 'rgba(163,130,76,0.08)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.2)',
-                  borderLeft: '2px solid var(--color-primary)',
+                  background: `${theme.palette.primary.main}20`,
+                  borderRadius: 1,
+                  border: `1px solid ${theme.palette.primary.main}40`,
+                  borderLeft: `2px solid ${theme.palette.primary.main}`,
                 }}
               >
                 <Typography
                   variant='body2'
                   sx={{
-                    color: 'var(--color-primary-dark)',
+                    color: theme.palette.text.secondary,
                     fontSize: getResponsiveValue(
                       '0.45rem',
                       '0.5rem',
@@ -989,7 +915,7 @@ const OrderCheckout = () => {
                         '0.85rem',
                         '0.7rem'
                       ),
-                      color: 'var(--color-primary)',
+                      color: theme.palette.primary.main,
                       mt: 0.1,
                     }}
                   >
@@ -1006,24 +932,16 @@ const OrderCheckout = () => {
                 sx={{
                   mt: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
                   p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                  background: 'rgba(163,130,76,0.08)',
-                  borderRadius: getResponsiveValue(
-                    0.25,
-                    0.5,
-                    0.75,
-                    1,
-                    1.25,
-                    1.5,
-                    0.75
-                  ),
-                  border: '1px solid rgba(163,130,76,0.2)',
+                  background: `${theme.palette.primary.main}20`,
+                  borderRadius: 1,
+                  border: `1px solid ${theme.palette.primary.main}40`,
                   textAlign: 'center',
                 }}
               >
                 <Typography
                   variant='body2'
                   sx={{
-                    color: 'var(--color-primary-dark)',
+                    color: theme.palette.text.secondary,
                     fontSize: getResponsiveValue(
                       '0.55rem',
                       '0.6rem',
@@ -1054,7 +972,7 @@ const OrderCheckout = () => {
                         '0.95rem',
                         '0.8rem'
                       ),
-                      color: 'var(--color-primary)',
+                      color: theme.palette.primary.main,
                     }}
                   >
                     💰
@@ -1107,11 +1025,10 @@ const OrderCheckout = () => {
               <Paper
                 sx={{
                   p: getResponsiveValue(0.75, 1, 1.25, 1.5, 1.75, 2, 1.25),
-                  borderRadius: getResponsiveValue(1, 1, 1.5, 2, 2.5, 3, 1.5),
-                  background:
-                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                  border: '1px solid var(--color-primary-light)',
-                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                  borderRadius: 1.5,
+                  background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  border: `1px solid ${theme.palette.primary.light}`,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}20`,
                 }}
                 className={`card-golden ${getResponsiveCardSize()}`}
               >
@@ -1119,7 +1036,7 @@ const OrderCheckout = () => {
                   fontWeight={600}
                   mb={getResponsiveValue(0.5, 0.5, 0.75, 1, 1.25, 1.5, 0.75)}
                   sx={{
-                    color: 'var(--color-primary)',
+                    color: theme.palette.primary.main,
                     fontSize: getResponsiveValue(
                       '0.7rem',
                       '0.75rem',
@@ -1147,20 +1064,14 @@ const OrderCheckout = () => {
                       1,
                       0.25
                     ),
-                    // Enhanced mobile layout
-                    '@media (max-width: 600px)': {
-                      gap: 0.125,
-                    },
-                    '@media (max-width: 480px)': {
-                      gap: 0.0625,
-                    },
+                    // Enhanced mobile layout - now using responsive system
                   }}
                 >
                   {addresses.map(addr => (
                     <FormControlLabel
                       key={addr._id}
                       value={addr._id}
-                      control={<Radio sx={{ color: 'var(--color-primary)' }} />}
+                      control={<Radio sx={{ color: theme.palette.primary.main }} />}
                       label={
                         <Box
                           sx={{
@@ -1173,37 +1084,21 @@ const OrderCheckout = () => {
                               1.25,
                               0.5
                             ),
-                            borderRadius: getResponsiveValue(
-                              0.5,
-                              0.5,
-                              0.75,
-                              1,
-                              1.5,
-                              2,
-                              0.75
-                            ),
-                            background: 'rgba(163,130,76,0.05)',
-                            border: '1px solid rgba(163,130,76,0.1)',
+                            borderRadius: theme.shape.borderRadius * 0.125,
+                            background: `${theme.palette.primary.main}1A`,
+                            border: `1px solid ${theme.palette.primary.main}33`,
                             transition: 'all 0.3s ease',
-                            // Enhanced mobile responsiveness
-                            '@media (max-width: 600px)': {
-                              p: 0.5,
-                              borderRadius: 0.5,
-                            },
-                            '@media (max-width: 480px)': {
-                              p: 0.375,
-                              borderRadius: 0.375,
-                            },
+                            // Enhanced mobile responsiveness - now using responsive system
                             '&:hover': {
-                              background: 'rgba(163,130,76,0.1)',
-                              borderColor: 'var(--color-primary-light)',
+                              background: `${theme.palette.primary.main}33`,
+                              borderColor: theme.palette.primary.light,
                             },
                           }}
                         >
                           <Typography
                             fontWeight={600}
                             sx={{
-                              color: 'var(--color-primary)',
+                              color: theme.palette.primary.main,
                               fontSize: getResponsiveValue(
                                 '0.65rem',
                                 '0.7rem',
@@ -1230,7 +1125,7 @@ const OrderCheckout = () => {
                           {addr.addressLine2 && (
                             <Typography
                               sx={{
-                                color: 'var(--color-primary-medium)',
+                                color: theme.palette.text.secondary,
                                 fontSize: getResponsiveValue(
                                   '0.6rem',
                                   '0.65rem',
@@ -1257,7 +1152,7 @@ const OrderCheckout = () => {
                           )}
                           <Typography
                             sx={{
-                              color: 'var(--color-primary-dark)',
+                              color: theme.palette.text.secondary,
                               fontSize: getResponsiveValue(
                                 '0.6rem',
                                 '0.65rem',
@@ -1284,7 +1179,7 @@ const OrderCheckout = () => {
                           </Typography>
                           <Typography
                             sx={{
-                              color: 'var(--color-primary-dark)',
+                              color: theme.palette.text.secondary,
                               fontSize: getResponsiveValue(
                                 '0.6rem',
                                 '0.65rem',
@@ -1323,19 +1218,10 @@ const OrderCheckout = () => {
                     mt: getResponsiveValue(0.75, 0.75, 1, 1.25, 1.5, 1.75, 1),
                     textTransform: 'none',
                     fontWeight: 600,
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-primary)',
-                    background:
-                      'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                    borderRadius: getResponsiveValue(
-                      0.75,
-                      0.75,
-                      1.5,
-                      2.25,
-                      3,
-                      3.75,
-                      1.5
-                    ),
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
+                    background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                    borderRadius: theme.shape.borderRadius * 0.125,
                     fontSize: getResponsiveValue(
                       '0.65rem',
                       '0.7rem',
@@ -1356,10 +1242,9 @@ const OrderCheckout = () => {
                       0.75
                     ),
                     '&:hover': {
-                      borderColor: 'var(--color-primary-light)',
-                      background:
-                        'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-cream-light) 100%)',
-                      color: 'var(--color-primary-dark)',
+                      borderColor: theme.palette.primary.light,
+                      background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+                      color: theme.palette.text.secondary,
                     },
                   }}
                   onClick={() => navigate('/addresses')}
@@ -1373,11 +1258,10 @@ const OrderCheckout = () => {
               <Paper
                 sx={{
                   p: getResponsiveValue(0.75, 1, 1.25, 1.5, 1.75, 2, 1.25),
-                  borderRadius: getResponsiveValue(1, 1, 1.5, 2, 2.5, 3, 1.5),
-                  background:
-                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                  border: '1px solid var(--color-primary-light)',
-                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                  borderRadius: theme.shape.borderRadius * 0.25,
+                  background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  border: `1px solid ${theme.palette.primary.light}`,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}33`,
                   '& .MuiTypography-root': {
                     fontSize: getResponsiveValue(
                       '0.6rem',
@@ -1464,11 +1348,10 @@ const OrderCheckout = () => {
                   maxHeight: 'none',
                   overflow: 'visible',
 
-                  borderRadius: getResponsiveValue(2, 2, 3, 4, 5, 6, 3),
-                  background:
-                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                  border: '1px solid var(--color-primary-light)',
-                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                  borderRadius: 3,
+                  background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  border: `1px solid ${theme.palette.primary.light}`,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}20`,
                 }}
                 className={`card-golden ${getResponsiveCardSize()} responsive-card`}
               >
@@ -1477,7 +1360,7 @@ const OrderCheckout = () => {
                   fontWeight={600}
                   mb={1}
                   sx={{
-                    color: 'var(--color-primary)',
+                    color: theme.palette.primary.main,
                     fontSize: getResponsiveValue(
                       '1rem',
                       '1.1rem',
@@ -1494,14 +1377,14 @@ const OrderCheckout = () => {
                 </Typography>
 
                 <Divider
-                  sx={{ mb: 1, borderColor: 'var(--color-primary-light)' }}
+                  sx={{ mb: 1, borderColor: theme.palette.primary.light }}
                 />
 
                 {/* Cart Items */}
                 {cart.length === 0 ? (
                   <Typography
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.875rem',
                         '0.9rem',
@@ -1527,23 +1410,15 @@ const OrderCheckout = () => {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'flex-start',
-                      borderRadius: getResponsiveValue(
-                        0.5,
-                        0.5,
-                        1,
-                        1.5,
-                        2,
-                        2.5,
-                        1
-                      ),
-                      background: 'rgba(163,130,76,0.05)',
-                      border: '1px solid rgba(163,130,76,0.1)',
+                      borderRadius: theme.shape.borderRadius * 0.17,
+                      background: `${theme.palette.primary.main}1A`,
+                      border: `1px solid ${theme.palette.primary.main}33`,
                     }}
                   >
                         <Box sx={{ flex: 1 }}>
                           <Typography
                             sx={{
-                              color: 'var(--color-primary)',
+                              color: theme.palette.primary.main,
                               fontWeight: 400,
                               fontSize: getResponsiveValue(
                                 '0.65rem',
@@ -1561,7 +1436,7 @@ const OrderCheckout = () => {
                           </Typography>
                           <Typography
                             sx={{
-                              color: 'var(--color-primary-medium)',
+                              color: theme.palette.text.secondary,
                               fontSize: getResponsiveValue(
                                 '0.6rem',
                                 '0.65rem',
@@ -1579,7 +1454,7 @@ const OrderCheckout = () => {
                         </Box>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-medium)',
+                            color: theme.palette.text.secondary,
                             fontWeight: 400,
                             fontSize: getResponsiveValue(
                               '0.65rem',
@@ -1599,7 +1474,7 @@ const OrderCheckout = () => {
                     ))}
 
                     <Divider
-                      sx={{ borderColor: 'var(--color-primary-light)', my: 1 }}
+                      sx={{ borderColor: theme.palette.primary.light, my: 1 }}
                     />
 
                     {/* Price Breakdown */}
@@ -1613,7 +1488,7 @@ const OrderCheckout = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.6rem',
                               '0.65rem',
@@ -1630,7 +1505,7 @@ const OrderCheckout = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.6rem',
                               '0.65rem',
@@ -1655,7 +1530,7 @@ const OrderCheckout = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.6rem',
                               '0.65rem',
@@ -1672,7 +1547,7 @@ const OrderCheckout = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.6rem',
                               '0.65rem',
@@ -1699,7 +1574,7 @@ const OrderCheckout = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.6rem',
                               '0.65rem',
@@ -1716,7 +1591,7 @@ const OrderCheckout = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.6rem',
                               '0.65rem',
@@ -1735,7 +1610,7 @@ const OrderCheckout = () => {
                       <Divider
                         sx={{
                           my: 1,
-                          borderColor: 'var(--color-primary-light)',
+                          borderColor: theme.palette.primary.light,
                         }}
                       />
                       <Box
@@ -1743,13 +1618,13 @@ const OrderCheckout = () => {
                           display: 'flex',
                           justifyContent: 'space-between',
                           p: 1,
-                          background: 'rgba(163,130,76,0.1)',
-                          borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+                          background: `${theme.palette.primary.main}33`,
+                          borderRadius: theme.shape.borderRadius * 0.33,
                         }}
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             fontWeight: 700,
                             fontSize: getResponsiveValue(
                               '0.6rem',
@@ -1767,7 +1642,7 @@ const OrderCheckout = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             fontWeight: 700,
                             fontSize: getResponsiveValue(
                               '0.6rem',
@@ -1796,7 +1671,7 @@ const OrderCheckout = () => {
                     >
                       <Typography
                         sx={{
-                          color: 'var(--color-primary-dark)',
+                          color: theme.palette.text.secondary,
                           fontSize: getResponsiveValue(
                             '0.6rem',
                             '0.65rem',
@@ -1815,8 +1690,8 @@ const OrderCheckout = () => {
                       <Chip
                         label={selectedPaymentMethod.toUpperCase()}
                         sx={{
-                          background: 'var(--color-background-light-gradient)',
-                          color: '#fff',
+                          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                          color: theme.palette.primary.contrastText,
                           fontWeight: 400,
                           fontSize: getResponsiveValue(
                             '0.5rem',
@@ -1837,12 +1712,11 @@ const OrderCheckout = () => {
                       severity='info'
                       sx={{
                         mb: 1,
-                        borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
-                        background:
-                          'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                        border: '1px solid var(--color-primary-light)',
+                        borderRadius: 2,
+                        background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                        border: `1px solid ${theme.palette.primary.light}`,
                         '& .MuiAlert-icon': {
-                          color: 'var(--color-primary)',
+                          color: theme.palette.primary.main,
                         },
                       }}
                       className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
@@ -1861,7 +1735,7 @@ const OrderCheckout = () => {
                             '0.8rem'
                           ),
                           fontWeight: 600,
-                          color: 'var(--color-primary)',
+                          color: theme.palette.primary.main,
                           mb: 0.5,
                         }}
                       >
@@ -1879,7 +1753,7 @@ const OrderCheckout = () => {
                             '0.9rem',
                             '0.75rem'
                           ),
-                          color: 'var(--color-primary-dark)',
+                          color: theme.palette.text.secondary,
                           display: 'block',
                           lineHeight: 1.3,
                           mb: 0.5,
@@ -1888,48 +1762,48 @@ const OrderCheckout = () => {
                       >
                         <strong>How it works:</strong>
                       </Typography>
-                      <Typography
-                        variant='caption'
-                        sx={{
-                          fontSize: getResponsiveValue(
-                            '0.65rem',
-                            '0.7rem',
-                            '0.75rem',
-                            '0.8rem',
-                            '0.85rem',
-                            '0.9rem',
-                            '0.75rem'
-                          ),
-                          color: 'var(--color-primary-dark)',
-                          display: 'block',
-                          lineHeight: 1.3,
-                          mb: 0.25,
-                        }}
-                        className={getResponsiveTextClasses()}
-                      >
-                        • Orders <strong>≥ Rs.499</strong>: <span style={{color: 'var(--color-primary)', fontWeight: 600}}>FREE delivery</span>
-                      </Typography>
-                      <Typography
-                        variant='caption'
-                        sx={{
-                          fontSize: getResponsiveValue(
-                            '0.65rem',
-                            '0.7rem',
-                            '0.75rem',
-                            '0.8rem',
-                            '0.85rem',
-                            '0.9rem',
-                            '0.75rem'
-                          ),
-                          color: 'var(--color-primary-dark)',
-                          display: 'block',
-                          lineHeight: 1.3,
-                          mb: 0.25,
-                        }}
-                        className={getResponsiveTextClasses()}
-                      >
-                        • Orders <strong>under Rs.499</strong>: <span style={{color: 'var(--color-primary)', fontWeight: 600}}>Rs.50 delivery charge</span>
-                      </Typography>
+                                              <Typography
+                          variant='caption'
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.9rem',
+                              '0.75rem'
+                            ),
+                            color: theme.palette.text.secondary,
+                            display: 'block',
+                            lineHeight: 1.3,
+                            mb: 0.25,
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          • Orders <strong>≥ Rs.499</strong>: <span style={{color: theme.palette.primary.main, fontWeight: 600}}>FREE delivery</span>
+                        </Typography>
+                                              <Typography
+                          variant='caption'
+                          sx={{
+                            fontSize: getResponsiveValue(
+                              '0.65rem',
+                              '0.7rem',
+                              '0.75rem',
+                              '0.8rem',
+                              '0.85rem',
+                              '0.9rem',
+                              '0.75rem'
+                            ),
+                            color: theme.palette.text.secondary,
+                            display: 'block',
+                            lineHeight: 1.3,
+                            mb: 0.25,
+                          }}
+                          className={getResponsiveTextClasses()}
+                        >
+                          • Orders <strong>under Rs.499</strong>: <span style={{color: theme.palette.primary.main, fontWeight: 600}}>Rs.50 delivery charge</span>
+                        </Typography>
                       {totals.subtotal < 499 && (
                         <Typography
                           variant='caption'
@@ -1943,7 +1817,7 @@ const OrderCheckout = () => {
                               '0.9rem',
                               '0.75rem'
                             ),
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             display: 'block',
                             lineHeight: 1.3,
                             mt: 0.5,
@@ -1962,12 +1836,11 @@ const OrderCheckout = () => {
                         severity='warning'
                         sx={{
                           mb: 1,
-                          borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
-                          background:
-                            'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                          border: '1px solid var(--color-primary-light)',
+                          borderRadius: theme.shape.borderRadius * 0.33,
+                          background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                          border: `1px solid ${theme.palette.primary.light}`,
                           '& .MuiAlert-icon': {
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                           },
                         }}
                         className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
@@ -1986,7 +1859,7 @@ const OrderCheckout = () => {
                               '0.8rem'
                             ),
                             fontWeight: 600,
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             mb: 0.5,
                           }}
                         >
@@ -2004,7 +1877,7 @@ const OrderCheckout = () => {
                               '0.9rem',
                               '0.75rem'
                             ),
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             display: 'block',
                             lineHeight: 1.3,
                           }}
@@ -2032,18 +1905,10 @@ const OrderCheckout = () => {
                       }
                       sx={{
                         fontWeight: 500,
-                        background: 'var(--color-background-light-gradient)',
-                        color: '#fff',
+                        background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                        color: theme.palette.primary.contrastText,
                         textTransform: 'none',
-                        borderRadius: getResponsiveValue(
-                          0.5,
-                          0.5,
-                          1,
-                          1.5,
-                          2,
-                          2.5,
-                          1
-                        ),
+                        borderRadius: 1,
                         fontSize: getResponsiveValue(
                           '0.6rem',
                           '0.65rem',
@@ -2053,15 +1918,14 @@ const OrderCheckout = () => {
                           '0.85rem',
                           '0.7rem'
                         ),
-                        boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+                        boxShadow: `0 2px 8px ${theme.palette.primary.main}20`,
                         mb: 1,
                         py: 0.75,
                         minHeight: '44px',
                         '&:hover': {
-                          background:
-                            'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%)',
-                          color: '#fff',
-                          boxShadow: '0 4px 16px rgba(163,130,76,0.18)',
+                          background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: theme.palette.primary.contrastText,
+                          boxShadow: `0 4px 16px ${theme.palette.primary.main}30`,
                         },
                         transition: 'all 0.3s ease',
                       }}
@@ -2078,10 +1942,9 @@ const OrderCheckout = () => {
                       sx={{
                         textTransform: 'none',
                         fontWeight: 600,
-                        background:
-                          'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                        color: 'var(--color-primary)',
-                        border: '1px solid var(--color-primary-light)',
+                        background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                        color: theme.palette.primary.main,
+                        border: `1px solid ${theme.palette.primary.light}`,
                       }}
                     >
                       Continue Shopping
@@ -2095,11 +1958,10 @@ const OrderCheckout = () => {
                         sx={{
                           textTransform: 'none',
                           fontWeight: 600,
-                          background:
-                            'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                          color: 'var(--color-primary)',
-                          border: '1px solid var(--color-primary-light)',
-                          borderRadius: getResponsiveValue(1, 1, 2, 3, 4, 5, 2),
+                          background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                          color: theme.palette.primary.main,
+                          border: `1px solid ${theme.palette.primary.light}`,
+                          borderRadius: 2,
                           fontSize: getResponsiveValue(
                             '0.875rem',
                             '0.9rem',
@@ -2141,9 +2003,8 @@ const OrderCheckout = () => {
                             borderRadius: 1.5,
                           },
                           '&:hover': {
-                            background:
-                              'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary-medium) 100%)',
-                            color: '#fff',
+                            background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                            color: theme.palette.primary.contrastText,
                           },
                         }}
                         href={`http://localhost:3000/api/invoice/${invoice._id}`}

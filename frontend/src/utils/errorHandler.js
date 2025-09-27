@@ -118,11 +118,32 @@ export const getErrorMessage = (error, context = '') => {
 
   // Check for custom error message first
   if (error.response?.data?.error) {
+    // Handle rate limiting specifically
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.data.retryAfter || 15;
+      if (retryAfter > 60) {
+        const minutes = Math.ceil(retryAfter / 60);
+        return `Too many requests. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
+      } else if (retryAfter > 0) {
+        return `Too many requests. Please wait ${retryAfter} second${retryAfter > 1 ? 's' : ''} before trying again.`;
+      }
+      return 'Too many requests. Please wait a moment before trying again.';
+    }
     return error.response.data.error;
   }
 
   // Check for specific error messages based on context
   if (context === 'login') {
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.data.retryAfter || 15;
+      if (retryAfter > 60) {
+        const minutes = Math.ceil(retryAfter / 60);
+        return `Too many login attempts. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
+      } else if (retryAfter > 0) {
+        return `Too many login attempts. Please wait ${retryAfter} second${retryAfter > 1 ? 's' : ''} before trying again.`;
+      }
+      return 'Too many login attempts. Please wait a moment before trying again.';
+    }
     if (error.response?.status === 423) {
       return 'Account is temporarily locked due to multiple failed attempts. Please try again later.';
     }
@@ -135,6 +156,16 @@ export const getErrorMessage = (error, context = '') => {
   }
 
   if (context === 'register') {
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.data.retryAfter || 15;
+      if (retryAfter > 60) {
+        const minutes = Math.ceil(retryAfter / 60);
+        return `Too many registration attempts. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
+      } else if (retryAfter > 0) {
+        return `Too many registration attempts. Please wait ${retryAfter} second${retryAfter > 1 ? 's' : ''} before trying again.`;
+      }
+      return 'Too many registration attempts. Please wait a moment before trying again.';
+    }
     if (error.response?.status === 409) {
       return 'An account with this email already exists. Please try logging in instead.';
     }
@@ -142,6 +173,13 @@ export const getErrorMessage = (error, context = '') => {
 
   if (context === 'forgot-password') {
     if (error.response?.status === 429) {
+      const retryAfter = error.response.data.retryAfter || 15;
+      if (retryAfter > 60) {
+        const minutes = Math.ceil(retryAfter / 60);
+        return `Too many password reset attempts. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
+      } else if (retryAfter > 0) {
+        return `Too many password reset attempts. Please wait ${retryAfter} second${retryAfter > 1 ? 's' : ''} before trying again.`;
+      }
       return 'Too many password reset attempts. Please wait a moment before trying again.';
     }
   }

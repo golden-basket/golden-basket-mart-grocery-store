@@ -1,65 +1,115 @@
-import React, { useState, useEffect } from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
+import React from 'react';
+import {
+  IconButton,
+  Tooltip,
+  Box,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
+import NightsStayIcon from '@mui/icons-material/NightsStay';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
 
-const DarkModeToggle = ({ onToggle, sx = {} }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+import { useThemeContext } from '../contexts/ThemeContext.jsx';
 
-  // Check system preference and user preference
-  useEffect(() => {
-    const savedPreference = localStorage.getItem('darkMode');
-    const systemPreference = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
+const DarkModeToggle = ({ sx = {} }) => {
+  const { isDarkMode, toggleTheme, isSystemTheme } = useThemeContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    if (savedPreference !== null) {
-      setIsDarkMode(savedPreference === 'true');
-    } else {
-      setIsDarkMode(systemPreference);
+  const getTooltipText = () => {
+    if (isSystemTheme) {
+      return `System theme (${isDarkMode ? 'Dark' : 'Light'}) - Click to override`;
     }
-  }, []);
-
-  // Listen for system preference changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = e => {
-      if (localStorage.getItem('darkMode') === null) {
-        setIsDarkMode(e.matches);
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  const handleToggle = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem('darkMode', newMode.toString());
-
-    if (onToggle) {
-      onToggle(newMode);
-    }
+    return `Switch to ${isDarkMode ? 'Light' : 'Dark'} Mode`;
   };
 
   return (
-    <Tooltip
-      title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-    >
+    <Tooltip title={getTooltipText()} arrow>
       <IconButton
-        onClick={handleToggle}
+        onClick={toggleTheme}
         sx={{
-          color: 'inherit',
-          transition: 'all 0.3s ease',
+          position: 'relative',
+          width: isMobile ? 32 : 40,
+          height: isMobile ? 32 : 40,
+          borderRadius: '50%',
+          background: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.divider}`,
+          color: theme.palette.text.primary,
+          transition: 'all 0.2s ease',
           '&:hover': {
-            transform: 'rotate(180deg)',
-            color: isDarkMode ? '#ffd700' : '#1976d2',
+            background: isDarkMode
+              ? theme.palette.action.hover
+              : theme.palette.grey[100],
+            transform: 'scale(1.05)',
+          },
+          '&:active': {
+            transform: 'scale(0.98)',
           },
           ...sx,
         }}
+        aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
       >
-        {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+        {/* Simple icon with hover effect */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'transform 0.3s ease',
+            transform: isDarkMode ? 'rotate(0deg)' : 'rotate(360deg)',
+          }}
+        >
+          {isDarkMode ? (
+            <WbSunnyIcon
+              sx={{
+                fontSize: { xs: '1.2rem', sm: '1.4rem' },
+                color: theme.palette.primary.light,
+                transition: 'color 0.2s ease',
+                '.MuiIconButton-root:hover &': {
+                  color: theme.palette.text.primary,
+                },
+              }}
+            />
+          ) : (
+            <NightsStayIcon
+              sx={{
+                fontSize: { xs: '1.2rem', sm: '1.4rem' },
+                color: theme.palette.text.primary,
+                transition: 'color 0.2s ease',
+                '.MuiIconButton-root:hover &': {
+                  color: theme.palette.primary.light,
+                },
+              }}
+            />
+          )}
+        </Box>
+
+        {/* System theme indicator */}
+        {isSystemTheme && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -2,
+              right: -2,
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: theme.palette.info.main,
+              border: `1px solid ${theme.palette.background.paper}`,
+              animation: 'pulse 2s infinite',
+              '@keyframes pulse': {
+                '0%, 100%': {
+                  opacity: 1,
+                  transform: 'scale(1)',
+                },
+                '50%': {
+                  opacity: 0.7,
+                  transform: 'scale(1.1)',
+                },
+              },
+            }}
+          />
+        )}
       </IconButton>
     </Tooltip>
   );

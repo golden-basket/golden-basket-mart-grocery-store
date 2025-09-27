@@ -174,8 +174,7 @@ const Login = () => {
         alignItems: 'center',
         minHeight: '100vh',
         p: { xs: 1, sm: 2, md: 3 },
-        background:
-          'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 50%, ${theme.palette.action.hover} 100%)`,
       }}
     >
       <Slide direction='right' in={true} timeout={400}>
@@ -186,10 +185,9 @@ const Login = () => {
             width: { xs: '100%', sm: '90%', md: '70%', lg: '50%', xl: '40%' },
             maxWidth: 500,
             borderRadius: { xs: 2, sm: 3, md: 4 },
-            background:
-              'linear-gradient(135deg, #fff 0%, #fffbe6 50%, #f7ecd0 100%)',
-            border: '2px solid #e6d897',
-            boxShadow: '0 20px 40px rgba(163,130,76,0.2)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 50%, ${theme.palette.action.selected} 100%)`,
+            border: `2px solid ${theme.palette.primary.light}`,
+            boxShadow: `0 20px 40px ${theme.palette.primary.main}30`,
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -199,8 +197,7 @@ const Login = () => {
               left: 0,
               right: 0,
               height: '4px',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+              background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
             },
           }}
         >
@@ -213,8 +210,7 @@ const Login = () => {
               variant={isMobile ? 'h5' : 'h4'}
               fontWeight={700}
               sx={{
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 1,
@@ -251,23 +247,32 @@ const Login = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <EmailIcon sx={{ color: '#a3824c' }} />
+                    <EmailIcon sx={{ color: theme.palette.primary.main }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-error fieldset': {
+                    borderColor: theme.palette.error.main,
+                    borderWidth: '2px',
+                  },
                 },
                 '& .MuiInputLabel-root': {
-                  '&.Mui-focused': { color: '#a3824c' },
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.primary.main },
                 },
                 '& .MuiFormHelperText-root': {
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-error': {
+                    color: theme.palette.error.main,
+                  },
                 },
               }}
             />
@@ -289,7 +294,7 @@ const Login = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <LockIcon sx={{ color: '#a3824c' }} />
+                    <LockIcon sx={{ color: theme.palette.primary.main }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -302,7 +307,7 @@ const Login = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         edge='end'
                         disabled={loading}
-                        sx={{ color: '#a3824c' }}
+                        sx={{ color: theme.palette.primary.main }}
                         aria-label={
                           showPassword ? 'Hide password' : 'Show password'
                         }
@@ -320,16 +325,23 @@ const Login = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-error fieldset': { borderColor: '#d32f2f' },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-error fieldset': {
+                    borderColor: theme.palette.error.main,
+                    borderWidth: '2px',
+                  },
                 },
                 '& .MuiInputLabel-root': {
-                  '&.Mui-focused': { color: '#a3824c' },
-                  '&.Mui-error': { color: '#d32f2f' },
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.primary.main },
                 },
                 '& .MuiFormHelperText-root': {
-                  '&.Mui-error': { color: '#d32f2f' },
+                  color: theme.palette.error.main,
                 },
               }}
             />
@@ -351,15 +363,20 @@ const Login = () => {
                     onChange={handleInputChange}
                     disabled={loading}
                     sx={{
-                      color: '#a3824c',
-                      '&.Mui-checked': { color: '#a3824c' },
+                      color: theme.palette.primary.main,
+                      '&.Mui-checked': { color: theme.palette.primary.main },
                     }}
                   />
                 }
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <RememberMeIcon sx={{ fontSize: 16, color: '#a3824c' }} />
-                    <Typography variant='body2' sx={{ color: '#7d6033' }}>
+                    <RememberMeIcon
+                      sx={{ fontSize: 16, color: theme.palette.primary.main }}
+                    />
+                    <Typography
+                      variant='body2'
+                      sx={{ color: theme.palette.text.secondary }}
+                    >
                       Remember me
                     </Typography>
                   </Box>
@@ -376,10 +393,10 @@ const Login = () => {
                   disabled={loading}
                   sx={{
                     textTransform: 'none',
-                    color: '#a3824c',
+                    color: theme.palette.primary.main,
                     fontSize: '0.875rem',
                     '&:hover': {
-                      color: '#866422',
+                      color: theme.palette.primary.dark,
                       textDecoration: 'underline',
                     },
                   }}
@@ -407,21 +424,19 @@ const Login = () => {
                 fontWeight: 700,
                 fontSize: { xs: '1rem', sm: '1.1rem' },
                 borderRadius: 2,
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                color: '#fff',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                color: theme.palette.primary.contrastText,
                 textTransform: 'none',
-                boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
+                boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
                 '&:hover': {
-                  background:
-                    'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                  color: '#000',
+                  background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                  color: theme.palette.primary.contrastText,
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
+                  boxShadow: `0 6px 20px ${theme.palette.primary.main}60`,
                 },
                 '&:disabled': {
-                  background: 'linear-gradient(90deg, #ccc 0%, #ddd 100%)',
-                  color: '#666',
+                  background: `linear-gradient(90deg, ${theme.palette.grey[300]} 0%, ${theme.palette.grey[400]} 100%)`,
+                  color: theme.palette.grey[600],
                   transform: 'none',
                   boxShadow: 'none',
                 },
@@ -432,7 +447,12 @@ const Login = () => {
             </Button>
 
             <Divider
-              sx={{ my: 3, '&::before, &::after': { borderColor: '#e6d897' } }}
+              sx={{
+                my: 3,
+                '&::before, &::after': {
+                  borderColor: theme.palette.primary.light,
+                },
+              }}
             >
               <Typography variant='body2' color='text.secondary' sx={{ px: 2 }}>
                 New to Golden Basket Mart?
@@ -449,20 +469,20 @@ const Login = () => {
                 py: { xs: 1.5, sm: 2 },
                 fontWeight: 600,
                 borderRadius: 2,
-                borderColor: '#a3824c',
-                color: '#a3824c',
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 textTransform: 'none',
                 fontSize: { xs: '0.9rem', sm: '1rem' },
                 '&:hover': {
-                  color: '#a3824c',
-                  borderColor: '#e6d897',
-                  backgroundColor: 'rgba(163,130,76,0.05)',
+                  color: theme.palette.primary.main,
+                  borderColor: theme.palette.primary.light,
+                  backgroundColor: `${theme.palette.primary.main}10`,
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(163,130,76,0.2)',
+                  boxShadow: `0 4px 12px ${theme.palette.primary.main}30`,
                 },
                 '&:disabled': {
-                  borderColor: '#ccc',
-                  color: '#999',
+                  borderColor: theme.palette.grey[400],
+                  color: theme.palette.grey[500],
                   transform: 'none',
                   boxShadow: 'none',
                 },

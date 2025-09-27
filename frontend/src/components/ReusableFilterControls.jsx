@@ -184,23 +184,23 @@ const ReusableFilterControls = ({
   // Common styling for form elements
   const commonInputStyles = {
     '& .MuiOutlinedInput-root': {
-      background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-      borderRadius: 1.5,
-      boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+      background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+      borderRadius: 0.75,
+      boxShadow: theme.shadows[1],
       height: 28,
       padding: '2px 6px',
-      '& fieldset': { borderRadius: 1.5 },
+      '& fieldset': { borderRadius: 0.75 },
       '&:hover fieldset': {
-        borderColor: '#a3824c',
-        borderRadius: 1.5,
+        borderColor: theme.palette.primary.main,
+        borderRadius: 0.75,
       },
       '&.Mui-focused fieldset': {
-        borderColor: '#a3824c',
-        borderRadius: 1.5,
+        borderColor: theme.palette.primary.main,
+        borderRadius: 0.75,
         borderWidth: '2px',
       },
       '&.Mui-disabled': {
-        background: 'linear-gradient(90deg, #f8f5e6 0%, #f0e8d1 100%)',
+        background: `linear-gradient(90deg, ${theme.palette.action.disabledBackground} 0%, ${theme.palette.action.hover} 100%)`,
         opacity: 0.8,
       },
     },
@@ -233,7 +233,7 @@ const ReusableFilterControls = ({
           input: {
             startAdornment: (
               <InputAdornment position='start'>
-                <SearchIcon sx={{ color: '#a3824c', fontSize: 14 }} />
+                <SearchIcon sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
               </InputAdornment>
             ),
             endAdornment: isSearching ? (
@@ -242,7 +242,7 @@ const ReusableFilterControls = ({
                   sx={{
                     width: 12,
                     height: 12,
-                    border: '1px solid #a3824c',
+                    border: `1px solid ${theme.palette.primary.main}`,
                     borderTop: '1px solid transparent',
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite',
@@ -281,19 +281,19 @@ const ReusableFilterControls = ({
             width: isMobileView ? '100%' : config.width || 120,
             maxWidth: isMobileView ? '100%' : config.maxWidth || 120,
             height: 28,
-            background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-            borderRadius: 1.5,
-            boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+            background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+            borderRadius: 0.75,
+            boxShadow: theme.shadows[1],
             '& .MuiOutlinedInput-root': {
               height: 28,
-              '& fieldset': { borderRadius: 1.5 },
+              '& fieldset': { borderRadius: 0.75 },
               '&:hover fieldset': {
-                borderColor: '#a3824c',
-                borderRadius: 1.5,
+                borderColor: theme.palette.primary.main,
+                borderRadius: 0.75,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#a3824c',
-                borderRadius: 1.5,
+                borderColor: theme.palette.primary.main,
+                borderRadius: 0.75,
               },
             },
             '& .MuiSelect-select': {
@@ -301,7 +301,7 @@ const ReusableFilterControls = ({
               fontSize: '0.75rem',
             },
             '& .MuiSelect-icon': {
-              color: '#a3824c',
+              color: theme.palette.primary.main,
               fontSize: 14,
             },
           }}
@@ -364,7 +364,7 @@ const ReusableFilterControls = ({
                 <InputAdornment position='start' sx={{ mr: 0 }}>
                   <Typography
                     sx={{
-                      color: '#a3824c',
+                      color: theme.palette.primary.main,
                       fontSize: '0.7rem',
                       fontWeight: 500,
                     }}
@@ -379,7 +379,7 @@ const ReusableFilterControls = ({
         {!isMobileView && (
           <Typography
             sx={{
-              color: '#a3824c',
+              color: theme.palette.primary.main,
               fontSize: '0.7rem',
               fontWeight: 500,
               px: 0.3,
@@ -417,7 +417,7 @@ const ReusableFilterControls = ({
                 <InputAdornment position='start' sx={{ mr: 0 }}>
                   <Typography
                     sx={{
-                      color: '#a3824c',
+                      color: theme.palette.primary.main,
                       fontSize: '0.7rem',
                       fontWeight: 500,
                     }}
@@ -455,19 +455,19 @@ const ReusableFilterControls = ({
               width: isMobileView ? '100%' : config.width || 140,
               maxWidth: isMobileView ? '100%' : config.maxWidth || 140,
               height: 28,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-              borderRadius: 1.5,
-              boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+              background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+              borderRadius: 0.75,
+              boxShadow: theme.shadows[1],
               '& .MuiOutlinedInput-root': {
                 height: 28,
-                '& fieldset': { borderRadius: 1.5 },
+                '& fieldset': { borderRadius: 0.75 },
                 '&:hover fieldset': {
-                  borderColor: '#a3824c',
-                  borderRadius: 1.5,
+                  borderColor: theme.palette.primary.main,
+                  borderRadius: 0.75,
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: '#a3824c',
-                  borderRadius: 1.5,
+                  borderColor: theme.palette.primary.main,
+                  borderRadius: 0.75,
                 },
               },
               '& .MuiPickersInputBase-root, & .MuiPickersOutlinedInput-root': {
@@ -516,7 +516,7 @@ const ReusableFilterControls = ({
               '& .MuiInputLabel-root': {
                 height: 28,
                 fontSize: '0.75rem',
-                color: '#a3824c',
+                color: theme.palette.primary.main,
                 transform: 'translate(8px, 6px) scale(1)',
                 '&.Mui-focused, &.MuiFormLabel-filled': {
                   transform: 'translate(8px, -6px) scale(0.75)',
@@ -524,11 +524,11 @@ const ReusableFilterControls = ({
               },
               '& .MuiPickersSectionList-sectionContent': {
                 fontSize: '0.75rem',
-                color: '#a3824c',
+                color: theme.palette.primary.main,
               },
               '& .MuiPickersInputBase-sectionContent': {
                 fontSize: '0.75rem',
-                color: '#a3824c',
+                color: theme.palette.primary.main,
               },
             }}
           />
@@ -547,9 +547,9 @@ const ReusableFilterControls = ({
             checked={filterValues[fieldName] || false}
             onChange={e => onFilterChange(fieldName, e.target.checked)}
             sx={{
-              color: '#a3824c',
+              color: theme.palette.primary.main,
               '&.Mui-checked': {
-                color: '#a3824c',
+                color: theme.palette.primary.main,
               },
             }}
           />
@@ -558,7 +558,7 @@ const ReusableFilterControls = ({
           <Typography
             variant='caption'
             sx={{
-              color: '#a3824c',
+              color: theme.palette.primary.main,
               fontWeight: 600,
               fontSize: '0.65rem',
             }}
@@ -630,13 +630,13 @@ const ReusableFilterControls = ({
           minWidth: 60,
           maxHeight: 28,
           maxWidth: 60,
-          borderColor: '#a3824c',
-          border: '1px solid #a3824c',
-          color: '#a3824c',
+          borderColor: theme.palette.primary.main,
+          border: `1px solid ${theme.palette.primary.main}`,
+          color: theme.palette.primary.main,
           fontSize: '0.75rem',
           borderRadius: 1.5,
-          background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-          boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+          background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+          boxShadow: theme.shadows[1],
           fontWeight: 500,
           '&:hover': {
             borderColor: '#e6d897',
@@ -669,16 +669,16 @@ const ReusableFilterControls = ({
               startIcon={<FilterListIcon />}
               onClick={() => setFilterDrawerOpen(true)}
               sx={{
-                borderColor: '#a3824c',
-                color: '#a3824c',
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 fontSize: '0.8rem',
                 px: 1.5,
                 py: 0.75,
                 minHeight: 32,
                 height: 32,
                 borderRadius: 1.5,
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+                background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+                boxShadow: theme.shadows[1],
                 textTransform: 'none',
                 fontWeight: 500,
                 '&:hover': {
@@ -703,7 +703,7 @@ const ReusableFilterControls = ({
             sx: {
               width: '100%',
               maxWidth: { xs: '100%', sm: 400 },
-              background: 'linear-gradient(135deg, #fffbe6 0%, #f7e7c4 100%)',
+              background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
               borderLeft: '2px solid #e6d897',
             },
           }}
@@ -732,7 +732,7 @@ const ReusableFilterControls = ({
               <Typography
                 variant='h6'
                 sx={{
-                  color: '#a3824c',
+                  color: theme.palette.primary.main,
                   fontWeight: 700,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' },
                 }}
@@ -742,7 +742,7 @@ const ReusableFilterControls = ({
               <IconButton
                 onClick={() => setFilterDrawerOpen(false)}
                 sx={{
-                  color: '#a3824c',
+                  color: theme.palette.primary.main,
                   '&:hover': { backgroundColor: 'rgba(163,130,76,0.1)' },
                 }}
               >
@@ -766,7 +766,7 @@ const ReusableFilterControls = ({
                   <Typography
                     variant='subtitle2'
                     sx={{
-                      color: '#a3824c',
+                      color: theme.palette.primary.main,
                       fontWeight: 600,
                       mb: 1,
                       fontSize: '0.875rem',
@@ -793,7 +793,7 @@ const ReusableFilterControls = ({
                       <Typography
                         variant='subtitle2'
                         sx={{
-                          color: '#a3824c',
+                          color: theme.palette.primary.main,
                           fontWeight: 600,
                           mb: 1,
                           fontSize: '0.875rem',
@@ -815,7 +815,7 @@ const ReusableFilterControls = ({
                       <Typography
                         variant='subtitle2'
                         sx={{
-                          color: '#a3824c',
+                          color: theme.palette.primary.main,
                           fontWeight: 600,
                           mb: 1,
                           fontSize: '0.875rem',
@@ -840,7 +840,7 @@ const ReusableFilterControls = ({
                   <Typography
                     variant='subtitle2'
                     sx={{
-                      color: '#a3824c',
+                      color: theme.palette.primary.main,
                       fontWeight: 600,
                       mb: 1,
                       fontSize: '0.875rem',
@@ -872,7 +872,7 @@ const ReusableFilterControls = ({
                       <Typography
                         variant='subtitle2'
                         sx={{
-                          color: '#a3824c',
+                          color: theme.palette.primary.main,
                           fontWeight: 600,
                           mb: 2,
                           fontSize: '0.875rem',
@@ -912,14 +912,13 @@ const ReusableFilterControls = ({
                           minWidth: hasCheckboxes ? 90 : '100%',
                           maxHeight: 36,
                           maxWidth: hasCheckboxes ? 90 : '100%',
-                          borderColor: '#a3824c',
-                          border: '1px solid #a3824c',
-                          color: '#a3824c',
+                          border: `1px solid ${theme.palette.primary.main} !important`,
+                          color: theme.palette.primary.main,
                           fontSize: '0.8rem',
-                          borderRadius: 1.5,
+                          borderRadius: theme.shape.borderRadius * 0.33,
                           background:
-                            'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                          boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
+                            `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+                          boxShadow: theme.shadows[1],
                           fontWeight: 500,
                           '&:hover': {
                             borderColor: '#e6d897',

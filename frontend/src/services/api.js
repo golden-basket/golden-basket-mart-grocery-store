@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { handleError } from '../utils/errorHandler';
+import globalErrorHandler from '../utils/globalErrorHandler';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
@@ -40,13 +42,44 @@ apiClient.interceptors.response.use(
       error.response?.status,
       error.response?.data
     );
+
+    // Handle specific error types
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
+    } else if (error.response?.status === 429) {
+      // Rate limiting - show user-friendly message
+      const errorInfo = handleError(error);
+      console.warn('Rate limit exceeded:', errorInfo.message);
+
+      // Store rate limit info for potential retry logic
+      error.rateLimitInfo = {
+        retryAfter: error.response?.data?.retryAfter || 15,
+        message: errorInfo.message,
+        timestamp: Date.now(),
+      };
+
+      // Use global error handler if available
+      try {
+        globalErrorHandler.handleApiError(error);
+      } catch (handlerError) {
+        console.warn('Global error handler failed:', handlerError);
+      }
+    } else if (error.response?.status >= 500) {
+      // Server errors - log for debugging and show to user
+      console.error('Server error:', error.response?.data);
+
+      // Use global error handler if available
+      try {
+        globalErrorHandler.handleApiError(error);
+      } catch (handlerError) {
+        console.warn('Global error handler failed:', handlerError);
+      }
     }
-    return Promise.reject(error);
+
+    return Promise.reject(error || 'Unknown error occurred');
   }
 );
 
@@ -62,6 +95,14 @@ class ApiService {
       return response.data;
     } catch (error) {
       console.error('ApiService.request: Error occurred:', error);
+
+      // Use global error handler if available
+      try {
+        globalErrorHandler.handleApiError(error, 'api');
+      } catch (handlerError) {
+        console.warn('Global error handler failed:', handlerError);
+      }
+
       const message = error.response?.data?.error || 'Network error occurred';
       throw new Error(message);
     }

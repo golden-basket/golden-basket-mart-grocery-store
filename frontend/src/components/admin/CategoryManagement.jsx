@@ -44,7 +44,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
   });
 
   // Get styles from shared utility
-  const styles = useMemo(() => createAdminStyles(isMobile), [isMobile]);
+  const styles = useMemo(() => createAdminStyles(isMobile, theme), [isMobile, theme]);
 
   // Category handlers
   const handleCatDialogOpen = useCallback((mode, cat = null) => {
@@ -97,10 +97,9 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
       key={category._id}
       sx={{
         mb: 2,
-        background:
-          'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-        border: '1px solid var(--color-primary-light)',
-        borderRadius: 2,
+        background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+        border: `1px solid ${theme.palette.primary.light}`,
+        borderRadius: theme.shape.borderRadius * 2,
       }}
       className='card-golden'
     >
@@ -116,7 +115,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
           <Box sx={{ flex: 1 }}>
             <Typography
               variant='h6'
-              sx={{ color: 'var(--color-primary)', fontWeight: 600, mb: 1 }}
+              sx={{ color: theme.palette.primary.main, fontWeight: 600, mb: 1 }}
             >
               {category.name}
             </Typography>
@@ -133,11 +132,11 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
             startIcon={<EditIcon />}
             onClick={() => handleCatDialogOpen('edit', category)}
             sx={{
-              borderColor: 'var(--color-primary)',
-              color: 'var(--color-primary)',
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
               '&:hover': {
-                borderColor: 'var(--color-primary-dark)',
-                backgroundColor: 'rgba(163,130,76,0.1)',
+                borderColor: theme.palette.primary.dark,
+                backgroundColor: theme.palette.action.hover,
               },
             }}
           >
@@ -246,22 +245,22 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         maxWidth={isMobile ? false : 'md'}
         fullWidth
         fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 3,
-            boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-            border: isMobile ? 'none' : '1px solid #e6d897',
-            maxWidth: isMobile ? '100%' : '600px',
-            width: isMobile ? '100%' : '90%',
+        slotProps={{
+          paper: {
+            sx: {
+              boxShadow: theme.shadows[8],
+              maxWidth: isMobile ? '100%' : '600px',
+              width: isMobile ? '100%' : '90%',
+            },
           },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-            color: '#fff',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+            color: theme.palette.common.white,
             fontWeight: 700,
-            borderRadius: isMobile ? 0 : '12px 12px 0 0',
+            borderRadius: isMobile ? 0 : `${theme.shape.borderRadius * 2.67}px ${theme.shape.borderRadius * 2.67}px 0 0`,
             position: 'relative',
           }}
         >
@@ -269,7 +268,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
           {isMobile && (
             <IconButton
               onClick={handleCatDialogClose}
-              sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+              sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.common.white }}
             >
               <CloseIcon />
             </IconButton>
@@ -278,7 +277,7 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         <DialogContent
           dividers
           sx={{
-            background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+            background: theme.palette.background.paper,
             p: isMobile ? 2 : 3,
             minHeight: isMobile ? 'auto' : '400px',
           }}
@@ -309,9 +308,9 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
         </DialogContent>
         <DialogActions
           sx={{
-            background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+            background: theme.palette.background.paper,
             p: 2,
-            borderRadius: isMobile ? 0 : '0 0 12px 12px',
+            borderRadius: isMobile ? 0 : `0 0 ${theme.shape.borderRadius * 2.67}px ${theme.shape.borderRadius * 2.67}px`,
             justifyContent: isMobile ? 'stretch' : 'flex-end',
             gap: 1,
           }}
@@ -319,14 +318,14 @@ const CategoryManagement = ({ categories, onCategoryUpdate }) => {
           <Button
             onClick={handleCatDialogClose}
             sx={{
-              color: '#a3824c',
-              border: '1px solid #a3824c',
-              borderRadius: 1,
+              color: theme.palette.primary.main,
+              border: `1px solid ${theme.palette.primary.main}`,
+              borderRadius: theme.shape.borderRadius * 1.33,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderColor: '#e6d897',
+                background: theme.palette.action.hover,
+                borderColor: theme.palette.primary.light,
               },
             }}
           >

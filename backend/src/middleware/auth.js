@@ -4,8 +4,8 @@ const rateLimit = require('express-rate-limit');
 
 exports.auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No token provided.' });
+  if (!authHeader?.startsWith('Bearer ')) {
+    next(new AuthenticationError('No token provided.'));
   }
   const token = authHeader.split(' ')[1];
   try {
@@ -13,7 +13,7 @@ exports.auth = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: 'Invalid token.' });
+    next(new AuthenticationError(err.message || 'Invalid token.'));
   }
 };
 
@@ -21,7 +21,7 @@ exports.admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
-    res.status(403).json({ error: 'Admin access required.' });
+    next(new AuthorizationError('Admin access required.'));
   }
 };
 

@@ -118,7 +118,6 @@ golden-basket-mart-grocery-store/
 │   │   │   ├── RoleBasedAccess.jsx # Role-based UI
 │   │   │   ├── RoleBasedNavigation.jsx # Role-based navigation
 │   │   │   ├── RoleBasedUI.jsx # Role-based components
-│   │   │   ├── TestComponent.jsx # Testing component
 │   │   │   ├── TestResetPassword.jsx # Password reset testing
 │   │   │   ├── TestVerification.jsx # Email verification testing
 │   │   │   └── admin/           # Admin-specific components

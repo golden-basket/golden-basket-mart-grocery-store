@@ -52,7 +52,10 @@ const UserManagement = ({ users, onUserUpdate }) => {
   });
 
   // Get styles from shared utility
-  const styles = useMemo(() => createAdminStyles(isMobile), [isMobile]);
+  const styles = useMemo(
+    () => createAdminStyles(isMobile, theme),
+    [isMobile, theme]
+  );
 
   // User handlers
   const handleUserDialogOpen = useCallback((mode, user = null) => {
@@ -146,10 +149,9 @@ const UserManagement = ({ users, onUserUpdate }) => {
       key={user._id}
       sx={{
         mb: 2,
-        background:
-          'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-        border: '1px solid var(--color-primary-light)',
-        borderRadius: 2,
+        background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+        border: `1px solid ${theme.palette.primary.light}`,
+        borderRadius: theme.shape.borderRadius * 2,
       }}
       className='card-golden'
     >
@@ -165,7 +167,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
           <Box>
             <Typography
               variant='h6'
-              sx={{ color: 'var(--color-primary)', fontWeight: 600 }}
+              sx={{ color: theme.palette.primary.main, fontWeight: 600 }}
             >
               {user.firstName} {user.lastName}
             </Typography>
@@ -188,11 +190,11 @@ const UserManagement = ({ users, onUserUpdate }) => {
             startIcon={<EditIcon />}
             onClick={() => handleUserDialogOpen('edit', user)}
             sx={{
-              borderColor: 'var(--color-primary)',
-              color: 'var(--color-primary)',
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
               '&:hover': {
-                borderColor: 'var(--color-primary-dark)',
-                backgroundColor: 'rgba(163,130,76,0.1)',
+                borderColor: theme.palette.primary.dark,
+                backgroundColor: theme.palette.action.hover,
               },
             }}
           >
@@ -211,14 +213,14 @@ const UserManagement = ({ users, onUserUpdate }) => {
             disabled={!user.isDefaultPassword && user.isVerified}
             onClick={() => handleInviteUser(user._id)}
             sx={{
-              borderColor: 'var(--color-accent)',
-              color: 'var(--color-accent)',
+              borderColor: theme.palette.success.main,
+              color: theme.palette.success.main,
               '&:hover': {
-                borderColor: 'var(--color-accent-dark)',
-                backgroundColor: 'rgba(56,142,60,0.1)',
+                borderColor: theme.palette.success.dark,
+                backgroundColor: theme.palette.success.light + '20',
               },
               '&:disabled': {
-                color: 'var(--color-primary) !important',
+                color: theme.palette.primary.main + ' !important',
                 opacity: 0.5,
               },
             }}
@@ -236,7 +238,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
             onClick={() => handleDeleteUser(user._id)}
             sx={{
               '&:hover': {
-                backgroundColor: 'rgba(211,47,47,0.1)',
+                backgroundColor: theme.palette.error.light + '20',
               },
             }}
           >
@@ -298,7 +300,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
                     <IconButton
                       size='small'
                       onClick={() => handleUserDialogOpen('edit', user)}
-                      sx={{ color: 'var(--color-primary)' }}
+                      sx={{ color: theme.palette.primary.main }}
                     >
                       <EditIcon />
                     </IconButton>
@@ -308,12 +310,12 @@ const UserManagement = ({ users, onUserUpdate }) => {
                       disabled={!user.isDefaultPassword && user.isVerified}
                       onClick={() => handleInviteUser(user._id)}
                       sx={{
-                        color: 'var(--color-accent)',
+                        color: theme.palette.success.main,
                         '&:hover': {
-                          backgroundColor: 'rgba(56,142,60,0.1)',
+                          backgroundColor: theme.palette.success.light + '20',
                         },
                         '&:disabled': {
-                          color: 'var(--color-primary) !important',
+                          color: theme.palette.primary.main + ' !important',
                           opacity: 0.5,
                         },
                       }}
@@ -327,7 +329,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
                     <IconButton
                       size='small'
                       onClick={() => handleDeleteUser(user._id)}
-                      sx={{ color: 'var(--color-error)' }}
+                      sx={{ color: theme.palette.error.main }}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -379,22 +381,24 @@ const UserManagement = ({ users, onUserUpdate }) => {
         maxWidth={isMobile ? false : 'md'}
         fullWidth
         fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 3,
-            boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-            border: isMobile ? 'none' : '1px solid #e6d897',
-            maxWidth: isMobile ? '100%' : '600px',
-            width: isMobile ? '100%' : '90%',
+        slotProps={{
+          paper: {
+            sx: {
+              boxShadow: theme.shadows[8],
+              maxWidth: isMobile ? '100%' : '600px',
+              width: isMobile ? '100%' : '90%',
+            },
           },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-            color: '#fff',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+            color: theme.palette.common.white,
             fontWeight: 700,
-            borderRadius: isMobile ? 0 : '12px 12px 0 0',
+            borderRadius: isMobile
+              ? 0
+              : `${theme.shape.borderRadius * 2.67}px ${theme.shape.borderRadius * 2.67}px 0 0`,
             position: 'relative',
           }}
         >
@@ -402,7 +406,12 @@ const UserManagement = ({ users, onUserUpdate }) => {
           {isMobile && (
             <IconButton
               onClick={handleUserDialogClose}
-              sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: theme.palette.common.white,
+              }}
             >
               <CloseIcon />
             </IconButton>
@@ -411,7 +420,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
         <DialogContent
           dividers
           sx={{
-            background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+            background: theme.palette.background.paper,
             p: isMobile ? 2 : 3,
             minHeight: isMobile ? 'auto' : '400px',
           }}
@@ -444,7 +453,7 @@ const UserManagement = ({ users, onUserUpdate }) => {
               displayEmpty
               sx={{
                 ...styles.inputStyles['& .MuiOutlinedInput-root'],
-                color: '#a3824c',
+                color: theme.palette.primary.main,
                 fontWeight: 500,
               }}
             >
@@ -455,9 +464,11 @@ const UserManagement = ({ users, onUserUpdate }) => {
         </DialogContent>
         <DialogActions
           sx={{
-            background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+            background: theme.palette.background.paper,
             p: 2,
-            borderRadius: isMobile ? 0 : '0 0 12px 12px',
+            borderRadius: isMobile
+              ? 0
+              : `0 0 ${theme.shape.borderRadius * 2.67}px ${theme.shape.borderRadius * 2.67}px`,
             justifyContent: isMobile ? 'stretch' : 'flex-end',
             gap: 1,
           }}
@@ -465,14 +476,14 @@ const UserManagement = ({ users, onUserUpdate }) => {
           <Button
             onClick={handleUserDialogClose}
             sx={{
-              color: '#a3824c',
-              border: '1px solid #a3824c',
-              borderRadius: 1,
+              color: theme.palette.primary.main,
+              border: `1px solid ${theme.palette.primary.main}`,
+              borderRadius: theme.shape.borderRadius * 1.33,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderColor: '#e6d897',
+                background: theme.palette.action.hover,
+                borderColor: theme.palette.primary.light,
               },
             }}
           >

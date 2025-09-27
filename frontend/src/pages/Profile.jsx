@@ -35,11 +35,13 @@ import { useToastNotifications } from '../hooks/useToast';
 import { Link } from 'react-router-dom';
 import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import Loading from '../components/Loading';
+import { useTheme } from '@mui/material/styles';
 
 const Profile = () => {
   const { user, getProfile, loading } = useAuth();
   const { isMobile, isTablet, isFoldable } = useFoldableDisplay();
   const { showError, showSuccess, showInfo } = useToastNotifications();
+  const theme = useTheme();
 
   // Use optimized hooks for data fetching with better error handling
   const { data: cart, isLoading: cartLoading, error: cartError } = useCart();
@@ -251,8 +253,7 @@ const Profile = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              'radial-gradient(circle at 20% 80%, rgba(163, 130, 76, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(163, 130, 76, 0.03) 0%, transparent 50%)',
+            background: `radial-gradient(circle at 20% 80%, ${theme.palette.primary.main}08 0%, transparent 50%), radial-gradient(circle at 80% 20%, ${theme.palette.primary.main}08 0%, transparent 50%)`,
             pointerEvents: 'none',
             zIndex: -1,
           },
@@ -299,8 +300,7 @@ const Profile = () => {
                     overflow: 'visible',
                     border: '2px solid',
                     borderColor: 'primary.light',
-                    background:
-                      'linear-gradient(135deg, background.paper 0%, rgba(163, 130, 76, 0.05) 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary.main}10 100%)`,
                   }}
                 >
                   <CardContent
@@ -418,8 +418,7 @@ const Profile = () => {
                                 md: isTablet ? 110 : 120,
                                 lg: 140,
                               },
-                              background:
-                                'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
                               fontSize: {
                                 xs: isMobile ? '1.75rem' : '2rem',
                                 sm: isFoldable ? '2.2rem' : '2.5rem',
@@ -427,16 +426,13 @@ const Profile = () => {
                                 lg: '3.5rem',
                               },
                               border: '4px solid',
-                              borderColor: '#e6d897',
-                              boxShadow:
-                                '0 8px 32px rgba(163, 130, 76, 0.25), 0 4px 16px rgba(230, 216, 151, 0.15)',
+                              borderColor: theme.palette.primary.light,
+                              boxShadow: `0 8px 32px ${theme.palette.primary.main}40, 0 4px 16px ${theme.palette.primary.light}25`,
                               transition: 'all 0.3s ease',
                               '&:hover': {
                                 transform: 'scale(1.05)',
-                                boxShadow:
-                                  '0 12px 40px rgba(163, 130, 76, 0.35), 0 8px 24px rgba(230, 216, 151, 0.25)',
-                                background:
-                                  'linear-gradient(135deg, #866422 0%, #a3824c 50%, #b59961 100%)',
+                                boxShadow: `0 12px 40px ${theme.palette.primary.main}50, 0 8px 24px ${theme.palette.primary.light}35`,
+                                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.primary.light} 100%)`,
                               },
                             }}
                           >
@@ -671,317 +667,6 @@ const Profile = () => {
                 </Card>
               </Grow>
 
-              {/* Statistics Section */}
-              {/* <Grow in timeout={1500}>
-                <Card
-                  elevation={6}
-                  sx={{
-                    border: '2px solid',
-                    borderColor: 'primary.light',
-                  }}
-                >
-                  <CardContent
-                    sx={{
-                      p: {
-                        xs: isMobile ? 1.5 : 2,
-                        sm: isFoldable ? 2.5 : 3,
-                        md: isTablet ? 3.5 : 4,
-                      },
-                    }}
-                  >
-                    <Typography
-                      variant="h4"
-                      component="h3"
-                      sx={{
-                        fontWeight: 700,
-                        color: 'primary.dark',
-                        mb: { xs: isMobile ? 3 : 4, sm: 4 },
-                        textAlign: 'center',
-                        fontSize: {
-                          xs: isMobile ? '1.1rem' : '1.25rem',
-                          sm: isFoldable ? '1.3rem' : '1.5rem',
-                          md: isTablet ? '1.6rem' : '1.75rem',
-                          lg: '2rem',
-                        },
-                        borderBottom: '3px solid',
-                        borderColor: 'primary.light',
-                        pb: { xs: isMobile ? 2 : 3, sm: 3 },
-                        position: 'relative',
-                        '&::after': {
-                          content: '""',
-                          position: 'absolute',
-                          bottom: -3,
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: { xs: isMobile ? '50px' : '60px', sm: '60px' },
-                          height: '3px',
-                          backgroundColor: 'primary.main',
-                          borderRadius: '2px',
-                        },
-                      }}
-                    >
-                      📊 Account Statistics
-                    </Typography>
-
-                    <Grid
-                      container
-                      spacing={{
-                        xs: isMobile ? 1.5 : 2,
-                        sm: isFoldable ? 2 : 3,
-                        md: isTablet ? 2.5 : 3,
-                      }}
-                    >
-                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
-                        <Box
-                          sx={{
-                            p: {
-                              xs: isMobile ? 1.5 : 2,
-                              sm: isFoldable ? 2.5 : 3,
-                              md: isTablet ? 2.5 : 3,
-                            },
-                            textAlign: 'center',
-                            bgcolor: 'background.paper',
-                            borderRadius: 3,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                            },
-                          }}
-                        >
-                          <CartIcon
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '1.2rem' : '1.5rem',
-                                sm: isFoldable ? '1.7rem' : '2rem',
-                                md: isTablet ? '2.2rem' : '2.5rem',
-                              },
-                              color: 'primary.main',
-                              mb: { xs: isMobile ? 1.5 : 2, sm: 2 },
-                            }}
-                          />
-                          <Typography
-                            variant="h4"
-                            component="div"
-                            sx={{
-                              fontWeight: 700,
-                              mb: 1,
-                              fontSize: {
-                                xs: isMobile ? '1rem' : '1.25rem',
-                                sm: isFoldable ? '1.3rem' : '1.5rem',
-                                md: isTablet ? '1.7rem' : '2rem',
-                              },
-                            }}
-                          >
-                            {cartItems}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '0.7rem' : '0.75rem',
-                                sm: isFoldable ? '0.8rem' : '0.875rem',
-                                md: isTablet ? '0.8rem' : '0.875rem',
-                              },
-                            }}
-                          >
-                            Cart Items
-                          </Typography>
-                        </Box>
-                      </Grid>
-
-                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
-                        <Box
-                          sx={{
-                            p: {
-                              xs: isMobile ? 1.5 : 2,
-                              sm: isFoldable ? 2.5 : 3,
-                              md: isTablet ? 2.5 : 3,
-                            },
-                            textAlign: 'center',
-                            bgcolor: 'background.paper',
-                            borderRadius: 3,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                            },
-                          }}
-                        >
-                          <OrderIcon
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '1.2rem' : '1.5rem',
-                                sm: isFoldable ? '1.7rem' : '2rem',
-                                md: isTablet ? '2.2rem' : '2.5rem',
-                              },
-                              color: 'secondary.main',
-                              mb: { xs: isMobile ? 1.5 : 2, sm: 2 },
-                            }}
-                          />
-                          <Typography
-                            variant="h4"
-                            component="div"
-                            sx={{
-                              fontWeight: 700,
-                              mb: 1,
-                              fontSize: {
-                                xs: isMobile ? '1rem' : '1.25rem',
-                                sm: isFoldable ? '1.3rem' : '1.5rem',
-                                md: isTablet ? '1.7rem' : '2rem',
-                              },
-                            }}
-                          >
-                            {safeOrderStats.totalOrders}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '0.7rem' : '0.75rem',
-                                sm: isFoldable ? '0.8rem' : '0.875rem',
-                                md: isTablet ? '0.8rem' : '0.875rem',
-                              },
-                            }}
-                          >
-                            Total Orders
-                          </Typography>
-                        </Box>
-                      </Grid>
-
-                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
-                        <Box
-                          sx={{
-                            p: {
-                              xs: isMobile ? 1.5 : 2,
-                              sm: isFoldable ? 2.5 : 3,
-                              md: isTablet ? 2.5 : 3,
-                            },
-                            textAlign: 'center',
-                            bgcolor: 'background.paper',
-                            borderRadius: 3,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                            },
-                          }}
-                        >
-                          <TrendingUpIcon
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '1.2rem' : '1.5rem',
-                                sm: isFoldable ? '1.7rem' : '2rem',
-                                md: isTablet ? '2.2rem' : '2.5rem',
-                              },
-                              color: 'success.main',
-                              mb: { xs: isMobile ? 1.5 : 2, sm: 2 },
-                            }}
-                          />
-                          <Typography
-                            variant="h4"
-                            component="div"
-                            sx={{
-                              fontWeight: 700,
-                              mb: 1,
-                              fontSize: {
-                                xs: isMobile ? '1rem' : '1.25rem',
-                                sm: isFoldable ? '1.3rem' : '1.5rem',
-                                md: isTablet ? '1.7rem' : '2rem',
-                              },
-                            }}
-                          >
-                            {safeOrderStats.totalSpent.toFixed(0)}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '0.7rem' : '0.75rem',
-                                sm: isFoldable ? '0.8rem' : '0.875rem',
-                                md: isTablet ? '0.8rem' : '0.875rem',
-                              },
-                            }}
-                          >
-                            Total Spent(₹)
-                          </Typography>
-                        </Box>
-                      </Grid>
-
-                      <Grid item size={{ xs: 6, sm: 6, md: 3 }}>
-                        <Box
-                          sx={{
-                            p: {
-                              xs: isMobile ? 1.5 : 2,
-                              sm: isFoldable ? 2.5 : 3,
-                              md: isTablet ? 2.5 : 3,
-                            },
-                            textAlign: 'center',
-                            bgcolor: 'background.paper',
-                            borderRadius: 3,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                            },
-                          }}
-                        >
-                          <StarIcon
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '1.2rem' : '1.5rem',
-                                sm: isFoldable ? '1.7rem' : '2rem',
-                                md: isTablet ? '2.2rem' : '2.5rem',
-                              },
-                              color: 'warning.main',
-                              mb: { xs: isMobile ? 1.5 : 2, sm: 2 },
-                            }}
-                          />
-                          <Typography
-                            variant="h6"
-                            component="div"
-                            sx={{
-                              fontWeight: 700,
-                              mb: 1,
-                              fontSize: {
-                                xs: isMobile ? '0.8rem' : '0.9rem',
-                                sm: isFoldable ? '0.95rem' : '1rem',
-                                md: isTablet ? '1.1rem' : '1.25rem',
-                              },
-                            }}
-                          >
-                            {safeOrderStats.topCategory}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              fontSize: {
-                                xs: isMobile ? '0.7rem' : '0.75rem',
-                                sm: isFoldable ? '0.8rem' : '0.875rem',
-                                md: isTablet ? '0.8rem' : '0.875rem',
-                              },
-                            }}
-                          >
-                            Top Category
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grow> */}
               {/* Compact Statistics */}
               <Grow in timeout={1900}>
                 <Card
@@ -989,8 +674,7 @@ const Profile = () => {
                   sx={{
                     border: '2px solid',
                     borderColor: 'primary.light',
-                    background:
-                      'linear-gradient(135deg, background.paper 0%, rgba(163, 130, 76, 0.03) 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary.main}08 100%)`,
                   }}
                 >
                   <CardContent
@@ -1082,14 +766,13 @@ const Profile = () => {
                           size={isMobile ? 'small' : 'small'}
                           sx={{
                             fontWeight: 600,
-                            background:
-                              'linear-gradient(135deg, #2196f3 0%, #0d47a1 100%) !important',
+                            background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%) !important`,
                             color: 'white !important',
                             flexShrink: 0,
                             '& .MuiChip-label': {
                               color: 'white !important',
                             },
-                            boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+                            boxShadow: `0 2px 8px ${theme.palette.info.main}50`,
                           }}
                         />
                       </Box>
@@ -1151,14 +834,13 @@ const Profile = () => {
                           size={isMobile ? 'small' : 'small'}
                           sx={{
                             fontWeight: 600,
-                            background:
-                              'linear-gradient(135deg, #e91e63 0%, #ad1457 100%) !important',
+                            background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%) !important`,
                             color: 'white !important',
                             flexShrink: 0,
                             '& .MuiChip-label': {
                               color: 'white !important',
                             },
-                            boxShadow: '0 2px 8px rgba(233, 30, 99, 0.3)',
+                            boxShadow: `0 2px 8px ${theme.palette.secondary.main}50`,
                           }}
                         />
                       </Box>
@@ -1220,14 +902,13 @@ const Profile = () => {
                           size={isMobile ? 'small' : 'small'}
                           sx={{
                             fontWeight: 600,
-                            background:
-                              'linear-gradient(135deg, #4caf50 0%, #1b5e20 100%) !important',
+                            background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%) !important`,
                             color: 'white !important',
                             flexShrink: 0,
                             '& .MuiChip-label': {
                               color: 'white !important',
                             },
-                            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                            boxShadow: `0 2px 8px ${theme.palette.success.main}50`,
                           }}
                         />
                       </Box>
@@ -1266,8 +947,7 @@ const Profile = () => {
                     border: '2px solid',
                     borderColor: 'primary.light',
                     height: 'fit-content',
-                    background:
-                      'linear-gradient(135deg, background.paper 0%, rgba(163, 130, 76, 0.03) 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary.main}08 100%)`,
                   }}
                 >
                   <CardContent
@@ -1485,8 +1165,7 @@ const Profile = () => {
                     border: '2px solid',
                     borderColor: 'primary.light',
                     height: 'fit-content',
-                    background:
-                      'linear-gradient(135deg, background.paper 0%, rgba(163, 130, 76, 0.03) 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary.main}08 100%)`,
                   }}
                 >
                   <CardContent
@@ -1633,8 +1312,7 @@ const Profile = () => {
                   sx={{
                     border: '2px solid',
                     borderColor: 'primary.light',
-                    background:
-                      'linear-gradient(135deg, background.paper 0%, rgba(163, 130, 76, 0.03) 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.primary.main}08 100%)`,
                   }}
                 >
                   <CardContent

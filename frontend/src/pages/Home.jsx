@@ -43,17 +43,15 @@ const HomeComponent = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Enhanced responsive utilities
-  const {
-    isExtraSmall,
-    isSmall,
-    isMedium,
-    isLarge,
-    getResponsiveContainer,
-    getResponsiveSpacingClasses,
-    getResponsiveTextClasses,
-    getResponsiveButtonSize,
-  } = useFoldableDisplay();
+  // Extract responsive variants to avoid nested ternary operations
+  const errorVariant = isMobile ? 'h6' : isTablet ? 'h5' : 'h4';
+  const warningVariant = isMobile ? 'h6' : isTablet ? 'h5' : 'h4';
+  const categoryVariant = isMobile ? 'h5' : isTablet ? 'h4' : 'h3';
+  const stackSpacing = isMobile ? 0.5 : isTablet ? 0.75 : 1;
+
+  // Simplified responsive utilities
+  const { getResponsiveContainer, getResponsiveSpacingClasses } =
+    useFoldableDisplay();
 
   // Update products and pagination when data changes
   useEffect(() => {
@@ -135,12 +133,7 @@ const HomeComponent = () => {
       maxWidth='xl'
       className={`${getResponsiveContainer()} ${getResponsiveSpacingClasses()}`}
       sx={{
-        px: {
-          xs: isExtraSmall ? 0.5 : 1,
-          sm: isSmall ? 1.5 : 2,
-          md: isMedium ? 2.5 : 3,
-          lg: isLarge ? 3.5 : 4,
-        },
+        px: { xs: 1, sm: 2, md: 3, lg: 4 },
       }}
     >
       <HeroBanner />
@@ -154,26 +147,11 @@ const HomeComponent = () => {
           }}
         >
           <Typography
-            variant={isMobile ? 'h6' : isTablet ? 'h5' : 'h4'}
-            className={getResponsiveTextClasses()}
+            variant={errorVariant}
             sx={{
-              color: '#a3824c',
+              color: theme.palette.error.main,
               fontWeight: 700,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #e6d897 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
               mb: { xs: 2, sm: 3 },
-              fontSize: {
-                xs: isExtraSmall
-                  ? 'clamp(1rem, 3.5vw, 1.25rem)'
-                  : 'clamp(1.125rem, 4vw, 1.5rem)',
-                sm: isSmall
-                  ? 'clamp(1.25rem, 3.5vw, 1.75rem)'
-                  : 'clamp(1.25rem, 3.5vw, 1.75rem)',
-                md: isMedium
-                  ? 'clamp(1.5rem, 3vw, 2rem)'
-                  : 'clamp(1.5rem, 3vw, 2rem)',
-              },
             }}
           >
             Failed to load products. Please try again later.
@@ -190,26 +168,11 @@ const HomeComponent = () => {
           }}
         >
           <Typography
-            variant={isMobile ? 'h6' : isTablet ? 'h5' : 'h4'}
-            className={getResponsiveTextClasses()}
+            variant={warningVariant}
             sx={{
-              color: '#a3824c',
+              color: theme.palette.warning.main,
               fontWeight: 700,
-              background: 'linear-gradient(90deg, #fffbe6 0%, #e6d897 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
               mb: { xs: 2, sm: 3 },
-              fontSize: {
-                xs: isExtraSmall
-                  ? 'clamp(1rem, 3.5vw, 1.25rem)'
-                  : 'clamp(1.125rem, 4vw, 1.5rem)',
-                sm: isSmall
-                  ? 'clamp(1.25rem, 3.5vw, 1.75rem)'
-                  : 'clamp(1.25rem, 3.5vw, 1.75rem)',
-                md: isMedium
-                  ? 'clamp(1.5rem, 3vw, 2rem)'
-                  : 'clamp(1.5rem, 3vw, 2rem)',
-              },
             }}
           >
             No products available. Please check back later.
@@ -222,55 +185,20 @@ const HomeComponent = () => {
           key={category}
           className={getResponsiveSpacingClasses()}
           sx={{
-            mt: {
-              xs: isExtraSmall ? 3 : 4,
-              sm: isSmall ? 4 : 5,
-              md: isMedium ? 5 : 6,
-              lg: isLarge ? 6 : 7,
-            },
+            mt: { xs: 4, sm: 5, md: 6, lg: 7 },
           }}
         >
           <Typography
-            variant={isMobile ? 'h5' : isTablet ? 'h4' : 'h3'}
-            className={getResponsiveTextClasses()}
+            variant={categoryVariant}
             sx={{
-              mb: {
-                xs: isExtraSmall ? 1.5 : 2,
-                sm: isSmall ? 2 : 3,
-                md: isMedium ? 3 : 4,
-              },
+              mb: { xs: 2, sm: 3, md: 4 },
               fontWeight: 700,
-              color: '#a3824c',
-              background:
-                'linear-gradient(90deg, #a3824c 0%, #e6d897 60%, #b59961 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: theme.palette.primary.main,
               letterSpacing: { xs: '0.5px', sm: '1px' },
-              textShadow: '0 2px 8px rgba(163,130,76,0.08)',
-              px: {
-                xs: isExtraSmall ? 0.5 : 1,
-                sm: isSmall ? 1.5 : 2,
-              },
-              py: {
-                xs: isExtraSmall ? 0.25 : 0.5,
-                sm: isSmall ? 0.75 : 1,
-              },
-              borderRadius: 2,
+              px: { xs: 1, sm: 2 },
+              py: { xs: 0.5, sm: 1 },
+              borderRadius: 0.5,
               display: 'inline-block',
-              fontSize: {
-                xs: isExtraSmall
-                  ? 'clamp(1.25rem, 4.5vw, 1.75rem)'
-                  : 'clamp(1.5rem, 5vw, 2rem)',
-                sm: isSmall
-                  ? 'clamp(1.75rem, 4vw, 2.25rem)'
-                  : 'clamp(1.75rem, 4vw, 2.25rem)',
-                md: isMedium
-                  ? 'clamp(2rem, 3.5vw, 2.5rem)'
-                  : 'clamp(2rem, 3.5vw, 2.5rem)',
-                lg: isLarge
-                  ? 'clamp(2.25rem, 3vw, 3rem)'
-                  : 'clamp(2.25rem, 3vw, 3rem)',
-              },
             }}
           >
             {category.charAt(0).toUpperCase() + category.slice(1)} Products
@@ -279,27 +207,16 @@ const HomeComponent = () => {
           <ProductCarousel
             products={filteredProducts[category]}
             renderActions={product => (
-              <Stack
-                direction='column'
-                spacing={isMobile ? 0.5 : isTablet ? 0.75 : 1}
-                width='100%'
-              >
+              <Stack direction='column' spacing={stackSpacing} width='100%'>
                 <Button
                   fullWidth
                   variant='contained'
-                  className={getResponsiveButtonSize()}
                   startIcon={
                     buyNowLoading[product._id] ? (
                       <CircularProgress size={15} />
                     ) : (
                       <LocalMallIcon
-                        sx={{
-                          color: '#fffbe6',
-                          fontSize: {
-                            xs: isExtraSmall ? 16 : 18,
-                            sm: isSmall ? 17 : 16,
-                          },
-                        }}
+                        sx={{ color: theme.palette.primary.contrastText }}
                       />
                     )
                   }
@@ -307,41 +224,19 @@ const HomeComponent = () => {
                   onClick={() => handleBuyNow(product._id)}
                   sx={{
                     fontWeight: 600,
-                    fontSize: {
-                      xs: isExtraSmall ? '0.8rem' : '0.875rem',
-                      sm: isSmall ? '0.85rem' : '0.75rem',
-                    },
-                    minWidth: {
-                      xs: isExtraSmall ? '100%' : '100%',
-                      sm: isSmall ? '100%' : 'auto',
-                    },
-                    px: {
-                      xs: isExtraSmall ? 1.5 : 2,
-                      sm: isSmall ? 1.75 : 1.5,
-                    },
-                    py: {
-                      xs: isExtraSmall ? 0.75 : 1,
-                      sm: isSmall ? 0.875 : 0.5,
-                    },
-                    minHeight: {
-                      xs: isExtraSmall ? '44px' : '48px',
-                      sm: isSmall ? '46px' : '36px',
-                    },
-                    background:
-                      'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-                    color: '#fff',
+                    fontSize: { xs: '0.875rem', sm: '0.75rem' },
+                    px: { xs: 2, sm: 1.5 },
+                    py: { xs: 1, sm: 0.5 },
+                    minHeight: { xs: '48px', sm: '36px' },
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                    color: theme.palette.primary.contrastText,
                     textTransform: 'none',
-                    borderRadius: {
-                      xs: isExtraSmall ? 1.5 : 2,
-                      sm: isSmall ? 1.75 : 1,
-                    },
-                    boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+                    borderRadius: 2,
+                    boxShadow: theme.shadows[4],
                     '&:hover': {
-                      background:
-                        'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                      color: '#000',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(163,130,76,0.15)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[6],
                     },
                     '&:active': {
                       transform: 'translateY(0)',
@@ -354,19 +249,12 @@ const HomeComponent = () => {
                 <Button
                   variant='outlined'
                   fullWidth
-                  className={getResponsiveButtonSize()}
                   startIcon={
                     actionLoading[product._id] ? (
                       <CircularProgress size={15} />
                     ) : (
                       <AddShoppingCartIcon
-                        sx={{
-                          color: '#a3824c',
-                          fontSize: {
-                            xs: isExtraSmall ? 16 : 18,
-                            sm: isSmall ? 17 : 16,
-                          },
-                        }}
+                        sx={{ color: theme.palette.primary.main }}
                       />
                     )
                   }
@@ -374,43 +262,22 @@ const HomeComponent = () => {
                   onClick={() => handleAddToCart(product._id)}
                   sx={{
                     fontWeight: 600,
-                    minWidth: {
-                      xs: isExtraSmall ? '100%' : '100%',
-                      sm: isSmall ? '100%' : 'auto',
-                    },
-                    px: {
-                      xs: isExtraSmall ? 1.5 : 2,
-                      sm: isSmall ? 1.75 : 1.5,
-                    },
-                    py: {
-                      xs: isExtraSmall ? 0.75 : 1,
-                      sm: isSmall ? 0.875 : 0.5,
-                    },
-                    fontSize: {
-                      xs: isExtraSmall ? '0.8rem' : '0.875rem',
-                      sm: isSmall ? '0.85rem' : '0.75rem',
-                    },
-                    minHeight: {
-                      xs: isExtraSmall ? '44px' : '48px',
-                      sm: isSmall ? '46px' : '36px',
-                    },
-                    borderColor: '#a3824c',
-                    color: '#a3824c',
+                    px: { xs: 2, sm: 1.5 },
+                    py: { xs: 1, sm: 0.5 },
+                    fontSize: { xs: '0.875rem', sm: '0.75rem' },
+                    minHeight: { xs: '48px', sm: '36px' },
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     textTransform: 'none',
-                    borderRadius: {
-                      xs: isExtraSmall ? 1.5 : 2,
-                      sm: isSmall ? 1.75 : 1,
-                    },
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    boxShadow: '0 2px 8px rgba(163,130,76,0.07)',
+                    borderRadius: 2,
+                    background: theme.palette.background.paper,
+                    boxShadow: theme.shadows[2],
                     '&:hover': {
-                      borderColor: '#e6d897',
-                      background:
-                        'linear-gradient(90deg, #e6d897 0%, #fffbe6 100%)',
-                      color: '#866422',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(163,130,76,0.12)',
+                      borderColor: theme.palette.primary.dark,
+                      backgroundColor: theme.palette.action.hover,
+                      color: theme.palette.primary.dark,
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[4],
                     },
                     '&:active': {
                       transform: 'translateY(0)',
@@ -432,15 +299,8 @@ const HomeComponent = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            mt: {
-              xs: isExtraSmall ? 3 : 4,
-              sm: isSmall ? 4 : 5,
-              md: isMedium ? 5 : 6,
-            },
-            mb: {
-              xs: isExtraSmall ? 1.5 : 2,
-              sm: isSmall ? 2 : 3,
-            },
+            mt: { xs: 4, sm: 5, md: 6 },
+            mb: { xs: 2, sm: 3 },
             gap: 2,
             className: getResponsiveSpacingClasses(),
           }}
@@ -456,32 +316,17 @@ const HomeComponent = () => {
               p: 0,
               mb: 1,
               '& .MuiTypography-root': {
-                fontSize: {
-                  xs: isExtraSmall
-                    ? 'clamp(0.75rem, 2.5vw, 0.875rem)'
-                    : 'clamp(0.875rem, 3vw, 1rem)',
-                  sm: isSmall
-                    ? 'clamp(0.875rem, 2.5vw, 1rem)'
-                    : 'clamp(0.875rem, 2.5vw, 1rem)',
-                },
+                fontSize: { xs: '0.875rem', sm: '1rem' },
               },
             }}
           />
           <Typography
             variant='body2'
-            className={getResponsiveTextClasses()}
             sx={{
-              color: '#a3824c',
+              color: theme.palette.primary.main,
               fontWeight: 500,
               textAlign: 'center',
-              fontSize: {
-                xs: isExtraSmall
-                  ? 'clamp(0.75rem, 2.5vw, 0.875rem)'
-                  : 'clamp(0.875rem, 3vw, 1rem)',
-                sm: isSmall
-                  ? 'clamp(0.875rem, 2.5vw, 1rem)'
-                  : 'clamp(0.875rem, 2.5vw, 1rem)',
-              },
+              fontSize: { xs: '0.875rem', sm: '1rem' },
             }}
           >
             Page {page} of {totalPages}
@@ -504,15 +349,14 @@ const HomeComponent = () => {
               size={isMobile ? 'small' : 'medium'}
               sx={{
                 '& .MuiPaginationItem-root': {
-                  color: '#a3824c',
+                  color: theme.palette.primary.main,
                   fontWeight: 600,
                   '&.Mui-selected': {
-                    backgroundColor:
-                      'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                    color: '#fff',
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
                   },
                   '&:hover': {
-                    backgroundColor: 'rgba(163,130,76,0.1)',
+                    backgroundColor: theme.palette.action.hover,
                   },
                 },
               }}
@@ -522,33 +366,21 @@ const HomeComponent = () => {
             {page < totalPages && (
               <Button
                 variant='outlined'
-                className={getResponsiveButtonSize()}
                 onClick={() => handlePageChange(null, page + 1)}
                 sx={{
-                  borderColor: '#a3824c',
-                  color: '#a3824c',
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
                   fontWeight: 600,
-                  px: {
-                    xs: isExtraSmall ? 2 : 3,
-                    sm: isSmall ? 2.5 : 3,
-                  },
-                  py: {
-                    xs: isExtraSmall ? 0.75 : 1,
-                    sm: isSmall ? 0.875 : 1,
-                  },
+                  px: { xs: 3, sm: 3 },
+                  py: { xs: 1, sm: 1 },
                   borderRadius: 2,
-                  fontSize: {
-                    xs: isExtraSmall ? '0.8rem' : '0.875rem',
-                    sm: isSmall ? '0.85rem' : '1rem',
-                  },
-                  minHeight: {
-                    xs: isExtraSmall ? '40px' : '44px',
-                    sm: isSmall ? '42px' : '48px',
-                  },
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  minHeight: { xs: '44px', sm: '48px' },
                   '&:hover': {
-                    borderColor: '#e6d897',
-                    backgroundColor: 'rgba(163,130,76,0.1)',
-                    transform: 'translateY(-1px)',
+                    borderColor: theme.palette.primary.dark,
+                    backgroundColor: theme.palette.action.hover,
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
                   },
                 }}
               >

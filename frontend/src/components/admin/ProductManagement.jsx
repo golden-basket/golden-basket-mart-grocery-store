@@ -8,13 +8,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Select,
   MenuItem,
   IconButton,
@@ -22,28 +15,37 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
-  Chip,
   Card,
   CardContent,
-  CardActions,
   Stack,
   Grid,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import PropTypes from 'prop-types';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import Loading from '../Loading';
 import FilterStatusBar from '../FilterStatusBar';
 import ReusableFilterControls from '../ReusableFilterControls';
-import { useAllProducts } from '../../hooks/useProducts';
+import {
+  useAllProducts,
+  useCreateProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+} from '../../hooks/useProducts';
 import { createAdminStyles } from './adminStyles';
 import { useToastNotifications } from '../../hooks/useToast';
+import ProductTable from './ProductTable';
+import ProductCard from './ProductCard';
 
-const ProductManagement = ({ categories, onProductUpdate }) => {
+const ProductManagement = ({ categories }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { showSuccess, showError } = useToastNotifications();
+
+  // React Query mutations
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
 
   // Product state
   const [prodDialogOpen, setProdDialogOpen] = useState(false);
@@ -65,7 +67,10 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
   const { data: products, isLoading, error } = useAllProducts();
 
   // Get styles from shared utility
-  const styles = useMemo(() => createAdminStyles(isMobile), [isMobile]);
+  const styles = useMemo(
+    () => createAdminStyles(isMobile, theme),
+    [isMobile, theme]
+  );
 
   // Memoized filter handlers
   const handleSearchChange = useCallback(e => {
@@ -138,6 +143,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
             price: prod.price.toString(),
             stock: prod.stock.toString(),
             images: prod.images || [],
+            category: prod.category._id,
           }
         : {
             name: '',
@@ -153,7 +159,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
 
   const handleProdDialogClose = useCallback(() => setProdDialogOpen(false), []);
 
-  const handleProdSave = useCallback(() => {
+  const handleProdSave = useCallback(async () => {
     if (
       !prodForm.name ||
       !prodForm.description ||
@@ -184,12 +190,17 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         stock: Number(prodForm.stock),
       };
 
-      onProductUpdate(prodDialogMode, payload, prodForm._id);
-      showSuccess(
-        prodDialogMode === 'add'
-          ? 'Product added successfully!'
-          : 'Product updated successfully!'
-      );
+      if (prodDialogMode === 'add') {
+        await createProductMutation.mutateAsync(payload);
+        showSuccess('Product added successfully!');
+      } else {
+        await updateProductMutation.mutateAsync({
+          id: prodForm._id,
+          data: payload,
+        });
+        showSuccess('Product updated successfully!');
+      }
+
       handleProdDialogClose();
     } catch (error) {
       console.log('Error in handleProdSave', error);
@@ -203,22 +214,23 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
     prodForm,
     prodDialogMode,
     handleProdDialogClose,
-    onProductUpdate,
+    createProductMutation,
+    updateProductMutation,
     showSuccess,
     showError,
   ]);
 
   const handleProdDelete = useCallback(
-    id => {
+    async id => {
       try {
-        onProductUpdate('delete', null, id);
+        await deleteProductMutation.mutateAsync(id);
         showSuccess('Product deleted successfully!');
       } catch (error) {
         console.log('Error in handleProdDelete', error);
         showError('Failed to delete product. Please try again.');
       }
     },
-    [onProductUpdate, showSuccess, showError]
+    [deleteProductMutation, showSuccess, showError]
   );
 
   const parseImageUrls = useCallback(urlString => {
@@ -237,6 +249,99 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
   const handleProdFormChange = useCallback((field, value) => {
     setProdForm(f => ({ ...f, [field]: value }));
   }, []);
+
+  // Render content based on loading/error state
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <Box display='flex' justifyContent='center' my={4}>
+          <Loading />
+        </Box>
+      );
+    }
+    
+    if (error) {
+      return (
+        <Alert severity='error' sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      );
+    }
+    
+    return (
+      <>
+        {/* Desktop Table View */}
+        {!isMobile &&
+          (filteredProducts?.length > 0 ? (
+            <ProductTable
+              products={filteredProducts}
+              categories={categories}
+              theme={theme}
+              onEdit={prod => handleProdDialogOpen('edit', prod)}
+              onDelete={handleProdDelete}
+            />
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 6 }}>
+              <Typography
+                variant='h6'
+                color={theme.palette.primary.main}
+                fontWeight={700}
+                mb={2}
+              >
+                No products found
+              </Typography>
+              <Typography
+                variant='body2'
+                color={theme.palette.text.secondary}
+              >
+                {search || filterCat
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Start by adding your first product'}
+              </Typography>
+            </Box>
+          ))}
+
+        {/* Mobile Card View */}
+        {isMobile && (
+          <Grid container spacing={2}>
+            {filteredProducts?.length > 0 ? (
+              filteredProducts.map(prod => (
+                <Grid item span={12} key={prod._id} sx={{ width: '100%' }}>
+                  <ProductCard
+                    product={prod}
+                    categories={categories}
+                    theme={theme}
+                    onEdit={prod => handleProdDialogOpen('edit', prod)}
+                    onDelete={handleProdDelete}
+                  />
+                </Grid>
+              ))
+            ) : (
+              <Grid item span={12}>
+                <Card sx={styles.cardStyles}>
+                  <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography
+                      variant='h6'
+                      color={theme.palette.primary.main}
+                      fontWeight={700}
+                      mb={2}
+                    >
+                      No products found
+                    </Typography>
+                    <Typography variant='body2' color={theme.palette.text.secondary}>
+                      {search || filterCat
+                        ? 'Try adjusting your search or filter criteria'
+                        : 'Start by adding your first product'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
+        )}
+      </>
+    );
+  };
 
   return (
     <Box sx={styles.sectionStyles}>
@@ -360,269 +465,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         />
       )}
 
-      {isLoading ? (
-        <Box display='flex' justifyContent='center' my={4}>
-          <Loading />
-        </Box>
-      ) : error ? (
-        <Alert severity='error' sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      ) : (
-        <>
-          {/* Desktop Table View */}
-          {!isMobile && (
-            <TableContainer component={Paper} sx={styles.tableContainerStyles}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={styles.tableHeaderStyles}>
-                    {[
-                      'Name',
-                      'Description',
-                      'Price',
-                      'Category',
-                      'Stock',
-                      'Images',
-                      'Actions',
-                    ].map(header => (
-                      <TableCell key={header} sx={styles.tableHeaderCellStyles}>
-                        {header}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredProducts?.length > 0 ? (
-                    filteredProducts.map(prod => (
-                      <TableRow key={prod._id} sx={styles.tableRowStyles}>
-                        <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
-                          {prod.name}
-                        </TableCell>
-                        <TableCell sx={{ color: '#b59961', maxWidth: 200 }}>
-                          {prod.description.length > 50
-                            ? `${prod.description.substring(0, 50)}...`
-                            : prod.description}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: '#a3824c' }}>
-                          ₹{prod.price}
-                        </TableCell>
-                        <TableCell sx={{ color: '#b59961' }}>
-                          {categories.find(cat => cat._id === prod.category._id)
-                            ?.name || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={prod.stock}
-                            size='small'
-                            sx={{
-                              backgroundColor:
-                                prod.stock > 10
-                                  ? '#4caf50'
-                                  : prod.stock > 0
-                                    ? '#ff9800'
-                                    : '#f44336',
-                              color: '#fff',
-                              fontWeight: 600,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ color: '#b59961' }}>
-                          <Chip
-                            label={`${prod.images?.length || 0} images`}
-                            size='small'
-                            variant='outlined'
-                            sx={{
-                              borderColor: '#a3824c',
-                              color: '#a3824c',
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Stack direction='row' spacing={1}>
-                            <IconButton
-                              onClick={() => handleProdDialogOpen('edit', prod)}
-                              sx={{
-                                color: '#a3824c',
-                                '&:hover': {
-                                  background: 'rgba(163,130,76,0.1)',
-                                },
-                              }}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => handleProdDelete(prod._id)}
-                              sx={{
-                                color: '#f44336',
-                                '&:hover': {
-                                  background: 'rgba(244,67,54,0.1)',
-                                },
-                              }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} align='center' sx={{ py: 6 }}>
-                        <Typography
-                          variant='h6'
-                          color='#a3824c'
-                          fontWeight={700}
-                          mb={2}
-                        >
-                          No products found
-                        </Typography>
-                        <Typography variant='body2' color='#b59961'>
-                          {search || filterCat
-                            ? 'Try adjusting your search or filter criteria'
-                            : 'Start by adding your first product'}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-
-          {/* Mobile Card View */}
-          {isMobile && (
-            <Grid container spacing={2}>
-              {filteredProducts?.length > 0 ? (
-                filteredProducts.map(prod => (
-                  <Grid item span={12} key={prod._id} sx={{ width: '100%' }}>
-                    <Card sx={styles.cardStyles}>
-                      <CardContent>
-                        <Stack spacing={2}>
-                          <Typography
-                            variant='h6'
-                            sx={{ color: '#a3824c', fontWeight: 700 }}
-                          >
-                            {prod.name}
-                          </Typography>
-                          <Typography variant='body2' sx={{ color: '#b59961' }}>
-                            {prod.description}
-                          </Typography>
-                          <Grid
-                            container
-                            spacing={1}
-                            justifyContent='space-between'
-                            sx={{ mt: 1 }}
-                          >
-                            <Grid item>
-                              <Chip
-                                label={`₹${prod.price}`}
-                                size='small'
-                                sx={{
-                                  backgroundColor: '#a3824c',
-                                  color: '#fff',
-                                  height: 24,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                }}
-                              />
-                            </Grid>
-                            <Grid item>
-                              <Chip
-                                label={
-                                  categories.find(
-                                    cat => cat._id === prod.category._id
-                                  )?.name || 'N/A'
-                                }
-                                variant='outlined'
-                                size='small'
-                                sx={{
-                                  borderColor: '#a3824c',
-                                  color: '#a3824c',
-                                  height: 24,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                }}
-                              />
-                            </Grid>
-                            <Grid item>
-                              <Chip
-                                label={`Stock: ${prod.stock}`}
-                                size='small'
-                                sx={{
-                                  backgroundColor:
-                                    prod.stock > 10
-                                      ? '#4caf50'
-                                      : prod.stock > 0
-                                        ? '#ff9800'
-                                        : '#f44336',
-                                  color: '#fff',
-                                  height: 24,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                }}
-                              />
-                            </Grid>
-                            <Grid item>
-                              <Chip
-                                label={`${prod.images?.length || 0} images`}
-                                variant='outlined'
-                                size='small'
-                                sx={{
-                                  borderColor: '#e6d897',
-                                  color: '#b59961',
-                                  height: 24,
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                }}
-                              />
-                            </Grid>
-                          </Grid>
-                        </Stack>
-                      </CardContent>
-                      <CardActions>
-                        <Button
-                          startIcon={<EditIcon />}
-                          onClick={() => handleProdDialogOpen('edit', prod)}
-                          sx={{ color: '#a3824c' }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          startIcon={<DeleteIcon />}
-                          onClick={() => handleProdDelete(prod._id)}
-                          sx={{ color: '#f44336' }}
-                        >
-                          Delete
-                        </Button>
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                ))
-              ) : (
-                <Grid item span={12}>
-                  <Card sx={styles.cardStyles}>
-                    <CardContent sx={{ textAlign: 'center', py: 4 }}>
-                      <Typography
-                        variant='h6'
-                        color='#a3824c'
-                        fontWeight={700}
-                        mb={2}
-                      >
-                        No products found
-                      </Typography>
-                      <Typography variant='body2' color='#b59961'>
-                        {search || filterCat
-                          ? 'Try adjusting your search or filter criteria'
-                          : 'Start by adding your first product'}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              )}
-            </Grid>
-          )}
-        </>
-      )}
+      {renderContent()}
 
       {/* Product Dialog */}
       <Dialog
@@ -631,14 +474,23 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
         maxWidth={isMobile ? false : 'md'}
         fullWidth
         fullScreen={isMobile}
-        PaperProps={{ sx: styles.dialogStyles }}
+        slotProps={{
+          paper: {
+            sx: styles.dialogStyles,
+          },
+        }}
       >
         <DialogTitle sx={styles.dialogTitleStyles}>
           {prodDialogMode === 'add' ? 'Add Product' : 'Edit Product'}
           {isMobile && (
             <IconButton
               onClick={handleProdDialogClose}
-              sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: theme.palette.common.white,
+              }}
             >
               <CloseIcon />
             </IconButton>
@@ -682,7 +534,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
                 displayEmpty
                 sx={{
                   ...styles.inputStyles['& .MuiOutlinedInput-root'],
-                  color: '#a3824c',
+                  color: theme.palette.primary.main,
                   fontWeight: 500,
                 }}
               >
@@ -727,14 +579,14 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
           <Button
             onClick={handleProdDialogClose}
             sx={{
-              color: '#a3824c',
-              border: '1px solid #a3824c',
-              borderRadius: 1,
+              color: theme.palette.primary.main,
+              border: '1px solid ' + theme.palette.primary.main,
+              borderRadius: theme.shape.borderRadius * 0.17,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderColor: '#e6d897',
+                background: theme.palette.action.hover,
+                borderColor: theme.palette.primary.light,
               },
             }}
           >
@@ -758,3 +610,7 @@ const ProductManagement = ({ categories, onProductUpdate }) => {
 };
 
 export default ProductManagement;
+
+ProductManagement.propTypes = {
+  categories: PropTypes.array.isRequired,
+};

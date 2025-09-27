@@ -175,13 +175,12 @@ const OrderManagement = () => {
         gutterBottom
         sx={{
           fontWeight: 700,
-          background:
-            'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           mb: 3,
           textAlign: isMobile ? 'center' : 'left',
-          textShadow: '0 2px 8px rgba(163, 130, 76, 0.1)',
+          textShadow: `0 2px 8px ${theme.palette.primary.main}20`,
         }}
       >
         Order Management

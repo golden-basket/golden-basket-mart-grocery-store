@@ -2,7 +2,6 @@
 export const ROUTES = {
   // Public Routes
   HOME: '/',
-  TEST: '/test',
   CATALOGUE: '/catalogue',
 
   // Authentication Routes

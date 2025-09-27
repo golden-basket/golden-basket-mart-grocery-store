@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Dialog,
   DialogTitle,
@@ -17,6 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Loading from './Loading';
 import { useAuth } from '../hooks/useAuth';
 import ApiService from '../services/api';
+import { useTheme } from '@mui/material/styles';
 
 const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
   const { user } = useAuth();
@@ -32,6 +34,7 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const theme = useTheme();
 
   const handleInputChange = field => event => {
     setFormData(prev => ({
@@ -129,27 +132,25 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
       onClose={handleClose}
       maxWidth='sm'
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: '0 12px 40px rgba(163, 130, 76, 0.15)',
-          m: { xs: 2, sm: 4 },
-          border: '2px solid var(--color-primary-light)',
-          background:
-            'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+      slotProps={{
+        paper: {
+          sx: {
+            boxShadow: theme.shadows[12],
+            m: { xs: 2, sm: 4 },
+            background: theme.palette.background.paper,
+          },
         },
       }}
     >
       <DialogTitle
         sx={{
-          background:
-            'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
-          color: 'white',
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: theme.palette.primary.contrastText,
           fontWeight: 800,
           fontSize: { xs: '1.25rem', sm: '1.5rem' },
           py: { xs: 2, sm: 3 },
           textAlign: 'center',
-          borderBottom: '3px solid var(--color-primary-light)',
+          borderBottom: `3px solid ${theme.palette.primary.light}`,
         }}
       >
         <Box
@@ -166,22 +167,6 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
       </DialogTitle>
 
       <DialogContent sx={{ pt: 4, pb: 2, px: { xs: 3, sm: 4 } }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant='body2'
-            sx={{
-              color: 'var(--color-text-secondary)',
-              textAlign: 'center',
-              mb: 3,
-              fontSize: { xs: '0.9rem', sm: '1rem' },
-              lineHeight: 1.6,
-            }}
-          >
-            Enter your current password and choose a new one to update your
-            account security.
-          </Typography>
-        </Box>
-
         {isSubmitting ? (
           <Loading size='small' variant='default' />
         ) : (
@@ -194,61 +179,58 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
               onChange={handleInputChange('currentPassword')}
               error={!!errors.currentPassword}
               helperText={errors.currentPassword}
-              FormHelperTextProps={{
-                sx: {
-                  color: errors.currentPassword
-                    ? 'var(--color-error)'
-                    : 'var(--color-text-secondary)',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                },
-              }}
               fullWidth
-              size='medium'
-              InputProps={{
-                startAdornment: (
-                  <LockIcon
-                    sx={{
-                      mr: 2,
-                      color: 'var(--color-primary)',
-                      fontSize: '1.5rem',
-                    }}
-                  />
-                ),
-                endAdornment: (
-                  <IconButton
-                    onClick={() => togglePasswordVisibility('currentPassword')}
-                    edge='end'
-                    sx={{ mr: 1 }}
-                  >
-                    {showPasswords.currentPassword ? (
-                      <VisibilityOffIcon />
-                    ) : (
-                      <VisibilityIcon />
-                    )}
-                  </IconButton>
-                ),
+              required
+              margin='normal'
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <LockIcon
+                      sx={{
+                        color: errors.currentPassword
+                          ? theme.palette.error.main
+                          : theme.palette.primary.main,
+                      }}
+                    />
+                  ),
+                  endAdornment: (
+                    <IconButton
+                      onClick={() =>
+                        togglePasswordVisibility('currentPassword')
+                      }
+                      edge='end'
+                    >
+                      {showPasswords.currentPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
+                    </IconButton>
+                  ),
+                },
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  border: '1px solid rgba(163, 130, 76, 0.2)',
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--color-primary)',
-                    borderWidth: '2px',
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
                   },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--color-primary)',
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-error fieldset': {
+                    borderColor: theme.palette.error.main,
                     borderWidth: '2px',
                   },
                 },
                 '& .MuiInputLabel-root': {
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 500,
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.error.main },
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'var(--color-primary)',
-                  fontWeight: 600,
+                '& .MuiFormHelperText-root': {
+                  '&.Mui-error': {
+                    color: theme.palette.error.main,
+                  },
                 },
               }}
             />
@@ -261,61 +243,56 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
               onChange={handleInputChange('newPassword')}
               error={!!errors.newPassword}
               helperText={errors.newPassword || 'Minimum 6 characters'}
-              FormHelperTextProps={{
-                sx: {
-                  color: errors.newPassword
-                    ? 'var(--color-error)'
-                    : 'var(--color-text-secondary)',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                },
-              }}
               fullWidth
-              size='medium'
-              InputProps={{
-                startAdornment: (
-                  <LockIcon
-                    sx={{
-                      mr: 2,
-                      color: 'var(--color-primary)',
-                      fontSize: '1.5rem',
-                    }}
-                  />
-                ),
-                endAdornment: (
-                  <IconButton
-                    onClick={() => togglePasswordVisibility('newPassword')}
-                    edge='end'
-                    sx={{ mr: 1 }}
-                  >
-                    {showPasswords.newPassword ? (
-                      <VisibilityOffIcon />
-                    ) : (
-                      <VisibilityIcon />
-                    )}
-                  </IconButton>
-                ),
+              required
+              margin='normal'
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <LockIcon
+                      sx={{
+                        color: errors.newPassword
+                          ? theme.palette.error.main
+                          : theme.palette.primary.main,
+                      }}
+                    />
+                  ),
+                  endAdornment: (
+                    <IconButton
+                      onClick={() => togglePasswordVisibility('newPassword')}
+                      edge='end'
+                    >
+                      {showPasswords.newPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
+                    </IconButton>
+                  ),
+                },
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  border: '1px solid rgba(163, 130, 76, 0.2)',
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--color-primary)',
-                    borderWidth: '2px',
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
                   },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--color-primary)',
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-error fieldset': {
+                    borderColor: theme.palette.error.main,
                     borderWidth: '2px',
                   },
                 },
                 '& .MuiInputLabel-root': {
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 500,
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.error.main },
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'var(--color-primary)',
-                  fontWeight: 600,
+                '& .MuiFormHelperText-root': {
+                  '&.Mui-error': {
+                    color: theme.palette.error.main,
+                  },
                 },
               }}
             />
@@ -328,61 +305,58 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
               onChange={handleInputChange('confirmPassword')}
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
-              FormHelperTextProps={{
-                sx: {
-                  color: errors.confirmPassword
-                    ? 'var(--color-error)'
-                    : 'var(--color-text-secondary)',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                },
-              }}
               fullWidth
-              size='medium'
-              InputProps={{
-                startAdornment: (
-                  <LockIcon
-                    sx={{
-                      mr: 2,
-                      color: 'var(--color-primary)',
-                      fontSize: '1.5rem',
-                    }}
-                  />
-                ),
-                endAdornment: (
-                  <IconButton
-                    onClick={() => togglePasswordVisibility('confirmPassword')}
-                    edge='end'
-                    sx={{ mr: 1 }}
-                  >
-                    {showPasswords.confirmPassword ? (
-                      <VisibilityOffIcon />
-                    ) : (
-                      <VisibilityIcon />
-                    )}
-                  </IconButton>
-                ),
+              required
+              margin='normal'
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <LockIcon
+                      sx={{
+                        color: errors.confirmPassword
+                          ? theme.palette.error.main
+                          : theme.palette.primary.main,
+                      }}
+                    />
+                  ),
+                  endAdornment: (
+                    <IconButton
+                      onClick={() =>
+                        togglePasswordVisibility('confirmPassword')
+                      }
+                      edge='end'
+                    >
+                      {showPasswords.confirmPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
+                    </IconButton>
+                  ),
+                },
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  border: '1px solid rgba(163, 130, 76, 0.2)',
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--color-primary)',
-                    borderWidth: '2px',
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
                   },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--color-primary)',
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-error fieldset': {
+                    borderColor: theme.palette.error.main,
                     borderWidth: '2px',
                   },
                 },
                 '& .MuiInputLabel-root': {
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 500,
+                  '&.Mui-focused': { color: theme.palette.primary.main },
+                  '&.Mui-error': { color: theme.palette.error.main },
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'var(--color-primary)',
-                  fontWeight: 600,
+                '& .MuiFormHelperText-root': {
+                  '&.Mui-error': {
+                    color: theme.palette.error.main,
+                  },
                 },
               }}
             />
@@ -396,8 +370,8 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
           variant='outlined'
           startIcon={<CloseIcon />}
           sx={{
-            color: 'var(--color-text-secondary)',
-            borderColor: 'var(--color-primary-light)',
+            color: theme.palette.text.secondary,
+            borderColor: theme.palette.primary.light,
             borderWidth: '2px',
             px: 4,
             py: 1.5,
@@ -406,11 +380,11 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
             borderRadius: 2,
             minWidth: 120,
             '&:hover': {
-              borderColor: 'var(--color-primary)',
-              color: 'var(--color-primary-dark)',
-              backgroundColor: 'var(--color-cream-light)',
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.dark,
+              backgroundColor: theme.palette.background.default,
               transform: 'translateY(-2px)',
-              boxShadow: '0 4px 16px rgba(163, 130, 76, 0.2)',
+              boxShadow: theme.shadows[4],
             },
             transition: 'all 0.3s ease',
           }}
@@ -424,9 +398,8 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
           disabled={isSubmitting}
           startIcon={<LockIcon />}
           sx={{
-            background:
-              'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
-            color: 'white',
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            color: theme.palette.primary.contrastText,
             borderWidth: '2px',
             px: 4,
             py: 1.5,
@@ -435,15 +408,13 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
             borderRadius: 2,
             minWidth: 120,
             '&:hover': {
-              background:
-                'linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
               transform: 'translateY(-2px)',
-              boxShadow: '0 8px 24px rgba(163, 130, 76, 0.3)',
+              boxShadow: theme.shadows[6],
             },
             '&:disabled': {
-              background: 'linear-gradient(90deg, #f5f5f5 0%, #e0e0e0 100%)',
-              color: '#999',
-              borderColor: '#ccc',
+              background: theme.palette.action.disabledBackground,
+              color: theme.palette.action.disabled,
               transform: 'none',
               boxShadow: 'none',
             },
@@ -455,6 +426,13 @@ const ChangePasswordDialog = ({ open, onClose, onSuccess, onError }) => {
       </DialogActions>
     </Dialog>
   );
+};
+
+ChangePasswordDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
 };
 
 export default ChangePasswordDialog;

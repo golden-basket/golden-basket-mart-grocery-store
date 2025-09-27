@@ -13,6 +13,7 @@ import {
   Divider,
   Stack,
   Paper,
+  useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
@@ -32,6 +33,7 @@ import { useFoldableDisplay } from '../hooks/useFoldableDisplay';
 import { useToastNotifications } from '../hooks/useToast';
 
 const Cart = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const { showSuccess, showError } = useToastNotifications();
@@ -128,7 +130,7 @@ const Cart = () => {
   const subtotal = cart
     .filter(item => item && item.product && item.product.price)
     .reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  
+
   const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
   const gst = subtotal * 0.18; // 18% GST
   const total = subtotal + deliveryCharge + gst; // Total including delivery and GST
@@ -259,11 +261,10 @@ const Cart = () => {
                   : isExtraLarge
                     ? 3
                     : 3.5,
-          background:
-            'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          textShadow: '0 2px 8px rgba(163,130,76,0.1)',
+          textShadow: `0 2px 8px ${theme.palette.primary.main}20`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -329,7 +330,7 @@ const Cart = () => {
       </Typography>
 
       {error && (
-        <Alert severity='error' sx={{ mb: 2, borderRadius: 2 }}>
+        <Alert severity='error' sx={{ mb: 2, borderRadius: 1 }}>
           {error}
         </Alert>
       )}
@@ -421,19 +422,9 @@ const Cart = () => {
                           : isExtraLarge
                             ? 3
                             : 3.5,
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                  borderRadius:
-                    isExtraSmall || isSmall
-                      ? 2
-                      : isMedium
-                        ? 2.5
-                        : isLarge
-                          ? 3
-                          : isExtraLarge
-                            ? 3.5
-                            : 4,
-                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                  background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  borderRadius: 1.5,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}20`,
                   maxWidth:
                     isExtraSmall || isSmall
                       ? 320
@@ -445,7 +436,7 @@ const Cart = () => {
                             ? 440
                             : 480,
                   mx: 'auto',
-                  border: '1px solid #e6d897',
+                  border: `1px solid ${theme.palette.primary.light}`,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -484,9 +475,8 @@ const Cart = () => {
                             : isExtraLarge
                               ? 2.5
                               : 3,
-                    background:
-                      'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                    boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+                    background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                    boxShadow: `0 2px 8px ${theme.palette.primary.main}20`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -504,8 +494,8 @@ const Cart = () => {
                               : isExtraLarge
                                 ? 32
                                 : 36,
-                      color: '#fffbe6',
-                      textShadow: '0 2px 8px rgba(163,130,76,0.18)',
+                      color: theme.palette.primary.contrastText,
+                      textShadow: `0 2px 8px ${theme.palette.primary.main}30`,
                     }}
                   />
                 </Avatar>
@@ -519,7 +509,7 @@ const Cart = () => {
                     'h3'
                   )}
                   sx={{
-                    color: '#a3824c',
+                    color: theme.palette.primary.main,
                     fontWeight: 600,
                     mb:
                       isExtraSmall || isSmall
@@ -565,7 +555,7 @@ const Cart = () => {
                     'body1'
                   )}
                   sx={{
-                    color: '#866422',
+                    color: theme.palette.text.secondary,
                     maxWidth:
                       isExtraSmall || isSmall
                         ? 280
@@ -608,19 +598,9 @@ const Cart = () => {
                             : 3.5,
                     textTransform: 'none',
                     fontWeight: 700,
-                    background:
-                      'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-                    color: '#fff',
-                    borderRadius:
-                      isExtraSmall || isSmall
-                        ? 1.5
-                        : isMedium
-                          ? 2
-                          : isLarge
-                            ? 2.5
-                            : isExtraLarge
-                              ? 3
-                              : 3.5,
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                    color: theme.palette.primary.contrastText,
+                    borderRadius: 1.5,
                     fontSize: getResponsiveTypography(
                       '0.875rem',
                       '0.9rem',
@@ -629,7 +609,7 @@ const Cart = () => {
                       '1.2rem',
                       '1.3rem'
                     ),
-                    boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+                    boxShadow: `0 2px 8px ${theme.palette.primary.main}20`,
                     px:
                       isExtraSmall || isSmall
                         ? 2
@@ -657,10 +637,9 @@ const Cart = () => {
                               ? 56
                               : 60,
                     '&:hover': {
-                      background:
-                        'linear-gradient(90deg, #e6d897 0%, #a3824c 100%)',
-                      color: '#866422',
-                      boxShadow: '0 4px 16px rgba(163,130,76,0.18)',
+                      background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                      color: theme.palette.primary.contrastText,
+                      boxShadow: `0 4px 16px ${theme.palette.primary.main}30`,
                     },
                   }}
                   onClick={() => navigate('/')}
@@ -678,19 +657,9 @@ const Cart = () => {
                     key={item.product._id}
                     alignItems='flex-start'
                     sx={{
-                      bgcolor:
-                        'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                      borderRadius:
-                        isExtraSmall || isSmall
-                          ? 1.5
-                          : isMedium
-                            ? 2
-                            : isLarge
-                              ? 2.5
-                              : isExtraLarge
-                                ? 3
-                                : 3.5,
-                      boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                      bgcolor: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                      borderRadius: 1.5,
+                      boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}20`,
                       mb:
                         isExtraSmall || isSmall
                           ? 0.75
@@ -746,7 +715,7 @@ const Cart = () => {
                       display: 'flex',
                       flexDirection: { xs: 'column', sm: 'row' },
                       alignItems: { xs: 'flex-start', sm: 'center' },
-                      border: '1px solid #e6d897',
+                      border: `1px solid ${theme.palette.primary.light}`,
                       position: 'relative',
                       overflow: 'hidden',
                       maxWidth: '100%',
@@ -761,19 +730,10 @@ const Cart = () => {
                         onClick={() => handleRemoveFromCart(item.product._id)}
                         disabled={removeFromCart.isPending}
                         sx={{
-                          bgcolor: '#fffbe6',
-                          borderRadius:
-                            isExtraSmall || isSmall
-                              ? 0.75
-                              : isMedium
-                                ? 1
-                                : isLarge
-                                  ? 1.25
-                                  : isExtraLarge
-                                    ? 1.5
-                                    : 1.75,
+                          bgcolor: theme.palette.background.paper,
+                          borderRadius: 0.75,
                           '&:hover': {
-                            bgcolor: '#e6d897',
+                            bgcolor: theme.palette.primary.light,
                             transform: 'scale(1.05)',
                           },
                           position: { xs: 'absolute', sm: 'static' },
@@ -846,11 +806,11 @@ const Cart = () => {
                                     : isExtraLarge
                                       ? '0.9rem'
                                       : '0.95rem',
-                            color: '#d32f2f',
+                            color: theme.palette.error.main,
                           },
                           '&:disabled': {
                             opacity: 0.6,
-                            bgcolor: '#f5f5f5',
+                            bgcolor: theme.palette.action.disabledBackground,
                           },
                         }}
                       >
@@ -871,7 +831,7 @@ const Cart = () => {
                           )}
                           sx={{
                             fontWeight: 600,
-                            color: '#a3824c',
+                            color: theme.palette.primary.main,
                             mb:
                               isExtraSmall || isSmall
                                 ? 0.0625
@@ -921,7 +881,7 @@ const Cart = () => {
                             'body1'
                           )}
                           sx={{
-                            color: '#7d6033',
+                            color: theme.palette.text.secondary,
                             fontWeight: 500,
                             fontSize:
                               isExtraSmall || isSmall
@@ -1032,17 +992,8 @@ const Cart = () => {
                                     : 1.5,
                           sm: 0,
                         },
-                        bgcolor: '#fffbe6',
-                        borderRadius:
-                          isExtraSmall || isSmall
-                            ? 1
-                            : isMedium
-                              ? 1.25
-                              : isLarge
-                                ? 1.5
-                                : isExtraLarge
-                                  ? 1.75
-                                  : 2,
+                        bgcolor: theme.palette.background.paper,
+                        borderRadius: 1,
                         px:
                           isExtraSmall || isSmall
                             ? 1
@@ -1071,39 +1022,12 @@ const Cart = () => {
                           updateCartItem.isPending || removeFromCart.isPending
                         }
                         sx={{
-                          color: '#a3824c',
-                          bgcolor: '#f7e7c1',
-                          borderRadius:
-                            isExtraSmall || isSmall
-                              ? 0.75
-                              : isMedium
-                                ? 1
-                                : isLarge
-                                  ? 1.5
-                                  : isExtraLarge
-                                    ? 2
-                                    : 2.5,
-                          '&:hover': { bgcolor: '#e6d897' },
-                          minWidth:
-                            isExtraSmall || isSmall
-                              ? 28
-                              : isMedium
-                                ? 32
-                                : isLarge
-                                  ? 36
-                                  : isExtraLarge
-                                    ? 40
-                                    : 44,
-                          minHeight:
-                            isExtraSmall || isSmall
-                              ? 28
-                              : isMedium
-                                ? 32
-                                : isLarge
-                                  ? 36
-                                  : isExtraLarge
-                                    ? 40
-                                    : 44,
+                          color: theme.palette.primary.main,
+                          bgcolor: theme.palette.action.hover,
+                          borderRadius: 0.75,
+                          '&:hover': { bgcolor: theme.palette.primary.light },
+                          minWidth: 32,
+                          minHeight: 32,
                           '& .MuiSvgIcon-root': {
                             fontSize: getResponsiveTypography(
                               '0.75rem',
@@ -1155,7 +1079,7 @@ const Cart = () => {
                                     : 36,
                           textAlign: 'center',
                           fontWeight: 600,
-                          color: '#a3824c',
+                          color: theme.palette.primary.main,
                           fontSize:
                             isExtraSmall || isSmall
                               ? '0.8rem'
@@ -1176,39 +1100,12 @@ const Cart = () => {
                           updateCartItem.isPending || removeFromCart.isPending
                         }
                         sx={{
-                          color: '#a3824c',
-                          bgcolor: '#f7e7c1',
-                          borderRadius:
-                            isExtraSmall || isSmall
-                              ? 0.75
-                              : isMedium
-                                ? 1
-                                : isLarge
-                                  ? 1.5
-                                  : isExtraLarge
-                                    ? 2
-                                    : 2.5,
-                          '&:hover': { bgcolor: '#e6d897' },
-                          minWidth:
-                            isExtraSmall || isSmall
-                              ? 28
-                              : isMedium
-                                ? 32
-                                : isLarge
-                                  ? 36
-                                  : isExtraLarge
-                                    ? 40
-                                    : 44,
-                          minHeight:
-                            isExtraSmall || isSmall
-                              ? 28
-                              : isMedium
-                                ? 32
-                                : isLarge
-                                  ? 36
-                                  : isExtraLarge
-                                    ? 40
-                                    : 44,
+                          color: theme.palette.primary.main,
+                          bgcolor: theme.palette.action.hover,
+                          borderRadius: 0.75,
+                          '&:hover': { bgcolor: theme.palette.primary.light },
+                          minWidth: 32,
+                          minHeight: 32,
                           '& .MuiSvgIcon-root': {
                             fontSize: getResponsiveTypography(
                               '0.75rem',
@@ -1249,7 +1146,7 @@ const Cart = () => {
                           sm: 0,
                         },
                         fontWeight: 500,
-                        color: '#a3824c',
+                        color: theme.palette.primary.main,
                         px:
                           isExtraSmall || isSmall
                             ? 0.5
@@ -1329,10 +1226,9 @@ const Cart = () => {
                   maxHeight: 'none',
                   overflow: 'visible',
                   borderRadius: getResponsiveValue(1.5, 1.5, 2, 2.5, 3, 3.5, 2),
-                  background:
-                    'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                  border: '1px solid var(--color-primary-light)',
-                  boxShadow: '0 2px 12px 0 rgba(163,130,76,0.10)',
+                  background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                  border: `1px solid ${theme.palette.primary.light}`,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}20`,
                 }}
                 className={`card-golden ${getResponsiveCardSize()} responsive-card`}
               >
@@ -1341,7 +1237,7 @@ const Cart = () => {
                   fontWeight={600}
                   mb={0.5}
                   sx={{
-                    color: 'var(--color-primary)',
+                    color: theme.palette.primary.main,
                     fontSize: getResponsiveValue(
                       '0.9rem',
                       '1rem',
@@ -1358,14 +1254,14 @@ const Cart = () => {
                 </Typography>
 
                 <Divider
-                  sx={{ mb: 0.5, borderColor: 'var(--color-primary-light)' }}
+                  sx={{ mb: 0.5, borderColor: theme.palette.primary.light }}
                 />
 
                 {/* Cart Items */}
                 {cart.length === 0 ? (
                   <Typography
                     sx={{
-                      color: 'var(--color-primary-dark)',
+                      color: theme.palette.text.secondary,
                       fontSize: getResponsiveValue(
                         '0.8rem',
                         '0.85rem',
@@ -1391,23 +1287,15 @@ const Cart = () => {
                           justifyContent: 'space-between',
                           alignItems: 'flex-start',
                           p: 0.25,
-                          borderRadius: getResponsiveValue(
-                            0.25,
-                            0.25,
-                            0.5,
-                            0.75,
-                            1,
-                            1.25,
-                            0.5
-                          ),
-                          background: 'rgba(163,130,76,0.05)',
-                          border: '1px solid rgba(163,130,76,0.1)',
+                          borderRadius: 0.5,
+                          background: `${theme.palette.primary.main}10`,
+                          border: `1px solid ${theme.palette.primary.main}20`,
                         }}
                       >
                         <Box sx={{ flex: 1 }}>
                           <Typography
                             sx={{
-                              color: 'var(--color-primary)',
+                              color: theme.palette.primary.main,
                               fontWeight: 400,
                               fontSize: getResponsiveValue(
                                 '0.6rem',
@@ -1425,7 +1313,7 @@ const Cart = () => {
                           </Typography>
                           <Typography
                             sx={{
-                              color: 'var(--color-primary-medium)',
+                              color: theme.palette.text.secondary,
                               fontSize: getResponsiveValue(
                                 '0.55rem',
                                 '0.6rem',
@@ -1443,7 +1331,7 @@ const Cart = () => {
                         </Box>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-medium)',
+                            color: theme.palette.text.secondary,
                             fontWeight: 200,
                             fontSize: getResponsiveValue(
                               '0.55rem',
@@ -1464,7 +1352,7 @@ const Cart = () => {
 
                     <Divider
                       sx={{
-                        borderColor: 'var(--color-primary-light)',
+                        borderColor: theme.palette.primary.light,
                         my: 0.5,
                       }}
                     />
@@ -1481,7 +1369,7 @@ const Cart = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.55rem',
                               '0.6rem',
@@ -1498,7 +1386,7 @@ const Cart = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.55rem',
                               '0.6rem',
@@ -1524,7 +1412,7 @@ const Cart = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.55rem',
                               '0.6rem',
@@ -1541,7 +1429,7 @@ const Cart = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.55rem',
                               '0.6rem',
@@ -1554,7 +1442,9 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          {deliveryCharge === 0 ? 'Free' : `Rs.${deliveryCharge.toFixed(2)}`}
+                          {deliveryCharge === 0
+                            ? 'Free'
+                            : `Rs.${deliveryCharge.toFixed(2)}`}
                         </Typography>
                       </Box>
                       <Box
@@ -1567,7 +1457,7 @@ const Cart = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.55rem',
                               '0.6rem',
@@ -1584,7 +1474,7 @@ const Cart = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary-dark)',
+                            color: theme.palette.text.secondary,
                             fontSize: getResponsiveValue(
                               '0.55rem',
                               '0.6rem',
@@ -1603,7 +1493,7 @@ const Cart = () => {
                       <Divider
                         sx={{
                           my: 0.5,
-                          borderColor: 'var(--color-primary-light)',
+                          borderColor: theme.palette.primary.light,
                         }}
                       />
                       <Box
@@ -1611,7 +1501,7 @@ const Cart = () => {
                           display: 'flex',
                           justifyContent: 'space-between',
                           p: 0.5,
-                          background: 'rgba(163,130,76,0.1)',
+                          background: `${theme.palette.primary.main}20`,
                           borderRadius: getResponsiveValue(
                             0.5,
                             0.5,
@@ -1625,7 +1515,7 @@ const Cart = () => {
                       >
                         <Typography
                           sx={{
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             fontWeight: 700,
                             fontSize: getResponsiveValue(
                               '0.55rem',
@@ -1643,7 +1533,7 @@ const Cart = () => {
                         </Typography>
                         <Typography
                           sx={{
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             fontWeight: 700,
                             fontSize: getResponsiveValue(
                               '0.55rem',
@@ -1667,12 +1557,19 @@ const Cart = () => {
                       severity='info'
                       sx={{
                         mb: 0.5,
-                        borderRadius: getResponsiveValue(0.5, 0.5, 1, 1.5, 2, 2.5, 1),
-                        background:
-                          'linear-gradient(90deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                        border: '1px solid var(--color-primary-light)',
+                        borderRadius: getResponsiveValue(
+                          0.5,
+                          0.5,
+                          1,
+                          1.5,
+                          2,
+                          2.5,
+                          1
+                        ),
+                        background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                        border: `1px solid ${theme.palette.primary.light}`,
                         '& .MuiAlert-icon': {
-                          color: 'var(--color-primary)',
+                          color: theme.palette.primary.main,
                         },
                       }}
                       className={getResponsiveCardSize()}
@@ -1690,7 +1587,7 @@ const Cart = () => {
                             '0.6rem'
                           ),
                           fontWeight: 600,
-                          color: 'var(--color-primary)',
+                          color: theme.palette.primary.main,
                           mb: 0.25,
                           display: 'block',
                         }}
@@ -1709,12 +1606,15 @@ const Cart = () => {
                             '0.7rem',
                             '0.55rem'
                           ),
-                          color: 'var(--color-primary-dark)',
+                          color: theme.palette.text.secondary,
                           display: 'block',
                           lineHeight: 1.2,
                         }}
                       >
-                        Orders ≥ Rs.499: <strong style={{color: 'var(--color-primary)'}}>FREE</strong>
+                        Orders ≥ Rs.499:{' '}
+                        <strong style={{ color: theme.palette.primary.main }}>
+                          FREE
+                        </strong>
                       </Typography>
                       <Typography
                         variant='caption'
@@ -1728,12 +1628,15 @@ const Cart = () => {
                             '0.7rem',
                             '0.55rem'
                           ),
-                          color: 'var(--color-primary-dark)',
+                          color: theme.palette.text.secondary,
                           display: 'block',
                           lineHeight: 1.2,
                         }}
                       >
-                        Orders under Rs.499: <strong style={{color: 'var(--color-primary)'}}>Rs.50</strong>
+                        Orders under Rs.499:{' '}
+                        <strong style={{ color: theme.palette.primary.main }}>
+                          Rs.50
+                        </strong>
                       </Typography>
                       {subtotal < 499 && (
                         <Typography
@@ -1748,14 +1651,15 @@ const Cart = () => {
                               '0.7rem',
                               '0.55rem'
                             ),
-                            color: 'var(--color-primary)',
+                            color: theme.palette.primary.main,
                             display: 'block',
                             lineHeight: 1.2,
                             mt: 0.25,
                             fontWeight: 600,
                           }}
                         >
-                          💡 Add Rs.{(499 - subtotal).toFixed(2)} more for free delivery!
+                          💡 Add Rs.{(499 - subtotal).toFixed(2)} more for free
+                          delivery!
                         </Typography>
                       )}
                     </Alert>
@@ -1768,18 +1672,10 @@ const Cart = () => {
                       disabled={cart.length === 0}
                       sx={{
                         fontWeight: 500,
-                        background: 'var(--color-background-light-gradient)',
-                        color: '#fff',
+                        background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                        color: theme.palette.primary.contrastText,
                         textTransform: 'none',
-                        borderRadius: getResponsiveValue(
-                          0.25,
-                          0.25,
-                          0.5,
-                          0.75,
-                          1,
-                          1.25,
-                          0.5
-                        ),
+                        borderRadius: 0.5,
                         fontSize: getResponsiveValue(
                           '0.55rem',
                           '0.6rem',
@@ -1789,15 +1685,14 @@ const Cart = () => {
                           '0.8rem',
                           '0.65rem'
                         ),
-                        boxShadow: '0 2px 8px rgba(163,130,76,0.10)',
+                        boxShadow: `0 2px 8px ${theme.palette.primary.main}20`,
                         mb: 0.5,
                         py: 0.5,
                         minHeight: '36px',
                         '&:hover': {
-                          background:
-                            'linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%)',
-                          color: '#fff',
-                          boxShadow: '0 4px 16px rgba(163,130,76,0.18)',
+                          background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                          color: theme.palette.primary.contrastText,
+                          boxShadow: `0 4px 16px ${theme.palette.primary.main}30`,
                         },
                         transition: 'all 0.3s ease',
                       }}

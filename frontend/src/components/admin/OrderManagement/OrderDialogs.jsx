@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Dialog,
   DialogTitle,
@@ -13,6 +14,7 @@ import {
   IconButton,
   Stack,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Close as CloseIcon } from '@mui/icons-material';
 import ApiService from '../../../services/api';
 import { useToastNotifications } from '../../../hooks/useToast';
@@ -27,6 +29,57 @@ const OrderDialogs = ({
   onUpdateSuccess,
 }) => {
   const { showError } = useToastNotifications();
+  const theme = useTheme();
+
+  // Standard TextField styling to match project theme
+  const getTextFieldStyles = () => ({
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+      '&:hover fieldset': {
+        borderColor: theme.palette.primary.main,
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: theme.palette.primary.main,
+      },
+      '&.Mui-error fieldset': {
+        borderColor: theme.palette.error.main,
+        borderWidth: '2px',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      '&.Mui-focused': { color: theme.palette.primary.main },
+      '&.Mui-error': { color: theme.palette.error.main },
+    },
+    '& .MuiFormHelperText-root': {
+      '&.Mui-error': {
+        color: theme.palette.error.main,
+      },
+    },
+  });
+
+  // Standard Select styling to match project theme
+  const getSelectStyles = () => ({
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+      '&:hover fieldset': {
+        borderColor: theme.palette.primary.main,
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: theme.palette.primary.main,
+      },
+      '&.Mui-error fieldset': {
+        borderColor: theme.palette.error.main,
+        borderWidth: '2px',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      '&.Mui-focused': { color: theme.palette.primary.main },
+      '&.Mui-error': { color: theme.palette.error.main },
+    },
+    '& .MuiSelect-icon': {
+      color: theme.palette.primary.main,
+    },
+  });
   const [statusForm, setStatusForm] = useState({
     orderStatus: '',
     trackingNumber: '',
@@ -95,20 +148,20 @@ const OrderDialogs = ({
         maxWidth={isMobile ? false : 'sm'}
         fullWidth
         fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 3,
-            boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-            border: isMobile ? 'none' : '1px solid #e6d897',
-            maxWidth: isMobile ? '100%' : '600px',
-            width: isMobile ? '100%' : '90%',
+        slotProps={{
+          paper: {
+            sx: {
+              boxShadow: theme.shadows[8],
+              maxWidth: isMobile ? '100%' : '600px',
+              width: isMobile ? '100%' : '90%',
+            },
           },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-            color: '#fff',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+            color: theme.palette.primary.contrastText,
             fontWeight: 700,
             borderRadius: isMobile ? 0 : '12px 12px 0 0',
             position: 'relative',
@@ -118,7 +171,12 @@ const OrderDialogs = ({
           {isMobile && (
             <IconButton
               onClick={onStatusDialogClose}
-              sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: theme.palette.primary.contrastText,
+              }}
             >
               <CloseIcon />
             </IconButton>
@@ -127,7 +185,7 @@ const OrderDialogs = ({
         <DialogContent
           dividers
           sx={{
-            background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+            background: theme.palette.background.paper,
             p: isMobile ? 2 : 3,
             minHeight: isMobile ? 'auto' : '400px',
           }}
@@ -144,26 +202,7 @@ const OrderDialogs = ({
                   }))
                 }
                 label='Order Status'
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: isMobile ? 2 : 1.5,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#a3824c',
-                    fontWeight: 500,
-                    '&.Mui-focused': {
-                      color: '#a3824c',
-                    },
-                  },
-                  '& .MuiSelect-icon': {
-                    color: '#a3824c',
-                  },
-                }}
+                sx={getSelectStyles()}
               >
                 <MenuItem value='processing'>Processing</MenuItem>
                 <MenuItem value='shipped'>Shipped</MenuItem>
@@ -183,23 +222,7 @@ const OrderDialogs = ({
                 }))
               }
               placeholder='Enter tracking number'
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                  borderRadius: isMobile ? 2 : 1.5,
-                  boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#a3824c',
-                  fontWeight: 500,
-                  '&.Mui-focused': {
-                    color: '#a3824c',
-                  },
-                },
-              }}
+              sx={getTextFieldStyles()}
             />
 
             <TextField
@@ -213,23 +236,7 @@ const OrderDialogs = ({
                 }))
               }
               placeholder='Enter tracking URL'
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                  borderRadius: isMobile ? 2 : 1.5,
-                  boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#a3824c',
-                  fontWeight: 500,
-                  '&.Mui-focused': {
-                    color: '#a3824c',
-                  },
-                },
-              }}
+              sx={getTextFieldStyles()}
             />
 
             <TextField
@@ -242,29 +249,13 @@ const OrderDialogs = ({
               placeholder='Add notes (optional)'
               multiline
               rows={isMobile ? 2 : 3}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                  borderRadius: isMobile ? 2 : 1.5,
-                  boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#a3824c',
-                  fontWeight: 500,
-                  '&.Mui-focused': {
-                    color: '#a3824c',
-                  },
-                },
-              }}
+              sx={getTextFieldStyles()}
             />
           </Stack>
         </DialogContent>
         <DialogActions
           sx={{
-            background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+            background: theme.palette.background.paper,
             p: 2,
             borderRadius: isMobile ? 0 : '0 0 12px 12px',
             justifyContent: isMobile ? 'stretch' : 'flex-end',
@@ -274,14 +265,14 @@ const OrderDialogs = ({
           <Button
             onClick={onStatusDialogClose}
             sx={{
-              color: '#a3824c',
-              border: '1px solid #a3824c',
-              borderRadius: 1,
+              color: theme.palette.primary.main,
+              border: `1px solid ${theme.palette.primary.main}`,
+              borderRadius: 2,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderColor: '#e6d897',
+                backgroundColor: theme.palette.action.hover,
+                borderColor: theme.palette.primary.dark,
               },
             }}
           >
@@ -291,18 +282,17 @@ const OrderDialogs = ({
             onClick={handleStatusUpdate}
             variant='contained'
             sx={{
-              background:
-                'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              color: '#fff',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              color: theme.palette.primary.contrastText,
               textTransform: 'none',
-              boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-              borderRadius: isMobile ? 1 : 2,
+              boxShadow: theme.shadows[4],
+              borderRadius: 2,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                 transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
+                boxShadow: theme.shadows[6],
               },
               transition: 'all 0.3s ease',
             }}
@@ -319,20 +309,20 @@ const OrderDialogs = ({
         maxWidth={isMobile ? false : 'sm'}
         fullWidth
         fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 3,
-            boxShadow: '0 8px 32px 0 rgba(163,130,76,0.25)',
-            border: isMobile ? 'none' : '1px solid #e6d897',
-            maxWidth: isMobile ? '100%' : '600px',
-            width: isMobile ? '100%' : '90%',
+        slotProps={{
+          paper: {
+            sx: {
+              boxShadow: theme.shadows[8],
+              maxWidth: isMobile ? '100%' : '600px',
+              width: isMobile ? '100%' : '90%',
+            },
           },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(90deg, #a3824c 0%, #e6d897 100%)',
-            color: '#fff',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+            color: theme.palette.primary.contrastText,
             fontWeight: 700,
             borderRadius: isMobile ? 0 : '12px 12px 0 0',
             position: 'relative',
@@ -342,7 +332,12 @@ const OrderDialogs = ({
           {isMobile && (
             <IconButton
               onClick={onPaymentDialogClose}
-              sx={{ position: 'absolute', right: 8, top: 8, color: '#fff' }}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: theme.palette.primary.contrastText,
+              }}
             >
               <CloseIcon />
             </IconButton>
@@ -351,7 +346,7 @@ const OrderDialogs = ({
         <DialogContent
           dividers
           sx={{
-            background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
+            background: theme.palette.background.paper,
             p: isMobile ? 2 : 3,
             minHeight: isMobile ? 'auto' : '400px',
           }}
@@ -368,26 +363,7 @@ const OrderDialogs = ({
                   }))
                 }
                 label='Payment Status'
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: isMobile ? 2 : 1.5,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#a3824c',
-                    fontWeight: 500,
-                    '&.Mui-focused': {
-                      color: '#a3824c',
-                    },
-                  },
-                  '& .MuiSelect-icon': {
-                    color: '#a3824c',
-                  },
-                }}
+                sx={getSelectStyles()}
               >
                 <MenuItem value='pending'>Pending</MenuItem>
                 <MenuItem value='paid'>Paid</MenuItem>
@@ -406,26 +382,7 @@ const OrderDialogs = ({
                   }))
                 }
                 label='Payment Method'
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    background:
-                      'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                    borderRadius: isMobile ? 2 : 1.5,
-                    boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                    '&:hover fieldset': { borderColor: '#a3824c' },
-                    '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#a3824c',
-                    fontWeight: 500,
-                    '&.Mui-focused': {
-                      color: '#a3824c',
-                    },
-                  },
-                  '& .MuiSelect-icon': {
-                    color: '#a3824c',
-                  },
-                }}
+                sx={getSelectStyles()}
               >
                 <MenuItem value='cod'>Cash on Delivery</MenuItem>
                 <MenuItem value='upi'>UPI</MenuItem>
@@ -443,29 +400,13 @@ const OrderDialogs = ({
                 }))
               }
               placeholder='Enter transaction ID (optional)'
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background:
-                    'linear-gradient(90deg, #fffbe6 0%, #f7e7c1 100%)',
-                  borderRadius: isMobile ? 2 : 1.5,
-                  boxShadow: '0 1px 4px 0 rgba(163,130,76,0.07)',
-                  '&:hover fieldset': { borderColor: '#a3824c' },
-                  '&.Mui-focused fieldset': { borderColor: '#a3824c' },
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#a3824c',
-                  fontWeight: 500,
-                  '&.Mui-focused': {
-                    color: '#a3824c',
-                  },
-                },
-              }}
+              sx={getTextFieldStyles()}
             />
           </Stack>
         </DialogContent>
         <DialogActions
           sx={{
-            background: 'linear-gradient(90deg, #f7e7c1 0%, #fffbe6 100%)',
+            background: theme.palette.background.paper,
             p: 2,
             borderRadius: isMobile ? 0 : '0 0 12px 12px',
             justifyContent: isMobile ? 'stretch' : 'flex-end',
@@ -475,14 +416,14 @@ const OrderDialogs = ({
           <Button
             onClick={onPaymentDialogClose}
             sx={{
-              color: '#a3824c',
-              border: '1px solid #a3824c',
-              borderRadius: 1,
+              color: theme.palette.primary.main,
+              border: `1px solid ${theme.palette.primary.main}`,
+              borderRadius: 2,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(90deg, #fffbe6 0%, #f7e7c4 100%)',
-                borderColor: '#e6d897',
+                backgroundColor: theme.palette.action.hover,
+                borderColor: theme.palette.primary.dark,
               },
             }}
           >
@@ -492,18 +433,17 @@ const OrderDialogs = ({
             onClick={handlePaymentUpdate}
             variant='contained'
             sx={{
-              background:
-                'linear-gradient(135deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
-              color: '#fff',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              color: theme.palette.primary.contrastText,
               textTransform: 'none',
-              boxShadow: '0 4px 12px rgba(163,130,76,0.3)',
-              borderRadius: isMobile ? 1 : 2,
+              boxShadow: theme.shadows[4],
+              borderRadius: 2,
               px: 3,
               flex: isMobile ? 1 : 'none',
               '&:hover': {
-                background: 'linear-gradient(135deg, #e6d897 0%, #a3824c 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                 transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(163,130,76,0.4)',
+                boxShadow: theme.shadows[6],
               },
               transition: 'all 0.3s ease',
             }}
@@ -514,6 +454,16 @@ const OrderDialogs = ({
       </Dialog>
     </>
   );
+};
+
+OrderDialogs.propTypes = {
+  statusDialogOpen: PropTypes.bool.isRequired,
+  paymentDialogOpen: PropTypes.bool.isRequired,
+  selectedOrder: PropTypes.object,
+  isMobile: PropTypes.bool.isRequired,
+  onStatusDialogClose: PropTypes.func.isRequired,
+  onPaymentDialogClose: PropTypes.func.isRequired,
+  onUpdateSuccess: PropTypes.func.isRequired,
 };
 
 export default OrderDialogs;

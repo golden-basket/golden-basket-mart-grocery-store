@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Dialog,
   DialogTitle,
@@ -18,10 +19,12 @@ import {
 import Grid from '@mui/material/Grid';
 import { useAuth } from '../hooks/useAuth';
 import { useToastNotifications } from '../hooks/useToast';
+import { useTheme } from '@mui/material/styles';
 
 const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
   const { updateProfile } = useAuth();
   const { showSuccess, showError } = useToastNotifications();
+  const theme = useTheme();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -129,34 +132,28 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
     onClose();
   };
 
-  const getTextFieldStyles = fieldName => ({
-    transition: 'all 0.3s ease',
+  const getTextFieldStyles = () => ({
     '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: errors[fieldName]
-          ? 'var(--color-error)'
-          : 'var(--color-primary-light)',
-      },
+      borderRadius: 2,
       '&:hover fieldset': {
-        borderColor: errors[fieldName]
-          ? 'var(--color-error)'
-          : 'var(--color-primary)',
+        borderColor: theme.palette.primary.main,
       },
       '&.Mui-focused fieldset': {
-        borderColor: errors[fieldName]
-          ? 'var(--color-error)'
-          : 'var(--color-primary-dark)',
+        borderColor: theme.palette.primary.main,
+      },
+      '&.Mui-error fieldset': {
+        borderColor: theme.palette.error.main,
+        borderWidth: '2px',
       },
     },
     '& .MuiInputLabel-root': {
-      color: errors[fieldName]
-        ? 'var(--color-error)'
-        : 'var(--color-primary-medium)',
+      '&.Mui-focused': { color: theme.palette.primary.main },
+      '&.Mui-error': { color: theme.palette.error.main },
     },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: errors[fieldName]
-        ? 'var(--color-error)'
-        : 'var(--color-primary-dark)',
+    '& .MuiFormHelperText-root': {
+      '&.Mui-error': {
+        color: theme.palette.error.main,
+      },
     },
   });
 
@@ -166,25 +163,23 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
       onClose={onClose}
       maxWidth='md'
       fullWidth
-      PaperProps={{
-        sx: {
-          background:
-            'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-          border: '2px solid var(--color-primary-light)',
-          borderRadius: 4,
-          boxShadow: '0 12px 40px rgba(163, 130, 76, 0.2)',
-          m: { xs: 2, sm: 3 },
+      slotProps={{
+        paper: {
+          sx: {
+            background: theme.palette.background.paper,
+            boxShadow: theme.shadows[12],
+            m: { xs: 2, sm: 3 },
+          },
         },
       }}
     >
       <DialogTitle
         sx={{
-          background:
-            'linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%)',
-          color: 'var(--color-cream-light)',
+          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+          color: theme.palette.primary.contrastText,
           fontWeight: 800,
           textAlign: 'center',
-          borderBottom: '2px solid var(--color-primary-light)',
+          borderBottom: `2px solid ${theme.palette.primary.light}`,
           fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
           py: { xs: 2, sm: 3 },
         }}
@@ -196,8 +191,7 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
         <DialogContent sx={{ pt: 4, pb: 2 }}>
           <Grid container spacing={4}>
             <Grid
-              item
-              span={{
+              size={{
                 xs: 12,
                 sm: 6,
               }}
@@ -211,25 +205,26 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                 error={!!errors.firstName}
                 helperText={errors.firstName}
                 required
-                sx={getTextFieldStyles('firstName')}
-                InputProps={{
-                  startAdornment: (
-                    <PersonIcon
-                      sx={{
-                        mr: 2,
-                        color: 'var(--color-primary-medium)',
-                        fontSize: '1.5rem',
-                      }}
-                    />
-                  ),
+                margin='normal'
+                sx={getTextFieldStyles()}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <PersonIcon
+                        sx={{
+                          color: errors.firstName
+                            ? theme.palette.error.main
+                            : theme.palette.primary.main,
+                        }}
+                      />
+                    ),
+                  },
                 }}
-                size='medium'
               />
             </Grid>
 
             <Grid
-              item
-              span={{
+              size={{
                 xs: 12,
                 sm: 6,
               }}
@@ -243,23 +238,25 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                 error={!!errors.lastName}
                 helperText={errors.lastName}
                 required
-                sx={getTextFieldStyles('lastName')}
-                InputProps={{
-                  startAdornment: (
-                    <PersonIcon
-                      sx={{
-                        mr: 2,
-                        color: 'var(--color-primary-medium)',
-                        fontSize: '1.5rem',
-                      }}
-                    />
-                  ),
+                margin='normal'
+                sx={getTextFieldStyles()}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <PersonIcon
+                        sx={{
+                          color: errors.lastName
+                            ? theme.palette.error.main
+                            : theme.palette.primary.main,
+                        }}
+                      />
+                    ),
+                  },
                 }}
-                size='medium'
               />
             </Grid>
 
-            <Grid item span={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label='Email'
@@ -270,23 +267,25 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                 error={!!errors.email}
                 helperText={errors.email}
                 required
-                sx={getTextFieldStyles('email')}
-                InputProps={{
-                  startAdornment: (
-                    <EmailIcon
-                      sx={{
-                        mr: 2,
-                        color: 'var(--color-primary-medium)',
-                        fontSize: '1.5rem',
-                      }}
-                    />
-                  ),
+                margin='normal'
+                sx={getTextFieldStyles()}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <EmailIcon
+                        sx={{
+                          color: errors.email
+                            ? theme.palette.error.main
+                            : theme.palette.primary.main,
+                        }}
+                      />
+                    ),
+                  },
                 }}
-                size='medium'
               />
             </Grid>
 
-            <Grid item span={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label='Phone'
@@ -296,19 +295,21 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
                 error={!!errors.phone}
                 helperText={errors.phone}
                 placeholder='+1 (555) 123-4567'
-                sx={getTextFieldStyles('phone')}
-                InputProps={{
-                  startAdornment: (
-                    <PhoneIcon
-                      sx={{
-                        mr: 2,
-                        color: 'var(--color-primary-medium)',
-                        fontSize: '1.5rem',
-                      }}
-                    />
-                  ),
+                margin='normal'
+                sx={getTextFieldStyles()}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <PhoneIcon
+                        sx={{
+                          color: errors.phone
+                            ? theme.palette.error.main
+                            : theme.palette.primary.main,
+                        }}
+                      />
+                    ),
+                  },
                 }}
-                size='medium'
               />
             </Grid>
           </Grid>
@@ -321,8 +322,8 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
             startIcon={<CancelIcon sx={{ fontSize: '1.25rem' }} />}
             disabled={isSubmitting}
             sx={{
-              color: 'var(--color-primary-dark)',
-              borderColor: 'var(--color-primary)',
+              color: theme.palette.primary.dark,
+              borderColor: theme.palette.primary.main,
               borderWidth: '2px',
               px: 4,
               py: 1.5,
@@ -331,10 +332,10 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
               borderRadius: 2,
               minWidth: 120,
               '&:hover': {
-                borderColor: 'var(--color-primary-dark)',
-                backgroundColor: 'var(--color-cream-light)',
+                borderColor: theme.palette.primary.dark,
+                backgroundColor: theme.palette.action.hover,
                 transform: 'translateY(-3px)',
-                boxShadow: '0 6px 20px rgba(163, 130, 76, 0.3)',
+                boxShadow: theme.shadows[6],
               },
               transition: 'all 0.3s ease',
             }}
@@ -354,10 +355,9 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
             }
             disabled={isSubmitting}
             sx={{
-              background:
-                'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%)',
-              color: 'var(--color-cream-light)',
-              border: '2px solid var(--color-primary-dark)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+              color: theme.palette.primary.contrastText,
+              border: `2px solid ${theme.palette.primary.dark}`,
               px: 4,
               py: 1.5,
               fontSize: '1rem',
@@ -365,10 +365,9 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
               borderRadius: 2,
               minWidth: 140,
               '&:hover': {
-                background:
-                  'linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
                 transform: 'translateY(-3px)',
-                boxShadow: '0 8px 24px rgba(163, 130, 76, 0.5)',
+                boxShadow: theme.shadows[8],
               },
               transition: 'all 0.3s ease',
             }}
@@ -379,6 +378,14 @@ const EditProfileDialog = ({ open, onClose, user, onSuccess, onError }) => {
       </form>
     </Dialog>
   );
+};
+
+EditProfileDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  user: PropTypes.object,
+  onSuccess: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
 };
 
 export default EditProfileDialog;

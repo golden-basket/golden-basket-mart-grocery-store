@@ -47,7 +47,7 @@ const validationSchemas = {
           'any.required': 'Password is required',
         }),
       phone: Joi.string()
-        .pattern(/^[0-9]{10}$/)
+        .pattern(/^\d{10}$/)
         .optional()
         .messages({
           'string.pattern.base': 'Phone number must be 10 digits',
@@ -88,7 +88,7 @@ const validationSchemas = {
             'Last name can only contain letters and spaces',
         }),
       phone: Joi.string()
-        .pattern(/^[0-9]{10}$/)
+        .pattern(/^\d{10}$/)
         .optional()
         .messages({
           'string.pattern.base': 'Phone number must be 10 digits',
@@ -126,7 +126,7 @@ const validationSchemas = {
         'string.max': 'Product name cannot exceed 100 characters',
         'any.required': 'Product name is required',
       }),
-      description: Joi.string().max(500).optional().messages({
+      description: Joi.string().max(500).allow('', null).optional().messages({
         'string.max': 'Product description cannot exceed 500 characters',
       }),
       price: Joi.number().positive().precision(2).required().messages({
@@ -164,7 +164,7 @@ const validationSchemas = {
         'string.min': 'Product name must be at least 2 characters long',
         'string.max': 'Product name cannot exceed 100 characters',
       }),
-      description: Joi.string().max(500).optional().messages({
+      description: Joi.string().max(500).allow('', null).optional().messages({
         'string.max': 'Product description cannot exceed 500 characters',
       }),
       price: Joi.number().positive().precision(2).optional().messages({
@@ -250,9 +250,14 @@ const validationSchemas = {
         'string.max': 'Address cannot exceed 100 characters',
         'any.required': 'Address is required',
       }),
-      addressLine2: Joi.string().max(100).trim().optional().messages({
-        'string.max': 'Address line 2 cannot exceed 100 characters',
-      }),
+      addressLine2: Joi.string()
+        .max(100)
+        .trim()
+        .allow('', null)
+        .optional()
+        .messages({
+          'string.max': 'Address line 2 cannot exceed 100 characters',
+        }),
       city: Joi.string().min(2).max(50).trim().required().messages({
         'string.min': 'City must be at least 2 characters long',
         'string.max': 'City cannot exceed 50 characters',
@@ -269,14 +274,14 @@ const validationSchemas = {
         'any.required': 'Country is required',
       }),
       pinCode: Joi.string()
-        .pattern(/^[0-9]{6}$/)
+        .pattern(/^\d{6}$/)
         .required()
         .messages({
           'string.pattern.base': 'PIN code must be 6 digits',
           'any.required': 'PIN code is required',
         }),
       phoneNumber: Joi.string()
-        .pattern(/^[0-9]{10}$/)
+        .pattern(/^\d{10}$/)
         .required()
         .messages({
           'string.pattern.base': 'Phone number must be 10 digits',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 
 const ImageWithFallback = ({
@@ -14,6 +14,7 @@ const ImageWithFallback = ({
   style = {},
   ...props
 }) => {
+  const theme = useTheme();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -55,10 +56,10 @@ const ImageWithFallback = ({
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'rgba(163, 130, 76, 0.1)',
-          borderRadius: 1,
-          border: '1px dashed rgba(163, 130, 76, 0.3)',
-          color: 'rgba(163, 130, 76, 0.6)',
+          backgroundColor: theme.palette.action.hover,
+          borderRadius: 8,
+          border: `1px dashed ${theme.palette.divider}`,
+          color: theme.palette.text.secondary,
           width: '100%',
           height: '100%',
           minWidth: '80px',
@@ -78,7 +79,7 @@ const ImageWithFallback = ({
               fontSize: '0.7rem',
               textAlign: 'center',
               px: 1,
-              color: 'rgba(163, 130, 76, 0.7)',
+              color: theme.palette.text.secondary,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -101,7 +102,9 @@ const ImageWithFallback = ({
       onLoad={handleImageLoad}
       sx={{
         opacity: imageLoaded ? 1 : 0,
-        transition: 'opacity 0.3s ease',
+        transition: theme.transitions.create('opacity', {
+          duration: theme.transitions.duration.standard,
+        }),
         width: '100%',
         height: '100%',
         objectFit: 'cover',

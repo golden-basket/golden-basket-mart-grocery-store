@@ -15,6 +15,7 @@ import {
   Tooltip,
   Card,
   CardContent,
+  useTheme,
 } from '@mui/material';
 import { Edit as EditIcon, Payment as PaymentIcon } from '@mui/icons-material';
 import { useFoldableDisplay } from '../../../hooks/useFoldableDisplay';
@@ -32,6 +33,7 @@ const OrderTable = ({
   onPaymentUpdate,
   loading = false,
 }) => {
+  const theme = useTheme();
   const { isExtraSmall, isSmall } = useFoldableDisplay();
 
   // Enhanced mobile order card
@@ -40,15 +42,14 @@ const OrderTable = ({
       key={order._id}
       sx={{
         mb: 2,
-        background:
-          'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-        border: '1px solid var(--color-primary-light)',
-        borderRadius: 2,
-        boxShadow: '0 2px 8px rgba(163, 130, 76, 0.1)',
+        background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+        border: `1px solid ${theme.palette.primary.light}`,
+        borderRadius: theme.shape.borderRadius * 0.33,
+        boxShadow: `0 2px 8px ${theme.palette.primary.main}1A`,
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: '0 4px 16px rgba(163, 130, 76, 0.2)',
+          boxShadow: `0 4px 16px ${theme.palette.primary.main}33`,
         },
       }}
       className='card-golden'
@@ -62,7 +63,7 @@ const OrderTable = ({
             alignItems: 'flex-start',
             mb: 2,
             pb: 1,
-            borderBottom: '1px solid rgba(163, 130, 76, 0.2)',
+            borderBottom: `1px solid ${theme.palette.primary.main}33`,
           }}
         >
           <Box>
@@ -70,9 +71,9 @@ const OrderTable = ({
               variant='subtitle2'
               sx={{
                 fontWeight: 700,
-                color: 'var(--color-primary)',
-                mb: 0.5,
-                textShadow: '0 1px 2px rgba(163, 130, 76, 0.2)',
+                              color: theme.palette.primary.main,
+              mb: 0.5,
+              textShadow: `0 1px 2px ${theme.palette.primary.main}33`,
               }}
             >
               #{order._id.slice(-8)}
@@ -80,7 +81,7 @@ const OrderTable = ({
             <Typography
               variant='caption'
               sx={{
-                color: 'var(--color-primary-light)',
+                color: theme.palette.primary.light,
                 fontWeight: 500,
               }}
             >
@@ -91,7 +92,7 @@ const OrderTable = ({
             label={order.orderStatus || 'Pending'}
             color={getStatusColor(order.orderStatus)}
             size='small'
-            sx={getChipStyles('orderStatus', order.orderStatus)}
+            sx={getChipStyles('orderStatus', order.orderStatus, theme)}
           />
         </Box>
 
@@ -126,16 +127,16 @@ const OrderTable = ({
             alignItems: 'center',
             mb: 2,
             p: 1.5,
-            background: 'rgba(163, 130, 76, 0.05)',
-            borderRadius: 1,
-            border: '1px solid rgba(163, 130, 76, 0.1)',
+            background: `${theme.palette.primary.main}0D`,
+            borderRadius: theme.shape.borderRadius * 0.17,
+            border: `1px solid ${theme.palette.primary.main}1A`,
           }}
         >
           <Typography
             variant='body2'
             sx={{
               fontWeight: 600,
-              color: 'var(--color-primary)',
+              color: theme.palette.primary.main,
             }}
           >
             Amount:
@@ -143,8 +144,7 @@ const OrderTable = ({
           <Typography
             variant='body2'
             sx={{
-              fontWeight: 700,
-              color: 'var(--color-accent)',
+              color: theme.palette.success.main,
               fontSize: '1.1rem',
             }}
           >
@@ -165,7 +165,7 @@ const OrderTable = ({
             variant='body2'
             sx={{
               fontWeight: 600,
-              color: 'var(--color-primary)',
+              color: theme.palette.primary.main,
             }}
           >
             Payment Method:
@@ -174,7 +174,7 @@ const OrderTable = ({
             label={order.paymentMethod || 'Pending'}
             color={getPaymentStatusColor(order.paymentMethod)}
             size='small'
-            sx={getChipStyles('paymentMethod', order.paymentMethod)}
+            sx={getChipStyles('paymentMethod', order.paymentMethod, theme)}
           />
         </Box>
 
@@ -191,7 +191,7 @@ const OrderTable = ({
             variant='body2'
             sx={{
               fontWeight: 600,
-              color: 'var(--color-primary)',
+              color: theme.palette.primary.main,
             }}
           >
             Payment Status:
@@ -200,7 +200,7 @@ const OrderTable = ({
             label={order.paymentStatus || 'Pending'}
             color={getPaymentStatusColor(order.paymentStatus)}
             size='small'
-            sx={getChipStyles('paymentStatus', order.paymentStatus)}
+            sx={getChipStyles('paymentStatus', order.paymentStatus, theme)}
             variant='outlined'
           />
         </Box>
@@ -212,7 +212,7 @@ const OrderTable = ({
             gap: 1,
             justifyContent: 'flex-end',
             pt: 1,
-            borderTop: '1px solid rgba(163, 130, 76, 0.2)',
+            borderTop: `1px solid ${theme.palette.primary.main}33`,
           }}
         >
           <Tooltip title='Update Status'>
@@ -264,15 +264,14 @@ const OrderTable = ({
               sx={{
                 textAlign: 'center',
                 p: 4,
-                background:
-                  'linear-gradient(135deg, rgba(163, 130, 76, 0.05) 0%, rgba(230, 216, 151, 0.1) 100%)',
-                borderRadius: 2,
-                border: '1px solid rgba(163, 130, 76, 0.2)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}0D 0%, ${theme.palette.primary.light}1A 100%)`,
+                borderRadius: theme.shape.borderRadius * 0.33,
+                border: `1px solid ${theme.palette.primary.main}33`,
               }}
             >
               <Typography
                 sx={{
-                  color: 'var(--color-primary)',
+                  color: theme.palette.primary.main,
                   fontWeight: 500,
                   fontSize: '1.1rem',
                 }}
@@ -282,7 +281,7 @@ const OrderTable = ({
               <Typography
                 variant='body2'
                 sx={{
-                  color: 'var(--color-primary-light)',
+                  color: theme.palette.primary.light,
                   mt: 1,
                   opacity: 0.8,
                 }}
@@ -301,11 +300,10 @@ const OrderTable = ({
       <TableContainer
         component={Paper}
         sx={{
-          background:
-            'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-          border: '1px solid var(--color-primary-light)',
-          borderRadius: 2,
-          boxShadow: '0 3px 12px rgba(163, 130, 76, 0.15)',
+          background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+          border: `1px solid ${theme.palette.primary.light}`,
+          borderRadius: theme.shape.borderRadius * 0.33,
+          boxShadow: `0 3px 12px ${theme.palette.primary.main}26`,
           overflow: 'hidden',
         }}
       >
@@ -313,8 +311,7 @@ const OrderTable = ({
           <TableHead>
             <TableRow
               sx={{
-                background:
-                  'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
               }}
             >
               <TableCell
@@ -407,12 +404,12 @@ const OrderTable = ({
                     sx={{
                       py: 4,
                       textAlign: 'center',
-                      background: 'rgba(163, 130, 76, 0.05)',
+                      background: `${theme.palette.primary.main}0D`,
                     }}
                   >
                     <Typography
                       sx={{
-                        color: 'var(--color-primary)',
+                        color: theme.palette.primary.main,
                         fontWeight: 500,
                         fontSize: '1.1rem',
                       }}
@@ -422,7 +419,7 @@ const OrderTable = ({
                     <Typography
                       variant='body2'
                       sx={{
-                        color: 'var(--color-primary-light)',
+                        color: theme.palette.primary.light,
                         mt: 1,
                         opacity: 0.8,
                       }}
@@ -439,7 +436,7 @@ const OrderTable = ({
                   hover
                   sx={{
                     '&:hover': {
-                      background: 'rgba(163, 130, 76, 0.05)',
+                      background: `${theme.palette.primary.main}0D`,
                     },
                     transition: 'background-color 0.2s ease',
                   }}
@@ -449,7 +446,7 @@ const OrderTable = ({
                       variant='body2'
                       sx={{
                         fontWeight: 600,
-                        color: 'var(--color-primary)',
+                        color: theme.palette.primary.main,
                         fontFamily: 'monospace',
                       }}
                     >
@@ -483,7 +480,7 @@ const OrderTable = ({
                       sx={{
                         fontWeight: 700,
                         color: 'var(--color-accent)',
-                        fontSize: '1.1rem',
+                        fontSize: theme.typography.body2,
                       }}
                     >
                       ₹{order.totalAmount?.toFixed(2) || '0.00'}
@@ -494,7 +491,7 @@ const OrderTable = ({
                       label={order.orderStatus || 'Pending'}
                       color={getStatusColor(order.orderStatus)}
                       size='small'
-                      sx={getChipStyles('orderStatus', order.orderStatus)}
+                      sx={getChipStyles('orderStatus', order.orderStatus, theme)}
                     />
                   </TableCell>
                   <TableCell>
@@ -502,7 +499,7 @@ const OrderTable = ({
                       label={(order.paymentMode || '').toUpperCase()}
                       color={getPaymentStatusColor(order.paymentMode)}
                       size='small'
-                      sx={getChipStyles('paymentMode', order.paymentMode)}
+                      sx={getChipStyles('paymentMode', order.paymentMode, theme)}
                     />
                   </TableCell>
                   <TableCell>
@@ -510,14 +507,14 @@ const OrderTable = ({
                       label={order.paymentStatus || 'Pending'}
                       color={getPaymentStatusColor(order.paymentStatus)}
                       size='small'
-                      sx={getChipStyles('paymentStatus', order.paymentStatus)}
+                      sx={getChipStyles('paymentStatus', order.paymentStatus, theme)}
                     />
                   </TableCell>
                   <TableCell>
                     <Typography
                       variant='body2'
                       sx={{
-                        color: 'var(--color-primary)',
+                        color: theme.palette.primary.main,
                         fontWeight: 500,
                       }}
                     >
@@ -531,10 +528,10 @@ const OrderTable = ({
                           size='small'
                           onClick={() => onStatusUpdate(order)}
                           sx={{
-                            color: 'var(--color-primary)',
-                            backgroundColor: 'rgba(163, 130, 76, 0.1)',
+                            color: theme.palette.primary.main,
+                            backgroundColor: `${theme.palette.primary.main}1A`,
                             '&:hover': {
-                              backgroundColor: 'rgba(163, 130, 76, 0.2)',
+                              backgroundColor: `${theme.palette.primary.main}33`,
                               transform: 'scale(1.1)',
                             },
                             transition: 'all 0.2s ease',
@@ -548,10 +545,10 @@ const OrderTable = ({
                           size='small'
                           onClick={() => onPaymentUpdate(order)}
                           sx={{
-                            color: 'var(--color-accent)',
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            color: theme.palette.success.main,
+                            backgroundColor: `${theme.palette.success.main}1A`,
                             '&:hover': {
-                              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                              backgroundColor: `${theme.palette.success.main}33`,
                               transform: 'scale(1.1)',
                             },
                             transition: 'all 0.2s ease',
@@ -578,10 +575,9 @@ const OrderTable = ({
         mt: 3,
         display: 'flex',
         justifyContent: 'center',
-        background:
-          'linear-gradient(135deg, rgba(163, 130, 76, 0.05) 0%, rgba(230, 216, 151, 0.1) 100%)',
-        borderRadius: 2,
-        border: '1px solid rgba(163, 130, 76, 0.2)',
+        background: `linear-gradient(135deg, ${theme.palette.primary.main}0D 0%, ${theme.palette.primary.light}1A 100%)`,
+        borderRadius: theme.shape.borderRadius * 0.33,
+        border: `1px solid ${theme.palette.primary.main}33`,
         p: 2,
       }}
     >
@@ -596,7 +592,7 @@ const OrderTable = ({
         sx={{
           '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows':
             {
-              color: 'var(--color-primary)',
+              color: theme.palette.primary.main,
               fontWeight: 600,
             },
           '& .MuiTablePagination-select': {
@@ -604,18 +600,20 @@ const OrderTable = ({
             fontWeight: 600,
           },
           '& .MuiIconButton-root': {
-            color: 'var(--color-primary)',
+            color: theme.palette.primary.main,
             '&:hover': {
-              backgroundColor: 'rgba(163, 130, 76, 0.1)',
+              backgroundColor: `${theme.palette.primary.main}1A`,
             },
           },
           '& .MuiIconButton-root.Mui-disabled': {
-            color: 'var(--color-primary-light)',
+            color: theme.palette.primary.light,
           },
         }}
       />
     </Box>
   );
+
+
 
   return (
     <Box sx={{ position: 'relative' }}>
@@ -636,51 +634,51 @@ const OrderTable = ({
   );
 };
 
-// Enhanced color coding functions
-const getStatusColor = status => {
-  switch (status?.toLowerCase()) {
-    case 'pending':
-      return 'warning';
-    case 'processing':
-      return 'info';
-    case 'shipped':
-      return 'primary';
-    case 'delivered':
-      return 'success';
-    case 'cancelled':
-      return 'error';
-    default:
-      return 'default';
-  }
-};
+  // Enhanced color coding functions
+  const getStatusColor = status => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'warning';
+      case 'processing':
+        return 'info';
+      case 'shipped':
+        return 'primary';
+      case 'delivered':
+        return 'success';
+      case 'cancelled':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
 
-const getPaymentStatusColor = status => {
-  switch (status?.toLowerCase()) {
-    case 'pending':
-      return 'warning';
-    case 'completed':
-      return 'success';
-    case 'failed':
-      return 'error';
-    case 'refunded':
-      return 'info';
-    default:
-      return 'default';
-  }
-};
+  const getPaymentStatusColor = status => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'warning';
+      case 'completed':
+        return 'success';
+      case 'failed':
+        return 'error';
+      case 'refunded':
+        return 'info';
+      default:
+        return 'default';
+    }
+  };
 
-const getChipStyles = (type, value) => {
-  const baseStyles = {
-    fontWeight: 700,
-    fontSize: '0.75rem',
-    textTransform: 'capitalize',
-    boxShadow: '0 2px 8px rgba(163, 130, 76, 0.15)',
-    border: '1px solid rgba(163, 130, 76, 0.2)',
-    '& .MuiChip-label': {
+  const getChipStyles = (type, value, theme) => {
+    const baseStyles = {
       fontWeight: 700,
       fontSize: '0.75rem',
-    },
-  };
+      textTransform: 'capitalize',
+      boxShadow: `0 2px 8px ${theme.palette.primary.main}26`,
+      border: `1px solid ${theme.palette.primary.main}33`,
+      '& .MuiChip-label': {
+        fontWeight: 700,
+        fontSize: '0.75rem',
+      },
+    };
 
   if (type === 'orderStatus') {
     switch (value?.toLowerCase()) {

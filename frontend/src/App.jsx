@@ -10,7 +10,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ToastProvider from './components/ToastNotifications';
-import TestComponent from './components/TestComponent';
 import { ROUTES } from './utils/routeConstants';
 
 // Lazy load components for better performance
@@ -56,7 +55,6 @@ const App = () => {
                   <Routes>
                     {/* Public Routes */}
                     <Route path={ROUTES.HOME} element={<HomeComponent />} />
-                    <Route path={ROUTES.TEST} element={<TestComponent />} />
                     <Route path={ROUTES.CATALOGUE} element={<Catalogue />} />
 
                     {/* Authentication Routes */}

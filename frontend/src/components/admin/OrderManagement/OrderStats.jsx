@@ -8,6 +8,7 @@ import {
   Chip,
   Stack,
   Skeleton,
+  useTheme,
 } from '@mui/material';
 import {
   Assessment as StatsIcon,
@@ -17,6 +18,7 @@ import {
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 
 const OrderStats = ({ stats, isMobile }) => {
+  const theme = useTheme();
   const getResponsiveSpacing = () => {
     if (isMobile) return 2;
     return 3;
@@ -35,11 +37,10 @@ const OrderStats = ({ stats, isMobile }) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 p: 1.5,
-                borderRadius: 2,
-                border: '1px solid var(--color-primary-light)',
+                borderRadius: theme.shape.borderRadius * 0.33,
+                border: `1px solid ${theme.palette.primary.light}`,
                 width: '100%',
-                background:
-                  'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
+                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
               }}
             >
               <Box
@@ -52,7 +53,7 @@ const OrderStats = ({ stats, isMobile }) => {
                 variant='rectangular'
                 width={60}
                 height={24}
-                sx={{ borderRadius: 1 }}
+                sx={{ borderRadius: theme.shape.borderRadius * 0.17 }}
               />
             </Box>
           ))}
@@ -70,10 +71,9 @@ const OrderStats = ({ stats, isMobile }) => {
           <Grid item size={{ xs: 12, sm: 6, md: 2.8 }} key={item}>
             <Card
               sx={{
-                background:
-                  'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-                border: '1px solid var(--color-primary-light)',
-                borderRadius: 2,
+                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                border: `1px solid ${theme.palette.primary.light}`,
+                borderRadius: theme.shape.borderRadius * 0.33,
                 height: '100%',
                 width: '100%',
                 maxWidth: '280px',
@@ -122,16 +122,15 @@ const OrderStats = ({ stats, isMobile }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             p: 1.5,
-            borderRadius: 2,
-            border: '1px solid var(--color-primary-light)',
+            borderRadius: theme.shape.borderRadius * 0.33,
+            border: `1px solid ${theme.palette.primary.light}`,
             width: '100%',
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-            boxShadow: '0 2px 8px rgba(163, 130, 76, 0.1)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+            boxShadow: `0 2px 8px ${theme.palette.primary.main}1A`,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateY(-2px)',
-              boxShadow: '0 4px 16px rgba(163, 130, 76, 0.2)',
+              boxShadow: `0 4px 16px ${theme.palette.primary.main}33`,
             },
           }}
         >
@@ -147,9 +146,9 @@ const OrderStats = ({ stats, isMobile }) => {
             <StatsIcon
               sx={{
                 fontSize: '1.2rem',
-                color: 'var(--color-primary)',
+                color: theme.palette.primary.main,
                 flexShrink: 0,
-                filter: 'drop-shadow(0 1px 2px rgba(163, 130, 76, 0.3))',
+                filter: `drop-shadow(0 1px 2px ${theme.palette.primary.main}4D)`,
               }}
             />
             <Typography
@@ -169,15 +168,14 @@ const OrderStats = ({ stats, isMobile }) => {
             size='small'
             sx={{
               fontWeight: 700,
-              background:
-                'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%) !important`,
               color: 'white !important',
               flexShrink: 0,
               '& .MuiChip-label': {
                 color: 'white !important',
                 fontSize: '0.875rem',
               },
-              boxShadow: '0 3px 12px rgba(163, 130, 76, 0.4)',
+              boxShadow: `0 3px 12px ${theme.palette.primary.main}66`,
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           />
@@ -190,16 +188,15 @@ const OrderStats = ({ stats, isMobile }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             p: 1.5,
-            borderRadius: 2,
-            border: '1px solid var(--color-accent-light)',
+            borderRadius: theme.shape.borderRadius * 0.33,
+            border: `1px solid ${theme.palette.success.light}`,
             width: '100%',
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-accent-light) 100%)',
-            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.1)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.success.light}20 100%)`,
+            boxShadow: `0 2px 8px ${theme.palette.success.main}1A`,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateY(-2px)',
-              boxShadow: '0 4px 16px rgba(76, 175, 80, 0.2)',
+              boxShadow: `0 4px 16px ${theme.palette.success.main}33`,
             },
           }}
         >
@@ -215,9 +212,9 @@ const OrderStats = ({ stats, isMobile }) => {
             <PaymentIcon
               sx={{
                 fontSize: '1.2rem',
-                color: 'var(--color-accent)',
+                color: theme.palette.success.main,
                 flexShrink: 0,
-                filter: 'drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3))',
+                filter: `drop-shadow(0 1px 2px ${theme.palette.success.main}4D)`,
               }}
             />
             <Typography
@@ -237,15 +234,14 @@ const OrderStats = ({ stats, isMobile }) => {
             size='small'
             sx={{
               fontWeight: 700,
-              background:
-                'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%) !important',
+              background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%) !important`,
               color: 'white !important',
               flexShrink: 0,
               '& .MuiChip-label': {
                 color: 'white !important',
                 fontSize: '0.875rem',
               },
-              boxShadow: '0 3px 12px rgba(76, 175, 80, 0.4)',
+              boxShadow: `0 3px 12px ${theme.palette.success.main}66`,
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           />
@@ -258,16 +254,15 @@ const OrderStats = ({ stats, isMobile }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             p: 1.5,
-            borderRadius: 2,
-            border: '1px solid var(--color-warning-light)',
+            borderRadius: theme.shape.borderRadius * 0.33,
+            border: `1px solid ${theme.palette.warning.light}`,
             width: '100%',
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-warning-light) 100%)',
-            boxShadow: '0 2px 8px rgba(255, 152, 0, 0.1)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.warning.light}20 100%)`,
+            boxShadow: `0 2px 8px ${theme.palette.warning.main}1A`,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateY(-2px)',
-              boxShadow: '0 4px 16px rgba(255, 152, 0, 0.2)',
+              boxShadow: `0 4px 16px ${theme.palette.warning.main}33`,
             },
           }}
         >
@@ -283,9 +278,9 @@ const OrderStats = ({ stats, isMobile }) => {
             <PendingActionsIcon
               sx={{
                 fontSize: '1.2rem',
-                color: 'var(--color-warning)',
+                color: theme.palette.warning.main,
                 flexShrink: 0,
-                filter: 'drop-shadow(0 1px 2px rgba(255, 152, 0, 0.3))',
+                filter: `drop-shadow(0 1px 2px ${theme.palette.warning.main}4D)`,
               }}
             />
             <Typography
@@ -305,15 +300,14 @@ const OrderStats = ({ stats, isMobile }) => {
             size='small'
             sx={{
               fontWeight: 700,
-              background:
-                'linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-dark) 100%) !important',
+              background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%) !important`,
               color: 'white !important',
               flexShrink: 0,
               '& .MuiChip-label': {
                 color: 'white !important',
                 fontSize: '0.875rem',
               },
-              boxShadow: '0 3px 12px rgba(255, 152, 0, 0.4)',
+              boxShadow: `0 3px 12px ${theme.palette.warning.main}66`,
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           />
@@ -326,16 +320,15 @@ const OrderStats = ({ stats, isMobile }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             p: 1.5,
-            borderRadius: 2,
-            border: '1px solid var(--color-success-light)',
+            borderRadius: theme.shape.borderRadius * 0.33,
+            border: `1px solid ${theme.palette.success.light}`,
             width: '100%',
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-success-light) 100%)',
-            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.1)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.success.light}20 100%)`,
+            boxShadow: `0 2px 8px ${theme.palette.success.main}1A`,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateY(-2px)',
-              boxShadow: '0 4px 16px rgba(76, 175, 80, 0.2)',
+              boxShadow: `0 4px 16px ${theme.palette.success.main}33`,
             },
           }}
         >
@@ -351,9 +344,9 @@ const OrderStats = ({ stats, isMobile }) => {
             <DoneOutlineIcon
               sx={{
                 fontSize: '1.2rem',
-                color: 'var(--color-success)',
+                color: theme.palette.success.main,
                 flexShrink: 0,
-                filter: 'drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3))',
+                filter: `drop-shadow(0 1px 2px ${theme.palette.success.main}4D)`,
               }}
             />
             <Typography
@@ -373,15 +366,14 @@ const OrderStats = ({ stats, isMobile }) => {
             size='small'
             sx={{
               fontWeight: 700,
-              background:
-                'linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%) !important',
+              background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%) !important`,
               color: 'white !important',
               flexShrink: 0,
               '& .MuiChip-label': {
                 color: 'white !important',
                 fontSize: '0.875rem',
               },
-              boxShadow: '0 3px 12px rgba(76, 175, 80, 0.4)',
+              boxShadow: `0 3px 12px ${theme.palette.success.main}66`,
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           />
@@ -416,10 +408,9 @@ const OrderStats = ({ stats, isMobile }) => {
       >
         <Card
           sx={{
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-cream-medium) 100%)',
-            border: '1px solid var(--color-primary-light)',
-            borderRadius: 2,
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+            border: `1px solid ${theme.palette.primary.light}`,
+            borderRadius: theme.shape.borderRadius * 0.33,
             height: '100%',
             width: '280px',
             maxWidth: '280px',
@@ -460,12 +451,12 @@ const OrderStats = ({ stats, isMobile }) => {
             <Typography
               variant='h6'
               sx={{
-                color: 'var(--color-primary)',
-                fontWeight: 700,
-                mb: 0.5,
-                textAlign: 'center',
-                width: '100%',
-                textShadow: '0 1px 2px rgba(163, 130, 76, 0.2)',
+                              color: theme.palette.primary.main,
+              fontWeight: 700,
+              mb: 0.5,
+              textAlign: 'center',
+              width: '100%',
+              textShadow: `0 1px 2px ${theme.palette.primary.main}33`,
               }}
             >
               {stats.totalOrders || 0}
@@ -499,10 +490,9 @@ const OrderStats = ({ stats, isMobile }) => {
       >
         <Card
           sx={{
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-accent-light) 100%)',
-            border: '1px solid var(--color-accent-light)',
-            borderRadius: 2,
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.success.light}20 100%)`,
+            border: `1px solid ${theme.palette.success.light}`,
+            borderRadius: theme.shape.borderRadius * 0.33,
             height: '100%',
             width: '280px',
             maxWidth: '280px',
@@ -510,11 +500,11 @@ const OrderStats = ({ stats, isMobile }) => {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            boxShadow: '0 3px 12px rgba(76, 175, 80, 0.15)',
+            boxShadow: `0 3px 12px ${theme.palette.success.main}26`,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateY(-4px)',
-              boxShadow: '0 6px 20px rgba(76, 175, 80, 0.25)',
+              boxShadow: `0 6px 20px ${theme.palette.success.main}40`,
             },
           }}
           className='card-golden'
@@ -534,21 +524,21 @@ const OrderStats = ({ stats, isMobile }) => {
             <PaymentIcon
               sx={{
                 fontSize: 40,
-                color: 'var(--color-accent)',
+                color: theme.palette.success.main,
                 mb: 1,
                 alignSelf: 'center',
-                filter: 'drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3))',
+                filter: `drop-shadow(0 2px 4px ${theme.palette.success.main}4D)`,
               }}
             />
             <Typography
               variant='h6'
               sx={{
-                color: 'var(--color-accent)',
-                fontWeight: 700,
-                mb: 0.5,
-                textAlign: 'center',
-                width: '100%',
-                textShadow: '0 1px 2px rgba(76, 175, 80, 0.2)',
+                              color: theme.palette.success.main,
+              fontWeight: 700,
+              mb: 0.5,
+              textAlign: 'center',
+              width: '100%',
+              textShadow: `0 1px 2px ${theme.palette.success.main}33`,
               }}
             >
               {`${stats.totalRevenue?.toFixed(2) || '0.00'}`}
@@ -617,21 +607,21 @@ const OrderStats = ({ stats, isMobile }) => {
             <PendingActionsIcon
               sx={{
                 fontSize: 40,
-                color: 'var(--color-warning)',
+                color: theme.palette.warning.main,
                 mb: 1,
                 alignSelf: 'center',
-                filter: 'drop-shadow(0 2px 4px rgba(255, 152, 0, 0.3))',
+                filter: `drop-shadow(0 2px 4px ${theme.palette.warning.main}4D)`,
               }}
             />
             <Typography
               variant='h6'
               sx={{
-                color: 'var(--color-warning)',
-                fontWeight: 700,
-                mb: 0.5,
-                textAlign: 'center',
-                width: '100%',
-                textShadow: '0 1px 2px rgba(255, 152, 0, 0.2)',
+                              color: theme.palette.warning.main,
+              fontWeight: 700,
+              mb: 0.5,
+              textAlign: 'center',
+              width: '100%',
+              textShadow: `0 1px 2px ${theme.palette.warning.main}33`,
               }}
             >
               {stats.pendingOrders || 0}
@@ -665,10 +655,9 @@ const OrderStats = ({ stats, isMobile }) => {
       >
         <Card
           sx={{
-            background:
-              'linear-gradient(135deg, var(--color-cream-light) 0%, var(--color-success-light) 100%)',
-            border: '1px solid var(--color-success-light)',
-            borderRadius: 2,
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.success.light}20 100%)`,
+            border: `1px solid ${theme.palette.success.light}`,
+            borderRadius: theme.shape.borderRadius * 0.33,
             height: '100%',
             width: '280px',
             maxWidth: '280px',
@@ -676,11 +665,11 @@ const OrderStats = ({ stats, isMobile }) => {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            boxShadow: '0 3px 12px rgba(76, 175, 80, 0.15)',
+            boxShadow: `0 3px 12px ${theme.palette.success.main}26`,
             transition: 'all 0.3s ease',
             '&:hover': {
               transform: 'translateY(-4px)',
-              boxShadow: '0 6px 20px rgba(76, 175, 80, 0.25)',
+              boxShadow: `0 6px 20px ${theme.palette.success.main}40`,
             },
           }}
           className='card-golden'
@@ -700,21 +689,21 @@ const OrderStats = ({ stats, isMobile }) => {
             <DoneOutlineIcon
               sx={{
                 fontSize: 40,
-                color: 'var(--color-success)',
+                color: theme.palette.success.main,
                 mb: 1,
                 alignSelf: 'center',
-                filter: 'drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3))',
+                filter: `drop-shadow(0 2px 4px ${theme.palette.success.main}4D)`,
               }}
             />
             <Typography
               variant='h6'
               sx={{
-                color: 'var(--color-success)',
-                fontWeight: 700,
-                mb: 0.5,
-                textAlign: 'center',
-                width: '100%',
-                textShadow: '0 1px 2px rgba(76, 175, 80, 0.2)',
+                              color: theme.palette.success.main,
+              fontWeight: 700,
+              mb: 0.5,
+              textAlign: 'center',
+              width: '100%',
+              textShadow: `0 1px 2px ${theme.palette.success.main}33`,
               }}
             >
               {stats.deliveredOrders || 0}

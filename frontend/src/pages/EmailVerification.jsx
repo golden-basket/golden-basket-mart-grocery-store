@@ -87,7 +87,7 @@ const EmailVerification = () => {
       case 'verifying':
         return (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <CircularProgress size={60} sx={{ color: '#a3824c', mb: 2 }} />
+            <CircularProgress size={60} sx={{ color: 'primary.main', mb: 2 }} />
             <Typography variant='h6' color='text.secondary' gutterBottom>
               Verifying your email...
             </Typography>
@@ -100,7 +100,7 @@ const EmailVerification = () => {
       case 'success':
         return (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <CheckCircle sx={{ fontSize: 80, color: '#4caf50', mb: 2 }} />
+            <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
             <Typography variant='h5' color='success.main' gutterBottom>
               Email Verified Successfully!
             </Typography>
@@ -114,11 +114,9 @@ const EmailVerification = () => {
               variant='contained'
               onClick={handleGoToLogin}
               sx={{
-                background:
-                  'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                background: 'primary.main',
                 '&:hover': {
-                  background:
-                    'linear-gradient(90deg, #8b6f3f 0%, #d4c085 50%, #a08555 100%)',
+                  background: 'primary.dark',
                 },
               }}
             >
@@ -130,7 +128,7 @@ const EmailVerification = () => {
       case 'error':
         return (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Error sx={{ fontSize: 80, color: '#f44336', mb: 2 }} />
+            <Error sx={{ fontSize: 80, color: 'error.main', mb: 2 }} />
             <Typography variant='h5' color='error.main' gutterBottom>
               Verification Failed
             </Typography>
@@ -150,11 +148,11 @@ const EmailVerification = () => {
                 startIcon={<Email />}
                 onClick={handleResendVerification}
                 sx={{
-                  borderColor: '#a3824c',
-                  color: '#a3824c',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
                   '&:hover': {
-                    borderColor: '#8b6f3f',
-                    backgroundColor: 'rgba(163, 130, 76, 0.04)',
+                    borderColor: 'primary.dark',
+                    backgroundColor: 'action.hover',
                   },
                 }}
               >
@@ -164,11 +162,9 @@ const EmailVerification = () => {
                 variant='contained'
                 onClick={handleGoToLogin}
                 sx={{
-                  background:
-                    'linear-gradient(90deg, #a3824c 0%, #e6d897 50%, #b59961 100%)',
+                  background: 'primary.main',
                   '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #8b6f3f 0%, #d4c085 50%, #a08555 100%)',
+                    background: 'primary.dark',
                   },
                 }}
               >
@@ -201,8 +197,7 @@ const EmailVerification = () => {
             maxWidth: 500,
             p: 4,
             borderRadius: 2,
-            background:
-              'linear-gradient(135deg, #f7fbe8 0%, #fffbe6 50%, #f7ecd0 100%)',
+            background: 'background.paper',
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -210,7 +205,7 @@ const EmailVerification = () => {
               variant='h4'
               component='h1'
               sx={{
-                color: '#a3824c',
+                color: 'primary.main',
                 fontWeight: 600,
                 mb: 1,
               }}

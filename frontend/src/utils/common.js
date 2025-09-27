@@ -350,3 +350,40 @@ export const getContrastColor = hexColor => {
   const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
   return brightness > 128 ? '#000000' : '#ffffff';
 };
+
+/**
+ * Get consistent border radius values for UI elements
+ * @param {string} size - The size category: 'xs', 'sm', 'md', 'lg', 'xl'
+ * @returns {number} Border radius value in Material-UI spacing units
+ */
+export const getBorderRadius = (size = 'md') => {
+  const radiusMap = {
+    xs: 0.5,    // 4px
+    sm: 1,      // 8px
+    md: 1.5,    // 12px
+    lg: 2,      // 16px
+    xl: 3,      // 24px
+    round: '50%' // For circular elements
+  };
+  
+  return radiusMap[size] || radiusMap.md;
+};
+
+/**
+ * Get responsive border radius values
+ * @param {string} size - The size category: 'xs', 'sm', 'md', 'lg', 'xl'
+ * @returns {object} Responsive border radius object
+ */
+export const getResponsiveBorderRadius = (size = 'md') => {
+  const baseRadius = getBorderRadius(size);
+  
+  if (baseRadius === '50%') return '50%';
+  
+  return {
+    xs: Math.max(0.25, baseRadius * 0.5),    // Smaller on mobile
+    sm: Math.max(0.5, baseRadius * 0.75),    // Small screens
+    md: baseRadius,                           // Medium screens
+    lg: Math.min(4, baseRadius * 1.25),      // Large screens
+    xl: Math.min(5, baseRadius * 1.5),       // Extra large screens
+  };
+};
