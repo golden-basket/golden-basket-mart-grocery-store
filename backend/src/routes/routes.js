@@ -328,9 +328,9 @@ router.put('/cart/update', auth, cartValidation, cartController.updateCartItem);
  *         description: Validation error
  */
 router.delete(
-  '/cart/remove',
+  '/cart/remove/:id',
   auth,
-  cartValidation,
+  validateObjectId,
   cartController.removeFromCart
 );
 

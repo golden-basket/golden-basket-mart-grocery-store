@@ -15,6 +15,8 @@ exports.getAddresses = async (req, res) => {
 exports.addAddress = async (req, res) => {
   try {
     const {
+      addressType,
+      villaNumber,
       addressLine1,
       addressLine2,
       city,
@@ -37,6 +39,8 @@ exports.addAddress = async (req, res) => {
     }
     const address = new ShippingAddress({
       user: req.user.userId,
+      addressType,
+      villaNumber,
       addressLine1,
       addressLine2,
       city,
@@ -57,10 +61,14 @@ exports.addAddress = async (req, res) => {
 exports.updateAddress = async (req, res) => {
   try {
     const { id } = req.params;
-    const update = req.body;
+    const updatedAddress = {
+      ...req.body,
+      villaNumber:
+        req.body.addressType === 'inside_anantra' ? req.body.villaNumber : null,
+    };
     const address = await ShippingAddress.findOneAndUpdate(
       { _id: id, user: req.user.userId },
-      update,
+      updatedAddress,
       { new: true }
     );
     if (!address) return res.status(404).json({ error: 'Address not found.' });

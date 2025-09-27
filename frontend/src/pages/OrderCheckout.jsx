@@ -52,7 +52,6 @@ const OrderCheckout = () => {
     isLarge,
     isExtraLarge,
     isTablet,
-    isFoldable,
     getResponsiveSpacingClasses,
     getResponsiveTextClasses,
     getResponsiveButtonSize,
@@ -100,7 +99,19 @@ const OrderCheckout = () => {
       (sum, item) => sum + (item.product?.price || 0) * (item.quantity || 0),
       0
     );
-    const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
+    
+    // Get selected address to determine delivery charges
+    const selectedAddr = addresses.find(addr => addr._id === selectedAddress);
+    
+    let deliveryCharge;
+    if (selectedAddr?.addressType === 'inside_anantra') {
+      // Free delivery for inside_anantra addresses
+      deliveryCharge = 0;
+    } else {
+      // For outside_anantra addresses or no address selected
+      deliveryCharge = subtotal >= 150 ? 0 : 10;
+    }
+    
     const gst = subtotal * 0.18; // 18% GST
     return {
       subtotal,
@@ -111,7 +122,7 @@ const OrderCheckout = () => {
   };
 
   // Minimum order amount
-  const MIN_ORDER_AMOUNT = 150;
+  const MIN_ORDER_AMOUNT = 100;
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
@@ -243,747 +254,83 @@ const OrderCheckout = () => {
         Checkout
       </Typography>
 
-      {/* Delivery & Payment Summary */}
-      <Box
+      {/* Delivery Information */}
+      <Alert
+        severity='info'
         sx={{
           mb: getResponsiveSpacing(),
-          p: getResponsiveValue(1, 1.5, 2, 2.5, 3, 3.5, 2),
-          background: `linear-gradient(135deg, ${theme.palette.primary.main}26 0%, ${theme.palette.primary.light}40 100%)`,
-          borderRadius: theme.shape.borderRadius * 0.33,
-          border: `2px solid ${theme.palette.primary.main}66`,
-          boxShadow: `0 4px 20px ${theme.palette.primary.main}33`,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '3px',
-            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+          borderRadius: 2,
+          background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+          border: `1px solid ${theme.palette.primary.light}`,
+          '& .MuiAlert-icon': {
+            color: theme.palette.primary.main,
           },
         }}
+        className={`${getResponsiveAlertSize()} ${getResponsiveCardSize()}`}
       >
         <Typography
-          variant='h6'
+          variant='body2'
+          className={getResponsiveTextClasses()}
           sx={{
-            fontWeight: 800,
-            color: theme.palette.primary.main,
             fontSize: getResponsiveValue(
+              '0.7rem',
+              '0.75rem',
+              '0.8rem',
               '0.85rem',
               '0.9rem',
               '0.95rem',
-              '1rem',
-              '1.05rem',
-              '1.1rem',
-              '0.95rem'
+              '0.8rem'
             ),
-            mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-            textAlign: 'center',
-            textShadow: `0 1px 2px ${theme.palette.primary.main}33`,
-            letterSpacing: '0.5px',
+            fontWeight: 600,
+            color: theme.palette.primary.main,
+            mb: 0.5,
+          }}
+        >
+          🚚 Delivery Information
+        </Typography>
+        <Typography
+          variant='caption'
+          sx={{
+            fontSize: getResponsiveValue(
+              '0.65rem',
+              '0.7rem',
+              '0.75rem',
+              '0.8rem',
+              '0.85rem',
+              '0.9rem',
+              '0.75rem'
+            ),
+            color: theme.palette.text.secondary,
+            display: 'block',
+            lineHeight: 1.3,
+            mb: 0.25,
           }}
           className={getResponsiveTextClasses()}
         >
-          🚚 Delivery & Payment Summary
+          • <strong>Inside Anantra:</strong> Free delivery for all orders
         </Typography>
-
-        <Box
+        <Typography
+          variant='caption'
           sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'stretch', sm: 'flex-start' },
-            gap: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-            flexWrap: { xs: 'nowrap', sm: 'nowrap' },
+            fontSize: getResponsiveValue(
+              '0.65rem',
+              '0.7rem',
+              '0.75rem',
+              '0.8rem',
+              '0.85rem',
+              '0.9rem',
+              '0.75rem'
+            ),
+            color: theme.palette.text.secondary,
+            display: 'block',
+            lineHeight: 1.3,
+            mb: 0.25,
           }}
+          className={getResponsiveTextClasses()}
         >
-          <Box
-            sx={{
-              flex: { xs: '1 1 100%', sm: '1 1 50%' },
-              p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-              background: `${theme.palette.primary.main}1A`,
-              borderRadius: theme.shape.borderRadius * 0.17,
-              border: `1px solid ${theme.palette.primary.main}4D`,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                background: `${theme.palette.primary.main}33`,
-                borderColor: `${theme.palette.primary.main}66`,
-                transform: 'translateY(-1px)',
-                boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
-              },
-            }}
-          >
-            <Typography
-              variant='body2'
-              sx={{
-                fontWeight: 700,
-                color: theme.palette.primary.main,
-                fontSize: getResponsiveValue(
-                  '0.55rem',
-                  '0.6rem',
-                  '0.65rem',
-                  '0.7rem',
-                  '0.75rem',
-                  '0.8rem',
-                  '0.65rem'
-                ),
-                mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-              className={getResponsiveTextClasses()}
-            >
-              <Box
-                component='span'
-                sx={{
-                  fontSize: getResponsiveValue(
-                    '0.7rem',
-                    '0.75rem',
-                    '0.8rem',
-                    '0.85rem',
-                    '0.9rem',
-                    '0.95rem',
-                    '0.8rem'
-                  ),
-                }}
-              >
-                🚚
-              </Box>
-              Delivery Charges
-            </Typography>
-
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 0.5,
-                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: `${theme.palette.background.paper}99`,
-                  borderRadius: theme.shape.borderRadius * 0.125,
-                  border: `1px solid ${theme.palette.primary.main}33`,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: `${theme.palette.background.paper}F2`,
-                    borderColor: `${theme.palette.primary.main}66`,
-                    transform: 'translateX(1px)',
-                  },
-                }}
-              >
-                <Box
-                  component='span'
-                  sx={{
-                    fontSize: getResponsiveValue(
-                      '0.65rem',
-                      '0.7rem',
-                      '0.75rem',
-                      '0.8rem',
-                      '0.85rem',
-                      '0.9rem',
-                      '0.75rem'
-                    ),
-                    color: theme.palette.secondary.main,
-                  }}
-                >
-                  🏠
-                </Box>
-                <Box>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.75rem',
-                        '0.6rem'
-                      ),
-                      fontWeight: 600,
-                      mb: 0.25,
-                      lineHeight: 1.3,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    Mangalam Anantra Colony
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.secondary.main,
-                      fontSize: getResponsiveValue(
-                        '0.45rem',
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.55rem'
-                      ),
-                      lineHeight: 1.4,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    Free delivery for orders ≥ ₹499
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 0.5,
-                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: `${theme.palette.background.paper}60`,
-                  borderRadius: 0.75,
-                  border: `1px solid ${theme.palette.primary.main}20`,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: `${theme.palette.background.paper}90`,
-                    borderColor: `${theme.palette.primary.main}40`,
-                    transform: 'translateX(1px)',
-                  },
-                }}
-              >
-                <Box
-                  component='span'
-                  sx={{
-                    fontSize: getResponsiveValue(
-                      '0.65rem',
-                      '0.7rem',
-                      '0.75rem',
-                      '0.8rem',
-                      '0.85rem',
-                      '0.9rem',
-                      '0.75rem'
-                    ),
-                    color: theme.palette.secondary.main,
-                  }}
-                >
-                  🎯
-                </Box>
-                <Box>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.75rem',
-                        '0.6rem'
-                      ),
-                      fontWeight: 600,
-                      mb: 0.25,
-                      lineHeight: 1.3,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    Free Delivery Threshold
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.secondary.main,
-                      fontSize: getResponsiveValue(
-                        '0.45rem',
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.55rem'
-                      ),
-                      lineHeight: 1.4,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    Free delivery for orders ≥ ₹499
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                  background: `${theme.palette.primary.main}20`,
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.primary.main}40`,
-                  borderLeft: `2px solid ${theme.palette.primary.main}`,
-                }}
-              >
-                <Typography
-                  variant='body2'
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: getResponsiveValue(
-                      '0.5rem',
-                      '0.55rem',
-                      '0.6rem',
-                      '0.65rem',
-                      '0.7rem',
-                      '0.75rem',
-                      '0.6rem'
-                    ),
-                    fontWeight: 600,
-                    mb: 0.25,
-                    lineHeight: 1.4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.25,
-                  }}
-                  className={getResponsiveTextClasses()}
-                >
-                  <Box
-                    component='span'
-                    sx={{
-                      fontSize: getResponsiveValue(
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.75rem',
-                        '0.8rem',
-                        '0.85rem',
-                        '0.7rem'
-                      ),
-                      color: theme.palette.primary.main,
-                    }}
-                  >
-                    📍
-                  </Box>
-                  Delivery Charges
-                </Typography>
-                <Box
-                  sx={{ display: 'flex', flexDirection: 'column', gap: 0.125 }}
-                >
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.45rem',
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.55rem'
-                      ),
-                      lineHeight: 1.4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.25,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    <Box
-                      component='span'
-                      sx={{
-                        fontSize: getResponsiveValue(
-                          '0.4rem',
-                          '0.45rem',
-                          '0.5rem',
-                          '0.55rem',
-                          '0.6rem',
-                          '0.65rem',
-                          '0.5rem'
-                        ),
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      •
-                    </Box>
-                    Orders ≥ ₹499: Free delivery
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.45rem',
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.55rem'
-                      ),
-                      lineHeight: 1.4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.25,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    <Box
-                      component='span'
-                      sx={{
-                        fontSize: getResponsiveValue(
-                          '0.4rem',
-                          '0.45rem',
-                          '0.5rem',
-                          '0.55rem',
-                          '0.6rem',
-                          '0.65rem',
-                          '0.5rem'
-                        ),
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      •
-                    </Box>
-                    Orders under Rs.499: Rs.50 delivery charge
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              flex: { xs: '1 1 100%', sm: '1 1 50%' },
-              p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-              background: `${theme.palette.primary.main}1A`,
-              borderRadius: theme.shape.borderRadius * 0.17,
-              border: `1px solid ${theme.palette.primary.main}4D`,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                background: `${theme.palette.primary.main}33`,
-                borderColor: `${theme.palette.primary.main}66`,
-                transform: 'translateY(-1px)',
-                boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
-              },
-            }}
-          >
-            <Typography
-              variant='body2'
-              sx={{
-                fontWeight: 700,
-                color: theme.palette.primary.main,
-                fontSize: getResponsiveValue(
-                  '0.55rem',
-                  '0.6rem',
-                  '0.65rem',
-                  '0.7rem',
-                  '0.75rem',
-                  '0.8rem',
-                  '0.65rem'
-                ),
-                mb: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-              className={getResponsiveTextClasses()}
-            >
-              <Box
-                component='span'
-                sx={{
-                  fontSize: getResponsiveValue(
-                    '0.7rem',
-                    '0.75rem',
-                    '0.8rem',
-                    '0.85rem',
-                    '0.9rem',
-                    '0.95rem',
-                    '0.8rem'
-                  ),
-                }}
-              >
-                💰
-              </Box>
-              Payment Methods
-            </Typography>
-
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 0.5,
-                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: `${theme.palette.background.paper}60`,
-                  borderRadius: 0.75,
-                  border: `1px solid ${theme.palette.primary.main}20`,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: `${theme.palette.background.paper}90`,
-                    borderColor: `${theme.palette.primary.main}40`,
-                    transform: 'translateX(1px)',
-                  },
-                }}
-              >
-                <Box
-                  component='span'
-                  sx={{
-                    fontSize: getResponsiveValue(
-                      '0.65rem',
-                      '0.7rem',
-                      '0.75rem',
-                      '0.8rem',
-                      '0.85rem',
-                      '0.9rem',
-                      '0.75rem'
-                    ),
-                    color: theme.palette.secondary.main,
-                  }}
-                >
-                  💳
-                </Box>
-                <Box>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.75rem',
-                        '0.6rem'
-                      ),
-                      fontWeight: 600,
-                      mb: 0.25,
-                      lineHeight: 1.3,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    COD (Cash on Delivery)
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.45rem',
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.55rem'
-                      ),
-                      lineHeight: 1.4,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    Available for all orders
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 0.5,
-                  p: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  background: `${theme.palette.background.paper}60`,
-                  borderRadius: 0.75,
-                  border: `1px solid ${theme.palette.primary.main}20`,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: `${theme.palette.background.paper}90`,
-                    borderColor: `${theme.palette.primary.main}40`,
-                    transform: 'translateX(1px)',
-                  },
-                }}
-              >
-                <Box
-                  component='span'
-                  sx={{
-                    fontSize: getResponsiveValue(
-                      '0.65rem',
-                      '0.7rem',
-                      '0.75rem',
-                      '0.8rem',
-                      '0.85rem',
-                      '0.9rem',
-                      '0.75rem'
-                    ),
-                    color: theme.palette.secondary.main,
-                  }}
-                >
-                  📱
-                </Box>
-                <Box>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.75rem',
-                        '0.6rem'
-                      ),
-                      fontWeight: 600,
-                      mb: 0.25,
-                      lineHeight: 1.3,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    UPI Payment
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: getResponsiveValue(
-                        '0.45rem',
-                        '0.5rem',
-                        '0.55rem',
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.55rem'
-                      ),
-                      lineHeight: 1.4,
-                    }}
-                    className={getResponsiveTextClasses()}
-                  >
-                    Available only at the store location
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                  background: `${theme.palette.primary.main}20`,
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.primary.main}40`,
-                  borderLeft: `2px solid ${theme.palette.primary.main}`,
-                }}
-              >
-                <Typography
-                  variant='body2'
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: getResponsiveValue(
-                      '0.45rem',
-                      '0.5rem',
-                      '0.55rem',
-                      '0.6rem',
-                      '0.65rem',
-                      '0.7rem',
-                      '0.55rem'
-                    ),
-                    fontWeight: 600,
-                    lineHeight: 1.5,
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 0.25,
-                  }}
-                  className={getResponsiveTextClasses()}
-                >
-                  <Box
-                    component='span'
-                    sx={{
-                      fontSize: getResponsiveValue(
-                        '0.6rem',
-                        '0.65rem',
-                        '0.7rem',
-                        '0.75rem',
-                        '0.8rem',
-                        '0.85rem',
-                        '0.7rem'
-                      ),
-                      color: theme.palette.primary.main,
-                      mt: 0.1,
-                    }}
-                  >
-                    ⚠️
-                  </Box>
-                  <span>
-                    <strong>Note:</strong> If paying via UPI at store, please
-                    provide a screenshot of the successful transaction
-                  </span>
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  mt: getResponsiveValue(0.25, 0.5, 0.75, 1, 1.25, 1.5, 0.75),
-                  p: getResponsiveValue(0.5, 0.75, 1, 1.25, 1.5, 1.75, 1),
-                  background: `${theme.palette.primary.main}20`,
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.primary.main}40`,
-                  textAlign: 'center',
-                }}
-              >
-                <Typography
-                  variant='body2'
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: getResponsiveValue(
-                      '0.55rem',
-                      '0.6rem',
-                      '0.65rem',
-                      '0.7rem',
-                      '0.75rem',
-                      '0.8rem',
-                      '0.65rem'
-                    ),
-                    fontWeight: 700,
-                    lineHeight: 1.4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 0.25,
-                  }}
-                  className={getResponsiveTextClasses()}
-                >
-                  <Box
-                    component='span'
-                    sx={{
-                      fontSize: getResponsiveValue(
-                        '0.7rem',
-                        '0.75rem',
-                        '0.8rem',
-                        '0.85rem',
-                        '0.9rem',
-                        '0.95rem',
-                        '0.8rem'
-                      ),
-                      color: theme.palette.primary.main,
-                    }}
-                  >
-                    💰
-                  </Box>
-                  Minimum order: ₹{MIN_ORDER_AMOUNT}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
+          • <strong>Outside Anantra:</strong> Free delivery for orders ≥ ₹150, ₹10 for orders below ₹150
+        </Typography>
+      </Alert>
 
       {loading || !cartData ? (
         <Loading />
@@ -1006,7 +353,7 @@ const OrderCheckout = () => {
             sx={{
               width: {
                 xs: '100%',
-                sm: isFoldable ? '100%' : '100%',
+                sm: '100%',
                 md: isTablet ? '100%' : '66%',
                 lg: '66%',
               },
@@ -1014,7 +361,7 @@ const OrderCheckout = () => {
               flexDirection: 'column',
               justifyContent: {
                 xs: 'center',
-                sm: isFoldable ? 'center' : 'center',
+                sm: 'center',
                 md: isTablet ? 'center' : 'flex-start',
                 lg: 'flex-start',
               },
@@ -1095,6 +442,68 @@ const OrderCheckout = () => {
                             },
                           }}
                         >
+                          {/* Address Type and Villa Number */}
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              mb: getResponsiveValue(
+                                0.125,
+                                0.125,
+                                0.25,
+                                0.375,
+                                0.5,
+                                0.625,
+                                0.25
+                              ),
+                            }}
+                          >
+                            <Chip
+                              label={addr.addressType === 'inside_anantra' ? 'Inside Anantra' : 'Outside Anantra'}
+                              size="small"
+                              sx={{
+                                background: addr.addressType === 'inside_anantra' 
+                                  ? `linear-gradient(90deg, ${theme.palette.success.main} 0%, ${theme.palette.success.light} 100%)`
+                                  : `linear-gradient(90deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.light} 100%)`,
+                                color: theme.palette.primary.contrastText,
+                                fontWeight: 600,
+                                fontSize: getResponsiveValue(
+                                  '0.5rem',
+                                  '0.55rem',
+                                  '0.6rem',
+                                  '0.65rem',
+                                  '0.7rem',
+                                  '0.75rem',
+                                  '0.6rem'
+                                ),
+                                height: '20px',
+                              }}
+                            />
+                            {addr.villaNumber && (
+                              <Chip
+                                label={`Villa ${addr.villaNumber}`}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  borderColor: theme.palette.primary.main,
+                                  color: theme.palette.primary.main,
+                                  fontWeight: 600,
+                                  fontSize: getResponsiveValue(
+                                    '0.5rem',
+                                    '0.55rem',
+                                    '0.6rem',
+                                    '0.65rem',
+                                    '0.7rem',
+                                    '0.75rem',
+                                    '0.6rem'
+                                  ),
+                                  height: '20px',
+                                }}
+                              />
+                            )}
+                          </Box>
+
                           <Typography
                             fontWeight={600}
                             sx={{
@@ -1208,6 +617,10 @@ const OrderCheckout = () => {
                         ),
                         alignItems: 'flex-start',
                         width: '100%',
+                        '& .MuiFormControlLabel-label': {
+                          width: '100% !important',
+                          margin: 0,
+                        },
                       }}
                     />
                   ))}
@@ -1326,7 +739,7 @@ const OrderCheckout = () => {
             sx={{
               width: {
                 xs: '100%',
-                sm: isFoldable ? '100%' : '100%',
+                sm: '100%',
                 md: isTablet ? '100%' : '30%',
                 lg: '30%',
               },
@@ -1334,8 +747,8 @@ const OrderCheckout = () => {
               flexDirection: 'column',
               justifyContent: {
                 xs: 'center',
-                sm: isFoldable ? 'center' : 'center',
-                md: isTablet ? 'center' : 'flex-start',
+                sm: 'center',
+                md: 'flex-start',
                 lg: 'flex-start',
               },
             }}
@@ -1762,72 +1175,78 @@ const OrderCheckout = () => {
                       >
                         <strong>How it works:</strong>
                       </Typography>
-                                              <Typography
-                          variant='caption'
-                          sx={{
-                            fontSize: getResponsiveValue(
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.85rem',
-                              '0.9rem',
-                              '0.75rem'
-                            ),
-                            color: theme.palette.text.secondary,
-                            display: 'block',
-                            lineHeight: 1.3,
-                            mb: 0.25,
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          • Orders <strong>≥ Rs.499</strong>: <span style={{color: theme.palette.primary.main, fontWeight: 600}}>FREE delivery</span>
-                        </Typography>
-                                              <Typography
-                          variant='caption'
-                          sx={{
-                            fontSize: getResponsiveValue(
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.85rem',
-                              '0.9rem',
-                              '0.75rem'
-                            ),
-                            color: theme.palette.text.secondary,
-                            display: 'block',
-                            lineHeight: 1.3,
-                            mb: 0.25,
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          • Orders <strong>under Rs.499</strong>: <span style={{color: theme.palette.primary.main, fontWeight: 600}}>Rs.50 delivery charge</span>
-                        </Typography>
-                      {totals.subtotal < 499 && (
-                        <Typography
-                          variant='caption'
-                          sx={{
-                            fontSize: getResponsiveValue(
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.85rem',
-                              '0.9rem',
-                              '0.75rem'
-                            ),
-                            color: theme.palette.primary.main,
-                            display: 'block',
-                            lineHeight: 1.3,
-                            mt: 0.5,
-                            fontWeight: 600,
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          💡 Tip: Add ₹{(499 - totals.subtotal).toFixed(2)} more to your cart for free delivery!
-                        </Typography>
-                      )}
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.9rem',
+                            '0.75rem'
+                          ),
+                          color: theme.palette.text.secondary,
+                          display: 'block',
+                          lineHeight: 1.3,
+                          mb: 0.25,
+                        }}
+                        className={getResponsiveTextClasses()}
+                      >
+                        • <strong>Inside Anantra:</strong> <span style={{color: theme.palette.success.main, fontWeight: 600}}>FREE delivery</span> for all orders
+                      </Typography>
+                      <Typography
+                        variant='caption'
+                        sx={{
+                          fontSize: getResponsiveValue(
+                            '0.65rem',
+                            '0.7rem',
+                            '0.75rem',
+                            '0.8rem',
+                            '0.85rem',
+                            '0.9rem',
+                            '0.75rem'
+                          ),
+                          color: theme.palette.text.secondary,
+                          display: 'block',
+                          lineHeight: 1.3,
+                          mb: 0.25,
+                        }}
+                        className={getResponsiveTextClasses()}
+                      >
+                        • <strong>Outside Anantra:</strong> <span style={{color: theme.palette.primary.main, fontWeight: 600}}>FREE delivery</span> for orders ≥ ₹150, <span style={{color: theme.palette.warning.main, fontWeight: 600}}>₹10 delivery charge</span> for orders below ₹150
+                      </Typography>
+                      {(() => {
+                        const selectedAddr = addresses.find(addr => addr._id === selectedAddress);
+                        if (selectedAddr && selectedAddr.addressType === 'outside_anantra' && totals.subtotal < 150) {
+                          return (
+                            <Typography
+                              variant='caption'
+                              sx={{
+                                fontSize: getResponsiveValue(
+                                  '0.65rem',
+                                  '0.7rem',
+                                  '0.75rem',
+                                  '0.8rem',
+                                  '0.85rem',
+                                  '0.9rem',
+                                  '0.75rem'
+                                ),
+                                color: theme.palette.primary.main,
+                                display: 'block',
+                                lineHeight: 1.3,
+                                mt: 0.5,
+                                fontWeight: 600,
+                              }}
+                              className={getResponsiveTextClasses()}
+                            >
+                              💡 Tip: Add ₹{(150 - totals.subtotal).toFixed(2)} more to your cart for free delivery!
+                            </Typography>
+                          );
+                        }
+                        return null;
+                      })()}
                     </Alert>
 
                     {/* Minimum Order Notice */}

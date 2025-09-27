@@ -2,8 +2,6 @@ import { useState } from 'react';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Button,
   List,
   ListItem,
@@ -46,7 +44,6 @@ const Cart = () => {
     isLarge,
     isExtraLarge,
     isTablet,
-    isFoldable,
     getResponsiveTypography,
     getResponsiveCardSize,
     getResponsiveButtonSize,
@@ -128,12 +125,8 @@ const Cart = () => {
   };
 
   const subtotal = cart
-    .filter(item => item && item.product && item.product.price)
+    .filter(item => !!item?.product?.price)
     .reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-
-  const deliveryCharge = subtotal >= 499 ? 0 : 50; // Free delivery for orders ≥ ₹499
-  const gst = subtotal * 0.18; // 18% GST
-  const total = subtotal + deliveryCharge + gst; // Total including delivery and GST
 
   // Show loading state
   if (isLoading) {
@@ -146,36 +139,9 @@ const Cart = () => {
       <Box
         className={getResponsiveContainer()}
         sx={{
-          mt:
-            isExtraSmall || isSmall
-              ? 1
-              : isMedium
-                ? 1
-                : isLarge
-                  ? 2
-                  : isExtraLarge
-                    ? 3
-                    : 4,
-          px:
-            isExtraSmall || isSmall
-              ? 1
-              : isMedium
-                ? 1
-                : isLarge
-                  ? 2
-                  : isExtraLarge
-                    ? 3
-                    : 4,
-          pb:
-            isExtraSmall || isSmall
-              ? 2
-              : isMedium
-                ? 3
-                : isLarge
-                  ? 4
-                  : isExtraLarge
-                    ? 5
-                    : 6,
+        mt: getResponsiveValue(1, 1, 2, 3, 4),
+          px: getResponsiveValue(1, 1, 2, 3, 4),
+          pb: getResponsiveValue(2, 3, 4, 5, 6),
         }}
       >
         <Alert severity='error' sx={{ mb: 2, borderRadius: 2 }}>
@@ -359,7 +325,7 @@ const Cart = () => {
           sx={{
             width: {
               xs: '100%',
-              sm: isFoldable ? '100%' : '100%',
+              sm: '100%',
               md: isTablet ? '100%' : cart.length === 0 ? '100%' : '67.5%',
               lg: cart.length === 0 ? '100%' : '67.5%',
             },
@@ -369,7 +335,7 @@ const Cart = () => {
             flexDirection: 'column',
             justifyContent: {
               xs: 'center',
-              sm: isFoldable ? 'center' : 'center',
+              sm: 'center',
               md: isTablet
                 ? 'center'
                 : cart.length === 0
@@ -1204,7 +1170,7 @@ const Cart = () => {
             sx={{
               width: {
                 xs: '100%',
-                sm: isFoldable ? '100%' : '100%',
+                sm: '100%',
                 md: isTablet ? '100%' : '27.5%',
                 lg: '27.5%',
               },
@@ -1212,7 +1178,7 @@ const Cart = () => {
               flexDirection: 'column',
               justifyContent: {
                 xs: 'center',
-                sm: isFoldable ? 'center' : 'center',
+                sm: 'center',
                 md: isTablet ? 'center' : 'flex-start',
                 lg: 'flex-start',
               },
@@ -1402,94 +1368,6 @@ const Cart = () => {
                           ₹{subtotal.toFixed(2)}
                         </Typography>
                       </Box>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          mb: 0.25,
-                          p: 0.25,
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            fontSize: getResponsiveValue(
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.65rem'
-                            ),
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          Delivery:
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            fontSize: getResponsiveValue(
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.65rem'
-                            ),
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          {deliveryCharge === 0
-                            ? 'Free'
-                            : `Rs.${deliveryCharge.toFixed(2)}`}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          mb: 0.25,
-                          p: 0.25,
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            fontSize: getResponsiveValue(
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.65rem'
-                            ),
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          GST (18%):
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            fontSize: getResponsiveValue(
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.65rem'
-                            ),
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          ₹{gst.toFixed(2)}
-                        </Typography>
-                      </Box>
                       <Divider
                         sx={{
                           my: 0.5,
@@ -1529,7 +1407,7 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          Total:
+                          Subtotal:
                         </Typography>
                         <Typography
                           sx={{
@@ -1547,122 +1425,11 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          ₹{total.toFixed(2)}
+                          ₹{subtotal.toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
 
-                    {/* Delivery Charges Information */}
-                    <Alert
-                      severity='info'
-                      sx={{
-                        mb: 0.5,
-                        borderRadius: getResponsiveValue(
-                          0.5,
-                          0.5,
-                          1,
-                          1.5,
-                          2,
-                          2.5,
-                          1
-                        ),
-                        background: `linear-gradient(90deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
-                        border: `1px solid ${theme.palette.primary.light}`,
-                        '& .MuiAlert-icon': {
-                          color: theme.palette.primary.main,
-                        },
-                      }}
-                      className={getResponsiveCardSize()}
-                    >
-                      <Typography
-                        variant='caption'
-                        sx={{
-                          fontSize: getResponsiveValue(
-                            '0.5rem',
-                            '0.55rem',
-                            '0.6rem',
-                            '0.65rem',
-                            '0.7rem',
-                            '0.75rem',
-                            '0.6rem'
-                          ),
-                          fontWeight: 600,
-                          color: theme.palette.primary.main,
-                          mb: 0.25,
-                          display: 'block',
-                        }}
-                      >
-                        📦 Delivery Info
-                      </Typography>
-                      <Typography
-                        variant='caption'
-                        sx={{
-                          fontSize: getResponsiveValue(
-                            '0.45rem',
-                            '0.5rem',
-                            '0.55rem',
-                            '0.6rem',
-                            '0.65rem',
-                            '0.7rem',
-                            '0.55rem'
-                          ),
-                          color: theme.palette.text.secondary,
-                          display: 'block',
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        Orders ≥ Rs.499:{' '}
-                        <strong style={{ color: theme.palette.primary.main }}>
-                          FREE
-                        </strong>
-                      </Typography>
-                      <Typography
-                        variant='caption'
-                        sx={{
-                          fontSize: getResponsiveValue(
-                            '0.45rem',
-                            '0.5rem',
-                            '0.55rem',
-                            '0.6rem',
-                            '0.65rem',
-                            '0.7rem',
-                            '0.55rem'
-                          ),
-                          color: theme.palette.text.secondary,
-                          display: 'block',
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        Orders under Rs.499:{' '}
-                        <strong style={{ color: theme.palette.primary.main }}>
-                          Rs.50
-                        </strong>
-                      </Typography>
-                      {subtotal < 499 && (
-                        <Typography
-                          variant='caption'
-                          sx={{
-                            fontSize: getResponsiveValue(
-                              '0.45rem',
-                              '0.5rem',
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.55rem'
-                            ),
-                            color: theme.palette.primary.main,
-                            display: 'block',
-                            lineHeight: 1.2,
-                            mt: 0.25,
-                            fontWeight: 600,
-                          }}
-                        >
-                          💡 Add Rs.{(499 - subtotal).toFixed(2)} more for free
-                          delivery!
-                        </Typography>
-                      )}
-                    </Alert>
 
                     {/* Checkout Button */}
                     <Button

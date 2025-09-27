@@ -304,9 +304,8 @@ class ApiService {
   }
 
   static async removeFromCart(productId) {
-    return this.request('/cart/remove', {
+    return this.request(`/cart/remove/${productId}`, {
       method: 'DELETE',
-      data: { productId },
     });
   }
 
@@ -384,6 +383,7 @@ class ApiService {
   }
 
   static async addAddress(addressData) {
+    console.log('addressData', addressData);
     return this.request('/addresses', {
       method: 'POST',
       data: addressData,

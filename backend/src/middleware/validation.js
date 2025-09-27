@@ -281,6 +281,29 @@ const validationSchemas = {
   // Address validation schemas
   address: {
     create: Joi.object({
+      addressType: Joi.string()
+        .valid('inside_anantra', 'outside_anantra')
+        .optional()
+        .messages({
+          'any.only':
+            'Address type must be either inside_anantra or outside_anantra',
+        }),
+      villaNumber: Joi.string().when('addressType', {
+        is: 'inside_anantra',
+        then: Joi.string().max(20).trim().required().messages({
+          'string.max': 'Villa number cannot exceed 20 characters',
+          'any.required':
+            'Villa number is required for Inside Anantra addresses',
+        }),
+        otherwise: Joi.string()
+          .max(20)
+          .trim()
+          .allow(null, '')
+          .optional()
+          .messages({
+            'string.max': 'Villa number cannot exceed 20 characters',
+          }),
+      }),
       addressLine1: Joi.string().min(5).max(100).trim().required().messages({
         'string.min': 'Address must be at least 5 characters long',
         'string.max': 'Address cannot exceed 100 characters',
@@ -476,6 +499,7 @@ module.exports = {
   cartValidation: createValidationMiddleware('cart', 'add'),
   cartUpdateValidation: createValidationMiddleware('cart', 'update'),
   addressValidation: createValidationMiddleware('address', 'create'),
+  // addressUpdateValidation: createValidationMiddleware('address', 'update'),
   orderValidation: createValidationMiddleware('order', 'place'),
   searchValidation: createValidationMiddleware('search', 'products'),
 };

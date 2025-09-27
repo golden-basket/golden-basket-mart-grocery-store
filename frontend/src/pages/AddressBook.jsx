@@ -12,6 +12,11 @@ import {
   Card,
   CardContent,
   useTheme,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Loading from '../components/Loading';
@@ -20,6 +25,7 @@ import { useToastNotifications } from '../hooks/useToast';
 import EditIcon from '@mui/icons-material/Edit';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AddIcon from '@mui/icons-material/Add';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 const AddressBook = () => {
   const { token } = useAuth();
@@ -28,6 +34,8 @@ const AddressBook = () => {
 
   const [addresses, setAddresses] = useState([]);
   const [form, setForm] = useState({
+    addressType: 'outside_anantra',
+    villaNumber: '',
     addressLine1: '',
     addressLine2: '',
     city: '',
@@ -51,7 +59,35 @@ const AddressBook = () => {
   }, [token]); // Only depend on token, not showError (intentionally excluded to prevent infinite loops)
 
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prevForm => {
+      const newForm = { ...prevForm, [name]: value };
+
+      // If address type changes, set default values or clear fields appropriately
+      // Only reset fields when NOT editing an existing address
+      if (name === 'addressType' && !editingId) {
+        if (value === 'inside_anantra') {
+          // Set default values for Inside Anantra
+          newForm.addressLine1 = 'Mangalam Anantra, Managalam Grand City';
+          newForm.addressLine2 = 'Opp. Pink Pearl Water Park, Mahapura';
+          newForm.city = 'Jaipur';
+          newForm.state = 'Rajasthan';
+          newForm.country = 'India';
+          newForm.pinCode = '302026';
+        } else if (value === 'outside_anantra') {
+          // Clear inside anantra fields and reset address fields
+          newForm.villaNumber = '';
+          newForm.addressLine1 = '';
+          newForm.addressLine2 = '';
+          newForm.city = '';
+          newForm.state = '';
+          newForm.country = '';
+          newForm.pinCode = '';
+        }
+      }
+
+      return newForm;
+    });
   };
 
   const handleSubmit = e => {
@@ -66,6 +102,8 @@ const AddressBook = () => {
             : 'Address added successfully!'
         );
         setForm({
+          addressType: 'inside_anantra',
+          villaNumber: '',
           addressLine1: '',
           addressLine2: '',
           city: '',
@@ -98,6 +136,21 @@ const AddressBook = () => {
           .catch(() => showError('Failed to refresh addresses.'));
       })
       .catch(() => showError('Failed to delete address. Please try again.'));
+  };
+
+  const handleCancelEdit = () => {
+    setForm({
+      addressType: 'outside_anantra',
+      villaNumber: '',
+      addressLine1: '',
+      addressLine2: '',
+      city: '',
+      state: '',
+      country: '',
+      pinCode: '',
+      phoneNumber: '',
+    });
+    setEditingId(null);
   };
 
   // Show loading state
@@ -292,6 +345,48 @@ const AddressBook = () => {
                               width: { xs: '100%', sm: 'auto' },
                             }}
                           >
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                mb: 1,
+                              }}
+                            >
+                              <Typography
+                                variant='body2'
+                                sx={{
+                                  bgcolor: theme.palette.primary.main,
+                                  color: 'white',
+                                  px: 1.5,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  textTransform: 'uppercase',
+                                }}
+                              >
+                                {addr.addressType === 'inside_anantra'
+                                  ? 'Inside Anantra'
+                                  : 'Outside Anantra'}
+                              </Typography>
+                              {addr.villaNumber && (
+                                <Typography
+                                  variant='body2'
+                                  sx={{
+                                    bgcolor: theme.palette.secondary.main,
+                                    color: 'white',
+                                    px: 1.5,
+                                    py: 0.5,
+                                    borderRadius: 1,
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  Villa {addr.villaNumber}
+                                </Typography>
+                              )}
+                            </Box>
                             <Typography
                               variant='h6'
                               sx={{
@@ -463,7 +558,11 @@ const AddressBook = () => {
                       justifyContent: 'center',
                     }}
                   >
-                    <AddIcon sx={{ color: 'white', fontSize: '1.5rem' }} />
+                    {editingId ? (
+                      <EditIcon sx={{ color: 'white', fontSize: '1.5rem' }} />
+                    ) : (
+                      <AddIcon sx={{ color: 'white', fontSize: '1.5rem' }} />
+                    )}
                   </Box>
                   <Typography
                     variant='h4'
@@ -477,19 +576,153 @@ const AddressBook = () => {
                   </Typography>
                 </Box>
 
+
                 <form onSubmit={handleSubmit}>
-                  <Stack spacing={2}>
+                  <Stack spacing={1.5}>
+                    {/* Address Type Selection */}
+                    <FormControl component='fieldset' sx={{ mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <FormLabel
+                          component='legend'
+                          sx={{
+                            color: theme.palette.primary.main,
+                            fontWeight: 600,
+                            fontSize: '1.1rem',
+                            mb: 0,
+                          }}
+                        >
+                          Address Type
+                        </FormLabel>
+                        {editingId && (
+                          <Button
+                            onClick={handleCancelEdit}
+                            startIcon={<RestartAltIcon />}
+                            size='small'
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              borderRadius: 1.5,
+                              py: 0.8,
+                              px: 1.5,
+                              minWidth: '80px',
+                              height: '32px',
+                              background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
+                              color: theme.palette.primary.contrastText,
+                              textTransform: 'none',
+                              boxShadow: `0 2px 8px ${theme.palette.primary.main}40`,
+                              '&:hover': {
+                                background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                                color: theme.palette.primary.contrastText,
+                                transform: 'translateY(-1px)',
+                                boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
+                              },
+                              transition: 'all 0.3s ease',
+                            }}
+                          >
+                            Reset
+                          </Button>
+                        )}
+                      </Box>
+                      <RadioGroup
+                        row
+                        name='addressType'
+                        value={form.addressType}
+                        onChange={handleChange}
+                        sx={{ gap: 1.5 }}
+                      >
+                        <FormControlLabel
+                          value='outside_anantra'
+                          control={
+                            <Radio 
+                              size="small"
+                              sx={{ 
+                                color: theme.palette.primary.main,
+                                '&.Mui-checked': {
+                                  color: theme.palette.primary.main,
+                                },
+                              }} 
+                            />
+                          }
+                          label='Outside Anantra'
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              fontWeight: 500,
+                              color: theme.palette.text.primary,
+                              fontSize: '0.875rem',
+                            },
+                          }}
+                        />
+                        <FormControlLabel
+                          value='inside_anantra'
+                          control={
+                            <Radio 
+                              size="small"
+                              sx={{ 
+                                color: theme.palette.primary.main,
+                                '&.Mui-checked': {
+                                  color: theme.palette.primary.main,
+                                },
+                              }} 
+                            />
+                          }
+                          label='Inside Anantra'
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              fontWeight: 500,
+                              color: theme.palette.text.primary,
+                              fontSize: '0.875rem',
+                            },
+                          }}
+                        />
+                      </RadioGroup>
+                    </FormControl>
+
+                    {/* Villa Number - Only for Inside Anantra */}
+                    {form.addressType === 'inside_anantra' && (
+                      <TextField
+                        label='Villa Number'
+                        name='villaNumber'
+                        value={form.villaNumber}
+                        onChange={handleChange}
+                        required
+                        fullWidth
+                        size="small"
+                        margin='dense'
+                        placeholder='e.g., A-101, B-205'
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 1.5,
+                            '&:hover fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: '0.875rem',
+                            '&.Mui-focused': {
+                              color: theme.palette.primary.main,
+                            },
+                          },
+                        }}
+                      />
+                    )}
+
+                    {/* Address Line 1 */}
                     <TextField
                       label='Address Line 1'
                       name='addressLine1'
                       value={form.addressLine1}
                       onChange={handleChange}
-                      required
+                      required={form.addressType === 'outside_anantra'}
                       fullWidth
+                      size='small'
                       margin='normal'
+                      disabled={form.addressType === 'inside_anantra'}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
+                          borderRadius: 1.5,
                           '&:hover fieldset': {
                             borderColor: theme.palette.primary.main,
                           },
@@ -498,22 +731,27 @@ const AddressBook = () => {
                           },
                         },
                         '& .MuiInputLabel-root': {
+                          fontSize: '0.875rem',
                           '&.Mui-focused': {
                             color: theme.palette.primary.main,
                           },
                         },
                       }}
                     />
+
+                    {/* Address Line 2 */}
                     <TextField
                       label='Address Line 2'
                       name='addressLine2'
                       value={form.addressLine2}
                       onChange={handleChange}
                       fullWidth
+                      size='small'
                       margin='normal'
+                      disabled={form.addressType === 'inside_anantra'}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
+                          borderRadius: 1.5,
                           '&:hover fieldset': {
                             borderColor: theme.palette.primary.main,
                           },
@@ -522,12 +760,15 @@ const AddressBook = () => {
                           },
                         },
                         '& .MuiInputLabel-root': {
+                          fontSize: '0.875rem',
                           '&.Mui-focused': {
                             color: theme.palette.primary.main,
                           },
                         },
                       }}
                     />
+
+                    {/* City and State */}
                     <Grid container spacing={3}>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
@@ -535,12 +776,14 @@ const AddressBook = () => {
                           name='city'
                           value={form.city}
                           onChange={handleChange}
-                          required
+                          required={form.addressType === 'outside_anantra'}
                           fullWidth
-                          margin='normal'
+                          size='small'
+                          margin='dense'
+                          disabled={form.addressType === 'inside_anantra'}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 2,
+                              borderRadius: 1.5,
                               '&:hover fieldset': {
                                 borderColor: theme.palette.primary.main,
                               },
@@ -549,6 +792,7 @@ const AddressBook = () => {
                               },
                             },
                             '& .MuiInputLabel-root': {
+                              fontSize: '0.875rem',
                               '&.Mui-focused': {
                                 color: theme.palette.primary.main,
                               },
@@ -562,12 +806,14 @@ const AddressBook = () => {
                           name='state'
                           value={form.state}
                           onChange={handleChange}
-                          required
+                          required={form.addressType === 'outside_anantra'}
                           fullWidth
-                          margin='normal'
+                          size='small'
+                          margin='dense'
+                          disabled={form.addressType === 'inside_anantra'}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 2,
+                              borderRadius: 1.5,
                               '&:hover fieldset': {
                                 borderColor: theme.palette.primary.main,
                               },
@@ -576,6 +822,7 @@ const AddressBook = () => {
                               },
                             },
                             '& .MuiInputLabel-root': {
+                              fontSize: '0.875rem',
                               '&.Mui-focused': {
                                 color: theme.palette.primary.main,
                               },
@@ -584,6 +831,8 @@ const AddressBook = () => {
                         />
                       </Grid>
                     </Grid>
+
+                    {/* Country and Pin Code */}
                     <Grid container spacing={3}>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
@@ -591,12 +840,14 @@ const AddressBook = () => {
                           name='country'
                           value={form.country}
                           onChange={handleChange}
-                          required
+                          required={form.addressType === 'outside_anantra'}
                           fullWidth
-                          margin='normal'
+                          size='small'
+                          margin='dense'
+                          disabled={form.addressType === 'inside_anantra'}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 2,
+                              borderRadius: 1.5,
                               '&:hover fieldset': {
                                 borderColor: theme.palette.primary.main,
                               },
@@ -605,6 +856,7 @@ const AddressBook = () => {
                               },
                             },
                             '& .MuiInputLabel-root': {
+                              fontSize: '0.875rem',
                               '&.Mui-focused': {
                                 color: theme.palette.primary.main,
                               },
@@ -618,13 +870,15 @@ const AddressBook = () => {
                           name='pinCode'
                           value={form.pinCode}
                           onChange={handleChange}
-                          required
+                          required={form.addressType === 'outside_anantra'}
                           fullWidth
-                          margin='normal'
+                          size='small'
+                          margin='dense'
+                          disabled={form.addressType === 'inside_anantra'}
                           slotProps={{ input: { maxLength: 6 } }}
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 2,
+                              borderRadius: 1.5,
                               '&:hover fieldset': {
                                 borderColor: theme.palette.primary.main,
                               },
@@ -633,6 +887,7 @@ const AddressBook = () => {
                               },
                             },
                             '& .MuiInputLabel-root': {
+                              fontSize: '0.875rem',
                               '&.Mui-focused': {
                                 color: theme.palette.primary.main,
                               },
@@ -641,6 +896,8 @@ const AddressBook = () => {
                         />
                       </Grid>
                     </Grid>
+
+                    {/* Phone Number - Required for both address types */}
                     <TextField
                       label='Phone Number'
                       name='phoneNumber'
@@ -648,11 +905,12 @@ const AddressBook = () => {
                       onChange={handleChange}
                       required
                       fullWidth
+                      size='small'
                       margin='normal'
                       slotProps={{ input: { maxLength: 10 } }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
+                          borderRadius: 1.5,
                           '&:hover fieldset': {
                             borderColor: theme.palette.primary.main,
                           },
@@ -661,6 +919,7 @@ const AddressBook = () => {
                           },
                         },
                         '& .MuiInputLabel-root': {
+                          fontSize: '0.875rem',
                           '&.Mui-focused': {
                             color: theme.palette.primary.main,
                           },
@@ -670,22 +929,25 @@ const AddressBook = () => {
                     <Button
                       type='submit'
                       fullWidth
-                      startIcon={<AddIcon />}
+                      size='small'
+                      startIcon={editingId ? <EditIcon /> : <AddIcon />}
                       sx={{
-                        mt: 3,
+                        mt: 2,
                         mb: 2,
-                        fontWeight: 700,
-                        fontSize: { xs: '1rem', sm: '1.1rem' },
-                        borderRadius: 2,
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        borderRadius: 1.5,
+                        py: 1.2,
+                        height: '36px',
                         background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
                         color: theme.palette.primary.contrastText,
                         textTransform: 'none',
-                        boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
+                        boxShadow: `0 2px 8px ${theme.palette.primary.main}40`,
                         '&:hover': {
                           background: `linear-gradient(90deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
                           color: theme.palette.primary.contrastText,
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 6px 20px ${theme.palette.primary.main}60`,
+                          transform: 'translateY(-1px)',
+                          boxShadow: `0 4px 12px ${theme.palette.primary.main}50`,
                         },
                         transition: 'all 0.3s ease',
                       }}

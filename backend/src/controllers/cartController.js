@@ -87,13 +87,7 @@ exports.updateCartItem = async (req, res) => {
 // Remove item from cart
 exports.removeFromCart = async (req, res) => {
   try {
-    const { error } = Joi.object({
-      productId: Joi.string().required(),
-    }).validate(req.body);
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
-    const { productId } = req.body;
+    const productId = req.params.id;
 
     let cart = await Cart.findOne({ user: req.user.userId });
     if (!cart) {
