@@ -25,6 +25,33 @@ const createGmailTransporter = () => {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
     },
+    // Optimized settings for cloud platforms like Render
+    pool: true,
+    maxConnections: 1, // Single connection for better stability
+    maxMessages: 10, // Conservative message limit
+    rateLimit: 3, // Very conservative rate limit
+    // Shorter timeouts for better error handling
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 15000, // 15 seconds
+    socketTimeout: 30000, // 30 seconds
+    // Modern Gmail-specific optimizations
+    secure: true,
+    port: 465,
+    tls: {
+      rejectUnauthorized: true, // Use proper certificate validation
+      ciphers: 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
+      minVersion: 'TLSv1.2',
+      maxVersion: 'TLSv1.3',
+    },
+    // Connection management
+    keepAlive: false, // Disable keep-alive for cloud environments
+    // Retry configuration
+    retryDelay: 5000, // 5 seconds between retries
+    maxRetries: 3, // Fewer retries for faster failure detection
+    // Additional Gmail optimizations
+    requireTLS: true,
+    debug: process.env.NODE_ENV === 'development',
+    logger: process.env.NODE_ENV === 'development',
   });
 };
 
@@ -125,12 +152,13 @@ const reconnectGmailService = async () => {
     currentTransporterType = 'gmail';
 
     // Test the new connection with timeout
-    const verifyPromise = transporter.verify();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Connection verification timeout')), 10000)
-    );
-    
-    await Promise.race([verifyPromise, timeoutPromise]);
+
+    const verifyPromise = await transporter.verify();
+    logger.error('Gmail service reconnected successfully', "Verify Promise", verifyPromise);
+    if (!verifyPromise) {
+      logger.error('Failed to verify Gmail service');
+      return false;
+    }
     logger.info('Gmail service reconnected successfully');
     return true;
   } catch (error) {
@@ -157,8 +185,11 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
     // Verify connection before sending with timeout
     try {
       const verifyPromise = transporter.verify();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Connection verification timeout')), 5000)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Connection verification timeout')),
+          5000
+        )
       );
       await Promise.race([verifyPromise, timeoutPromise]);
     } catch (verifyError) {
@@ -185,10 +216,10 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
 
     // Send email with timeout
     const sendPromise = transporter.sendMail(mailOptions);
-    const sendTimeoutPromise = new Promise((_, reject) => 
+    const sendTimeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Email send timeout')), 15000)
     );
-    
+
     const result = await Promise.race([sendPromise, sendTimeoutPromise]);
     logger.info(
       `Email sent successfully to ${to} via ${currentTransporterType}: ${subject}`
@@ -225,9 +256,14 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
     }
 
     // Handle Gmail-specific errors
-    if (error.responseCode === 454 && error.message.includes('Too many recipients')) {
+    if (
+      error.responseCode === 454 &&
+      error.message.includes('Too many recipients')
+    ) {
       logger.error(`Gmail quota exceeded: ${error.message}`);
-      throw new Error('Daily email sending limit exceeded. Please try again tomorrow.');
+      throw new Error(
+        'Daily email sending limit exceeded. Please try again tomorrow.'
+      );
     }
 
     // Retry logic for specific error types
