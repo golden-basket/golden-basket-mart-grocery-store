@@ -152,13 +152,15 @@ const reconnectGmailService = async () => {
     currentTransporterType = 'gmail';
 
     // Test the new connection with timeout
+    const verifyPromise = transporter.verify();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error('Connection verification timeout')),
+        10000
+      )
+    );
 
-    const verifyPromise = await transporter.verify();
-    logger.error('Gmail service reconnected successfully', "Verify Promise", verifyPromise);
-    if (!verifyPromise) {
-      logger.error('Failed to verify Gmail service');
-      return false;
-    }
+    await Promise.race([verifyPromise, timeoutPromise]);
     logger.info('Gmail service reconnected successfully');
     return true;
   } catch (error) {
@@ -180,21 +182,6 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
     if (!transporter) {
       logger.warn('Transporter not initialized, creating new one');
       transporter = createGmailTransporter();
-    }
-
-    // Verify connection before sending with timeout
-    try {
-      const verifyPromise = transporter.verify();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error('Connection verification timeout')),
-          5000
-        )
-      );
-      await Promise.race([verifyPromise, timeoutPromise]);
-    } catch (verifyError) {
-      logger.warn(`Connection verification failed: ${verifyError.message}`);
-      // Don't fail immediately, try to send anyway
     }
 
     const mailOptions = {
