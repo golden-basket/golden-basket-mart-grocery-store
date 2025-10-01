@@ -174,108 +174,108 @@ const reconnectGmailService = async () => {
 
 // Helper function to send email with retry logic and service switching
 const sendEmail = async (to, subject, html, retryCount = 0) => {
-  const maxRetries = 2; // Reduced retries for faster failure detection
-  const retryDelay = Math.pow(2, retryCount) * 2000; // Exponential backoff: 2s, 4s
+  // const maxRetries = 2; // Reduced retries for faster failure detection
+  // const retryDelay = Math.pow(2, retryCount) * 2000; // Exponential backoff: 2s, 4s
 
-  try {
-    // Check if transporter exists and is valid
-    if (!transporter) {
-      logger.warn('Transporter not initialized, creating new one');
-      transporter = createGmailTransporter();
-    }
+  // try {
+  //   // Check if transporter exists and is valid
+  //   if (!transporter) {
+  //     logger.warn('Transporter not initialized, creating new one');
+  //     transporter = createGmailTransporter();
+  //   }
 
-    const mailOptions = {
-      from: EMAIL_FROM,
-      to: to,
-      subject: subject,
-      html: html,
-      // Add headers for better deliverability
-      headers: {
-        'X-Mailer': 'Golden Basket Mart',
-        'X-Priority': '3',
-        'X-MSMail-Priority': 'Normal',
-        // Gmail-specific headers
-        'X-Google-Original-From': EMAIL_FROM,
-      },
-      // Ensure Gmail doesn't rewrite the sender
-      replyTo: EMAIL_FROM,
-    };
+  const mailOptions = {
+    from: EMAIL_FROM,
+    to: to,
+    subject: subject,
+    html: html,
+    // Add headers for better deliverability
+    headers: {
+      'X-Mailer': 'Golden Basket Mart',
+      'X-Priority': '3',
+      'X-MSMail-Priority': 'Normal',
+      // Gmail-specific headers
+      'X-Google-Original-From': EMAIL_FROM,
+    },
+    // Ensure Gmail doesn't rewrite the sender
+    replyTo: EMAIL_FROM,
+  };
 
-    // Send email with timeout
-    const sendPromise = transporter.sendMail(mailOptions);
-    const sendTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Email send timeout')), 15000)
-    );
+  // Send email with timeout
+  const sendPromise = await transporter.sendMail(mailOptions);
+  // const sendTimeoutPromise = new Promise((_, reject) =>
+  //   setTimeout(() => reject(new Error('Email send timeout')), 15000)
+  // );
 
-    const result = await Promise.race([sendPromise, sendTimeoutPromise]);
-    logger.info(
-      `Email sent successfully to ${to} via ${currentTransporterType}: ${subject}`
-    );
-    return result;
-  } catch (error) {
-    logger.error(
-      `Failed to send email to ${to} via ${currentTransporterType} (attempt ${retryCount + 1}):`,
-      {
-        error: error.message,
-        code: error.code,
-        command: error.command,
-      }
-    );
+  // const result = await Promise.race([sendPromise, sendTimeoutPromise]);
+  logger.info(
+    `Email sent successfully to ${to} via ${currentTransporterType}: ${subject}`
+  );
+  return sendPromise;
+  // } catch (error) {
+  //   logger.error(
+  //     `Failed to send email to ${to} via ${currentTransporterType} (attempt ${retryCount + 1}):`,
+  //     {
+  //       error: error.message,
+  //       code: error.code,
+  //       command: error.command,
+  //     }
+  //   );
 
-    // Try reconnecting Gmail on connection errors (only on first attempt)
-    if (
-      retryCount === 0 &&
-      (error.code === 'ETIMEDOUT' ||
-        error.code === 'ECONNRESET' ||
-        error.code === 'ENOTFOUND' ||
-        error.message.includes('timeout') ||
-        error.message.includes('connection') ||
-        error.message.includes('verification'))
-    ) {
-      logger.warn(
-        `Attempting to reconnect Gmail service due to connection error`
-      );
-      const reconnected = await reconnectGmailService();
-      if (reconnected) {
-        // Retry with reconnected service
-        return sendEmail(to, subject, html, retryCount + 1);
-      }
-    }
+  //   // Try reconnecting Gmail on connection errors (only on first attempt)
+  //   if (
+  //     retryCount === 0 &&
+  //     (error.code === 'ETIMEDOUT' ||
+  //       error.code === 'ECONNRESET' ||
+  //       error.code === 'ENOTFOUND' ||
+  //       error.message.includes('timeout') ||
+  //       error.message.includes('connection') ||
+  //       error.message.includes('verification'))
+  //   ) {
+  //     logger.warn(
+  //       `Attempting to reconnect Gmail service due to connection error`
+  //     );
+  //     const reconnected = await reconnectGmailService();
+  //     if (reconnected) {
+  //       // Retry with reconnected service
+  //       return sendEmail(to, subject, html, retryCount + 1);
+  //     }
+  //   }
 
-    // Handle Gmail-specific errors
-    if (
-      error.responseCode === 454 &&
-      error.message.includes('Too many recipients')
-    ) {
-      logger.error(`Gmail quota exceeded: ${error.message}`);
-      throw new Error(
-        'Daily email sending limit exceeded. Please try again tomorrow.'
-      );
-    }
+  //   // Handle Gmail-specific errors
+  //   if (
+  //     error.responseCode === 454 &&
+  //     error.message.includes('Too many recipients')
+  //   ) {
+  //     logger.error(`Gmail quota exceeded: ${error.message}`);
+  //     throw new Error(
+  //       'Daily email sending limit exceeded. Please try again tomorrow.'
+  //     );
+  //   }
 
-    // Retry logic for specific error types
-    if (
-      retryCount < maxRetries &&
-      (error.code === 'ETIMEDOUT' ||
-        error.code === 'ECONNRESET' ||
-        error.code === 'ENOTFOUND' ||
-        error.message.includes('timeout') ||
-        error.message.includes('connection'))
-    ) {
-      logger.warn(
-        `Retrying email send to ${to} in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`
-      );
+  //   // Retry logic for specific error types
+  //   if (
+  //     retryCount < maxRetries &&
+  //     (error.code === 'ETIMEDOUT' ||
+  //       error.code === 'ECONNRESET' ||
+  //       error.code === 'ENOTFOUND' ||
+  //       error.message.includes('timeout') ||
+  //       error.message.includes('connection'))
+  //   ) {
+  //     logger.warn(
+  //       `Retrying email send to ${to} in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`
+  //     );
 
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
+  //     // Wait before retry
+  //     await new Promise(resolve => setTimeout(resolve, retryDelay));
 
-      // Recursive retry
-      return sendEmail(to, subject, html, retryCount + 1);
-    }
+  //     // Recursive retry
+  //     return sendEmail(to, subject, html, retryCount + 1);
+  //   }
 
-    // If all retries failed, throw the error
-    throw error;
-  }
+  //   // If all retries failed, throw the error
+  //   throw error;
+  // }
 };
 
 // Add email to queue for background processing
