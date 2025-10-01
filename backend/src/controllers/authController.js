@@ -13,6 +13,9 @@ const EMAIL_FROM = process.env.EMAIL_FROM;
 const FRONTEND_URL = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
 // Gmail-only configuration - no alternative services needed
+// Note: Gmail has daily sending limits:
+// - Personal Gmail: 500 recipients per rolling 24-hour period
+// - Google Workspace: 2,000 recipients per rolling 24-hour period
 
 // Create optimized Gmail transporter for cloud platforms
 const createGmailTransporter = () => {
@@ -37,7 +40,6 @@ const createGmailTransporter = () => {
     tls: {
       rejectUnauthorized: true, // Use proper certificate validation
       ciphers: 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
-      secureProtocol: 'TLSv1_2_method',
       minVersion: 'TLSv1.2',
       maxVersion: 'TLSv1.3',
     },
@@ -201,7 +203,11 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
         'X-Mailer': 'Golden Basket Mart',
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
+        // Gmail-specific headers
+        'X-Google-Original-From': EMAIL_FROM,
       },
+      // Ensure Gmail doesn't rewrite the sender
+      replyTo: EMAIL_FROM,
     };
 
     // Send email with timeout
@@ -243,6 +249,12 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
         // Retry with reconnected service
         return sendEmail(to, subject, html, retryCount + 1);
       }
+    }
+
+    // Handle Gmail-specific errors
+    if (error.responseCode === 454 && error.message.includes('Too many recipients')) {
+      logger.error(`Gmail quota exceeded: ${error.message}`);
+      throw new Error('Daily email sending limit exceeded. Please try again tomorrow.');
     }
 
     // Retry logic for specific error types
