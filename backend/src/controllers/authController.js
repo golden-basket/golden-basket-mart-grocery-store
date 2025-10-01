@@ -12,54 +12,18 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 const EMAIL_FROM = process.env.EMAIL_FROM;
 const FRONTEND_URL = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
-// Gmail-only configuration - no alternative services needed
-// Note: Gmail has daily sending limits:
-// - Personal Gmail: 500 recipients per rolling 24-hour period
-// - Google Workspace: 2,000 recipients per rolling 24-hour period
-
-// Create optimized Gmail transporter for cloud platforms
-const createGmailTransporter = () => {
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
-    },
-    // Optimized settings for cloud platforms like Render
-    pool: true,
-    maxConnections: 1, // Single connection for better stability
-    maxMessages: 10, // Conservative message limit
-    rateLimit: 3, // Very conservative rate limit
-    // Shorter timeouts for better error handling
-    connectionTimeout: 30000, // 30 seconds
-    greetingTimeout: 15000, // 15 seconds
-    socketTimeout: 30000, // 30 seconds
-    // Modern Gmail-specific optimizations
-    secure: true,
-    port: 465,
-    tls: {
-      rejectUnauthorized: true, // Use proper certificate validation
-      ciphers: 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
-      minVersion: 'TLSv1.2',
-      maxVersion: 'TLSv1.3',
-    },
-    // Connection management
-    keepAlive: false, // Disable keep-alive for cloud environments
-    // Retry configuration
-    retryDelay: 5000, // 5 seconds between retries
-    maxRetries: 3, // Fewer retries for faster failure detection
-    // Additional Gmail optimizations
-    requireTLS: true,
-    debug: process.env.NODE_ENV === 'development',
-    logger: process.env.NODE_ENV === 'development',
-  });
-};
-
-// Optimized Gmail configuration for cloud platforms like Render
-
-// Initialize primary transporter
-let transporter = createGmailTransporter();
-let currentTransporterType = 'gmail';
+// Email transporter with enhanced configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
+  },
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  rateLimit: 14, // 14 emails per second
+});
 
 // Enhanced validation schemas
 const registerSchema = Joi.object({
@@ -132,150 +96,23 @@ const getUserAgent = req => {
 const emailQueue = [];
 let isProcessingQueue = false;
 
-// Function to reconnect Gmail service
-const reconnectGmailService = async () => {
+// Helper function to send email
+const sendEmail = async (to, subject, html) => {
   try {
-    // Close current transporter gracefully
-    if (transporter) {
-      try {
-        transporter.close();
-      } catch (closeError) {
-        logger.warn('Error closing transporter:', closeError.message);
-      }
-    }
+    const mailOptions = {
+      from: EMAIL_FROM,
+      to: to,
+      subject: subject,
+      html: html,
+    };
 
-    // Wait before reconnecting
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    // Create new Gmail transporter
-    transporter = createGmailTransporter();
-    currentTransporterType = 'gmail';
-
-    // Test the new connection with timeout
-    const verifyPromise = transporter.verify();
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error('Connection verification timeout')),
-        10000
-      )
-    );
-
-    await Promise.race([verifyPromise, timeoutPromise]);
-    logger.info('Gmail service reconnected successfully');
-    return true;
+    const result = await transporter.sendMail(mailOptions);
+    logger.info(`Email sent successfully to ${to}: ${subject}`);
+    return result;
   } catch (error) {
-    logger.error('Failed to reconnect Gmail service:', {
-      error: error.message,
-      code: error.code,
-    });
-    return false;
+    logger.error(`Failed to send email to ${to}:`, error);
+    throw error;
   }
-};
-
-// Helper function to send email with retry logic and service switching
-const sendEmail = async (to, subject, html, retryCount = 0) => {
-  // const maxRetries = 2; // Reduced retries for faster failure detection
-  // const retryDelay = Math.pow(2, retryCount) * 2000; // Exponential backoff: 2s, 4s
-
-  // try {
-  //   // Check if transporter exists and is valid
-  //   if (!transporter) {
-  //     logger.warn('Transporter not initialized, creating new one');
-  //     transporter = createGmailTransporter();
-  //   }
-
-  const mailOptions = {
-    from: EMAIL_FROM,
-    to: to,
-    subject: subject,
-    html: html,
-    // Add headers for better deliverability
-    headers: {
-      'X-Mailer': 'Golden Basket Mart',
-      'X-Priority': '3',
-      'X-MSMail-Priority': 'Normal',
-      // Gmail-specific headers
-      'X-Google-Original-From': EMAIL_FROM,
-    },
-    // Ensure Gmail doesn't rewrite the sender
-    replyTo: EMAIL_FROM,
-  };
-
-  // Send email with timeout
-  const sendPromise = await transporter.sendMail(mailOptions);
-  // const sendTimeoutPromise = new Promise((_, reject) =>
-  //   setTimeout(() => reject(new Error('Email send timeout')), 15000)
-  // );
-
-  // const result = await Promise.race([sendPromise, sendTimeoutPromise]);
-  logger.info(
-    `Email sent successfully to ${to} via ${currentTransporterType}: ${subject}`
-  );
-  return sendPromise;
-  // } catch (error) {
-  //   logger.error(
-  //     `Failed to send email to ${to} via ${currentTransporterType} (attempt ${retryCount + 1}):`,
-  //     {
-  //       error: error.message,
-  //       code: error.code,
-  //       command: error.command,
-  //     }
-  //   );
-
-  //   // Try reconnecting Gmail on connection errors (only on first attempt)
-  //   if (
-  //     retryCount === 0 &&
-  //     (error.code === 'ETIMEDOUT' ||
-  //       error.code === 'ECONNRESET' ||
-  //       error.code === 'ENOTFOUND' ||
-  //       error.message.includes('timeout') ||
-  //       error.message.includes('connection') ||
-  //       error.message.includes('verification'))
-  //   ) {
-  //     logger.warn(
-  //       `Attempting to reconnect Gmail service due to connection error`
-  //     );
-  //     const reconnected = await reconnectGmailService();
-  //     if (reconnected) {
-  //       // Retry with reconnected service
-  //       return sendEmail(to, subject, html, retryCount + 1);
-  //     }
-  //   }
-
-  //   // Handle Gmail-specific errors
-  //   if (
-  //     error.responseCode === 454 &&
-  //     error.message.includes('Too many recipients')
-  //   ) {
-  //     logger.error(`Gmail quota exceeded: ${error.message}`);
-  //     throw new Error(
-  //       'Daily email sending limit exceeded. Please try again tomorrow.'
-  //     );
-  //   }
-
-  //   // Retry logic for specific error types
-  //   if (
-  //     retryCount < maxRetries &&
-  //     (error.code === 'ETIMEDOUT' ||
-  //       error.code === 'ECONNRESET' ||
-  //       error.code === 'ENOTFOUND' ||
-  //       error.message.includes('timeout') ||
-  //       error.message.includes('connection'))
-  //   ) {
-  //     logger.warn(
-  //       `Retrying email send to ${to} in ${retryDelay}ms (attempt ${retryCount + 1}/${maxRetries})`
-  //     );
-
-  //     // Wait before retry
-  //     await new Promise(resolve => setTimeout(resolve, retryDelay));
-
-  //     // Recursive retry
-  //     return sendEmail(to, subject, html, retryCount + 1);
-  //   }
-
-  //   // If all retries failed, throw the error
-  //   throw error;
-  // }
 };
 
 // Add email to queue for background processing

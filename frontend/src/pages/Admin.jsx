@@ -15,7 +15,7 @@ import { useAdmin } from '../hooks/useAdmin';
 import { createAdminStyles } from '../components/admin/adminStyles';
 
 // Helper function for responsive values
-const getResponsiveValue = (
+const getResponsiveValue = ({
   isSmallMobile,
   isMobile,
   isLargeScreen,
@@ -24,8 +24,8 @@ const getResponsiveValue = (
   mobile,
   large,
   extraLarge,
-  defaultVal
-) => {
+  defaultVal,
+}) => {
   if (isSmallMobile) return smallMobile;
   if (isMobile) return mobile;
   if (isLargeScreen) return large;
@@ -70,94 +70,94 @@ const Admin = () => {
   // Responsive tab styles based on screen size
   const responsiveTabStyles = useMemo(
     () => ({
-      fontSize: getResponsiveValue(
+      fontSize: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        '0.65rem',
-        '0.75rem',
-        '0.9rem',
-        '1rem',
-        '0.85rem'
-      ),
-      px: getResponsiveValue(
+        smallMobile: '0.65rem',
+        mobile: '0.75rem',
+        large: '0.9rem',
+        extraLarge: '1rem',
+        defaultVal: '0.85rem',
+      }),
+      px: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        0.5,
-        1,
-        2,
-        3,
-        1.5
-      ),
-      py: getResponsiveValue(
+        smallMobile: 0.5,
+        mobile: 1,
+        large: 2,
+        extraLarge: 3,
+        defaultVal: 1.5,
+      }),
+      py: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        0.25,
-        0.5,
-        1,
-        1.5,
-        0.75
-      ),
-      minWidth: getResponsiveValue(
+        smallMobile: 0.25,
+        mobile: 0.5,
+        large: 1,
+        extraLarge: 1.5,
+        defaultVal: 0.75,
+      }),
+      minWidth: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        '60px',
-        '70px',
-        '90px',
-        '100px',
-        '80px'
-      ),
-      height: getResponsiveValue(
+        smallMobile: '60px',
+        mobile: '70px',
+        large: '90px',
+        extraLarge: '100px',
+        defaultVal: '80px',
+      }),
+      height: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        '32px',
-        '36px',
-        '40px',
-        '44px',
-        '38px'
-      ),
-      borderRadius: getResponsiveValue(
+        smallMobile: '32px',
+        mobile: '36px',
+        large: '40px',
+        extraLarge: '44px',
+        defaultVal: '38px',
+      }),
+      borderRadius: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        '3px',
-        '4px',
-        '6px',
-        '8px',
-        '5px'
-      ),
-      fontWeight: getResponsiveValue(
+        smallMobile: '3px',
+        mobile: '4px',
+        large: '6px',
+        extraLarge: '8px',
+        defaultVal: '5px',
+      }),
+      fontWeight: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        500,
-        600,
-        600,
-        700,
-        600
-      ),
-      letterSpacing: getResponsiveValue(
+        smallMobile: 500,
+        mobile: 600,
+        large: 600,
+        extraLarge: 700,
+        defaultVal: 600,
+      }),
+      letterSpacing: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        '0.3px',
-        '0.4px',
-        '0.5px',
-        '0.6px',
-        '0.4px'
-      ),
+        smallMobile: '0.3px',
+        mobile: '0.4px',
+        large: '0.5px',
+        extraLarge: '0.6px',
+        defaultVal: '0.4px',
+      }),
     }),
     [isSmallMobile, isMobile, isLargeScreen, isExtraLargeScreen]
   );
@@ -165,80 +165,80 @@ const Admin = () => {
   // Responsive tabs container styles
   const responsiveTabsStyles = useMemo(
     () => ({
-      mb: getResponsiveValue(
+      mb: getResponsiveValue({
         isSmallMobile,
         isMobile,
         isLargeScreen,
         isExtraLargeScreen,
-        0.5,
-        1,
-        2,
-        3,
-        1.5
-      ),
+        smallMobile: 0.5,
+        mobile: 1,
+        large: 2,
+        extraLarge: 3,
+        defaultVal: 1.5,
+      }),
       '& .MuiTabs-indicator': {
         background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.primary.dark} 100%)`,
-        height: getResponsiveValue(
+        height: getResponsiveValue({
           isSmallMobile,
           isMobile,
           isLargeScreen,
           isExtraLargeScreen,
-          1.5,
-          2,
-          3,
-          4,
-          2.5
-        ),
-        borderRadius: getResponsiveValue(
+          smallMobile: 1.5,
+          mobile: 2,
+          large: 3,
+          extraLarge: 4,
+          defaultVal: 2.5,
+        }),
+        borderRadius: getResponsiveValue({
           isSmallMobile,
           isMobile,
           isLargeScreen,
           isExtraLargeScreen,
-          0.5,
-          1,
-          1.5,
-          2,
-          1
-        ),
+          smallMobile: 0.5,
+          mobile: 1,
+          large: 1.5,
+          extraLarge: 2,
+          defaultVal: 1,
+        }),
         boxShadow: `0 2px 8px ${theme.palette.primary.main}4D`,
       },
       '& .MuiTabs-flexContainer': {
-        gap: getResponsiveValue(
+        gap: getResponsiveValue({
           isSmallMobile,
           isMobile,
           isLargeScreen,
           isExtraLargeScreen,
-          0.25,
-          0.5,
-          1.5,
-          2,
-          1
-        ),
+          smallMobile: 0.25,
+          mobile: 0.5,
+          large: 1.5,
+          extraLarge: 2,
+          defaultVal: 1,
+        }),
       },
       // Responsive scroll buttons for mobile
       '& .MuiTabs-scrollButtons': {
-        width: getResponsiveValue(
+        width: getResponsiveValue({
           isSmallMobile,
           isMobile,
           isLargeScreen,
           isExtraLargeScreen,
-          '20px',
-          '28px',
-          '32px',
-          '32px',
-          '32px'
-        ),
-        height: getResponsiveValue(
+          smallMobile: '20px',
+          mobile: '28px',
+          large: '32px',
+          extraLarge: '32px',
+          defaultVal: '32px',
+        }),
+        height: getResponsiveValue({
           isSmallMobile,
           isMobile,
           isLargeScreen,
           isExtraLargeScreen,
-          '20px',
-          '28px',
-          '28px',
-          '28px',
-          '28px'
-        ),
+          smallMobile: '20px',
+          mobile: '28px',
+          large: '28px',
+          extraLarge: '28px',
+          defaultVal: '28px',
+        }),
       },
     }),
     [
@@ -255,43 +255,43 @@ const Admin = () => {
   return (
     <Container maxWidth='xl' sx={styles.containerStyles}>
       <Typography
-        variant={getResponsiveValue(
+        variant={getResponsiveValue({
           isSmallMobile,
           isMobile,
           isLargeScreen,
           isExtraLargeScreen,
-          'h6',
-          'h5',
-          'h4',
-          'h3',
-          'h5'
-        )}
+          smallMobile: 'h6',
+          mobile: 'h5',
+          large: 'h4',
+          extraLarge: 'h3',
+          defaultVal: 'h5',
+        })}
         align='center'
         gutterBottom
         sx={{
           ...styles.titleStyles,
-          fontSize: getResponsiveValue(
+          fontSize: getResponsiveValue({
             isSmallMobile,
             isMobile,
             isLargeScreen,
             isExtraLargeScreen,
-            '1.25rem',
-            '1.5rem',
-            '2rem',
-            '2.5rem',
-            '1.75rem'
-          ),
-          mb: getResponsiveValue(
+            smallMobile: '1.25rem',
+            mobile: '1.5rem',
+            large: '2rem',
+            extraLarge: '2.5rem',
+            defaultVal: '1.75rem',
+          }),
+          mb: getResponsiveValue({
             isSmallMobile,
             isMobile,
             isLargeScreen,
             isExtraLargeScreen,
-            1,
-            2,
-            4,
-            5,
-            3
-          ),
+            smallMobile: 1,
+            mobile: 2,
+            large: 4,
+            extraLarge: 5,
+            defaultVal: 3,
+          }),
         }}
       >
         Admin Dashboard
@@ -328,7 +328,7 @@ const Admin = () => {
           }}
         />
         <Tab
-          label='Users'
+          label='Orders'
           sx={{
             ...styles.tabStyles,
             ...responsiveTabStyles,
@@ -339,7 +339,7 @@ const Admin = () => {
           }}
         />
         <Tab
-          label='Orders'
+          label='Users'
           sx={{
             ...styles.tabStyles,
             ...responsiveTabStyles,
@@ -367,13 +367,13 @@ const Admin = () => {
         />
       )}
 
+      {/* Order Management */}
+      {tab === 2 && <OrderManagement />}
+
       {/* User Management */}
-      {tab === 2 && (
+      {tab === 3 && (
         <UserManagement users={users} onUserUpdate={handleUserUpdate} />
       )}
-
-      {/* Order Management */}
-      {tab === 3 && <OrderManagement />}
     </Container>
   );
 };
