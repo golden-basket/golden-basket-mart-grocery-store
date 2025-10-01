@@ -25,33 +25,6 @@ const createGmailTransporter = () => {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
     },
-    // Optimized settings for cloud platforms like Render
-    pool: true,
-    maxConnections: 1, // Single connection for better stability
-    maxMessages: 10, // Conservative message limit
-    rateLimit: 3, // Very conservative rate limit
-    // Shorter timeouts for better error handling
-    connectionTimeout: 30000, // 30 seconds
-    greetingTimeout: 15000, // 15 seconds
-    socketTimeout: 30000, // 30 seconds
-    // Modern Gmail-specific optimizations
-    secure: true,
-    port: 465,
-    tls: {
-      rejectUnauthorized: true, // Use proper certificate validation
-      ciphers: 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
-      minVersion: 'TLSv1.2',
-      maxVersion: 'TLSv1.3',
-    },
-    // Connection management
-    keepAlive: false, // Disable keep-alive for cloud environments
-    // Retry configuration
-    retryDelay: 5000, // 5 seconds between retries
-    maxRetries: 3, // Fewer retries for faster failure detection
-    // Additional Gmail optimizations
-    requireTLS: true,
-    debug: process.env.NODE_ENV === 'development',
-    logger: process.env.NODE_ENV === 'development',
   });
 };
 
