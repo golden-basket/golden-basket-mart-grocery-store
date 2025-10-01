@@ -24,27 +24,32 @@ const createGmailTransporter = () => {
     },
     // Optimized settings for cloud platforms like Render
     pool: true,
-    maxConnections: 2, // Conservative for cloud stability
-    maxMessages: 20, // Conservative message limit
-    rateLimit: 5, // Conservative rate limit
-    // Extended timeouts for cloud environments
-    connectionTimeout: 120000, // 2 minutes
-    greetingTimeout: 60000, // 1 minute
-    socketTimeout: 120000, // 2 minutes
-    // Gmail-specific optimizations
+    maxConnections: 1, // Single connection for better stability
+    maxMessages: 10, // Conservative message limit
+    rateLimit: 3, // Very conservative rate limit
+    // Shorter timeouts for better error handling
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 15000, // 15 seconds
+    socketTimeout: 30000, // 30 seconds
+    // Modern Gmail-specific optimizations
     secure: true,
     port: 465,
     tls: {
-      rejectUnauthorized: false,
-      ciphers: 'SSLv3',
+      rejectUnauthorized: true, // Use proper certificate validation
+      ciphers: 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
       secureProtocol: 'TLSv1_2_method',
+      minVersion: 'TLSv1.2',
+      maxVersion: 'TLSv1.3',
     },
     // Connection management
-    keepAlive: true,
-    keepAliveTimeout: 60000, // 1 minute
+    keepAlive: false, // Disable keep-alive for cloud environments
     // Retry configuration
-    retryDelay: 10000, // 10 seconds between retries
-    maxRetries: 5, // More retries for cloud reliability
+    retryDelay: 5000, // 5 seconds between retries
+    maxRetries: 3, // Fewer retries for faster failure detection
+    // Additional Gmail optimizations
+    requireTLS: true,
+    debug: process.env.NODE_ENV === 'development',
+    logger: process.env.NODE_ENV === 'development',
   });
 };
 
@@ -128,37 +133,62 @@ let isProcessingQueue = false;
 // Function to reconnect Gmail service
 const reconnectGmailService = async () => {
   try {
-    // Close current transporter
+    // Close current transporter gracefully
     if (transporter) {
-      transporter.close();
+      try {
+        transporter.close();
+      } catch (closeError) {
+        logger.warn('Error closing transporter:', closeError.message);
+      }
     }
 
-    // Wait a bit before reconnecting
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait before reconnecting
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // Create new Gmail transporter
     transporter = createGmailTransporter();
     currentTransporterType = 'gmail';
 
-    // Test the new connection
-    await transporter.verify();
+    // Test the new connection with timeout
+    const verifyPromise = transporter.verify();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Connection verification timeout')), 10000)
+    );
+    
+    await Promise.race([verifyPromise, timeoutPromise]);
     logger.info('Gmail service reconnected successfully');
     return true;
   } catch (error) {
-    logger.error('Failed to reconnect Gmail service:', error);
+    logger.error('Failed to reconnect Gmail service:', {
+      error: error.message,
+      code: error.code,
+    });
     return false;
   }
 };
 
 // Helper function to send email with retry logic and service switching
 const sendEmail = async (to, subject, html, retryCount = 0) => {
-  const maxRetries = 3;
-  const retryDelay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+  const maxRetries = 2; // Reduced retries for faster failure detection
+  const retryDelay = Math.pow(2, retryCount) * 2000; // Exponential backoff: 2s, 4s
 
   try {
-    // Verify connection before sending
-    if (!transporter.isIdle()) {
-      await transporter.verify();
+    // Check if transporter exists and is valid
+    if (!transporter) {
+      logger.warn('Transporter not initialized, creating new one');
+      transporter = createGmailTransporter();
+    }
+
+    // Verify connection before sending with timeout
+    try {
+      const verifyPromise = transporter.verify();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection verification timeout')), 5000)
+      );
+      await Promise.race([verifyPromise, timeoutPromise]);
+    } catch (verifyError) {
+      logger.warn(`Connection verification failed: ${verifyError.message}`);
+      // Don't fail immediately, try to send anyway
     }
 
     const mailOptions = {
@@ -174,7 +204,13 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
       },
     };
 
-    const result = await transporter.sendMail(mailOptions);
+    // Send email with timeout
+    const sendPromise = transporter.sendMail(mailOptions);
+    const sendTimeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email send timeout')), 15000)
+    );
+    
+    const result = await Promise.race([sendPromise, sendTimeoutPromise]);
     logger.info(
       `Email sent successfully to ${to} via ${currentTransporterType}: ${subject}`
     );
@@ -189,14 +225,15 @@ const sendEmail = async (to, subject, html, retryCount = 0) => {
       }
     );
 
-    // Try reconnecting Gmail on connection errors
+    // Try reconnecting Gmail on connection errors (only on first attempt)
     if (
       retryCount === 0 &&
       (error.code === 'ETIMEDOUT' ||
         error.code === 'ECONNRESET' ||
         error.code === 'ENOTFOUND' ||
         error.message.includes('timeout') ||
-        error.message.includes('connection'))
+        error.message.includes('connection') ||
+        error.message.includes('verification'))
     ) {
       logger.warn(
         `Attempting to reconnect Gmail service due to connection error`
@@ -267,18 +304,8 @@ const processEmailQueue = async () => {
     const emailJob = emailQueue.shift();
 
     try {
-      // Add connection health check before processing
-      try {
-        await transporter.verify();
-      } catch (verifyError) {
-        logger.warn(
-          `Email connection verification failed: ${verifyError.message}`
-        );
-        // Reset transporter connection
-        transporter.close();
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-
+      // Skip connection verification in queue processing to avoid delays
+      // The sendEmail function will handle connection issues internally
       await sendEmail(emailJob.to, emailJob.subject, emailJob.html);
       logger.info(`Background email sent successfully to ${emailJob.to}`);
     } catch (error) {
@@ -294,9 +321,9 @@ const processEmailQueue = async () => {
       if (emailJob.attempts < emailJob.maxAttempts) {
         // Calculate exponential backoff delay
         const delay = Math.min(
-          5000 * Math.pow(2, emailJob.attempts - 1),
-          30000
-        ); // Max 30 seconds
+          3000 * Math.pow(2, emailJob.attempts - 1),
+          15000
+        ); // Max 15 seconds
 
         // Retry after delay
         setTimeout(() => {
@@ -315,8 +342,8 @@ const processEmailQueue = async () => {
       }
     }
 
-    // Adaptive delay between emails based on queue size and errors
-    const delay = emailQueue.length > 10 ? 200 : 100;
+    // Adaptive delay between emails based on queue size
+    const delay = emailQueue.length > 5 ? 500 : 200;
     await new Promise(resolve => setTimeout(resolve, delay));
   }
 
