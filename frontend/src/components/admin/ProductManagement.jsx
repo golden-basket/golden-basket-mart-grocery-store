@@ -62,6 +62,7 @@ const ProductManagement = ({ categories }) => {
   const [filterCat, setFilterCat] = useState('');
   const [priceRange, setPriceRange] = useState([5, 1000]);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   // Load all products
   const { data: products, isLoading, error } = useAllProducts();
@@ -259,7 +260,7 @@ const ProductManagement = ({ categories }) => {
         </Box>
       );
     }
-    
+
     if (error) {
       return (
         <Alert severity='error' sx={{ mb: 2 }}>
@@ -267,7 +268,7 @@ const ProductManagement = ({ categories }) => {
         </Alert>
       );
     }
-    
+
     return (
       <>
         {/* Desktop Table View */}
@@ -290,10 +291,7 @@ const ProductManagement = ({ categories }) => {
               >
                 No products found
               </Typography>
-              <Typography
-                variant='body2'
-                color={theme.palette.text.secondary}
-              >
+              <Typography variant='body2' color={theme.palette.text.secondary}>
                 {search || filterCat
                   ? 'Try adjusting your search or filter criteria'
                   : 'Start by adding your first product'}
@@ -328,7 +326,10 @@ const ProductManagement = ({ categories }) => {
                     >
                       No products found
                     </Typography>
-                    <Typography variant='body2' color={theme.palette.text.secondary}>
+                    <Typography
+                      variant='body2'
+                      color={theme.palette.text.secondary}
+                    >
                       {search || filterCat
                         ? 'Try adjusting your search or filter criteria'
                         : 'Start by adding your first product'}
@@ -417,6 +418,8 @@ const ProductManagement = ({ categories }) => {
             priceRange,
             inStockOnly,
           }}
+          filterDrawerOpen={filterDrawerOpen}
+          setFilterDrawerOpen={setFilterDrawerOpen}
           onFilterChange={(field, value) => {
             switch (field) {
               case 'searchQuery':

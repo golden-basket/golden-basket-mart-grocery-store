@@ -30,7 +30,7 @@ exports.createOrUpdateCategory = async (req, res) => {
 // Get all categories
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().sort({ name: 'asc' });
     res.json(categories);
   } catch (err) {
     logger.error('Error fetching categories:', err);

@@ -139,7 +139,7 @@ const Cart = () => {
       <Box
         className={getResponsiveContainer()}
         sx={{
-        mt: getResponsiveValue(1, 1, 2, 3, 4),
+          mt: getResponsiveValue(1, 1, 2, 3, 4),
           px: getResponsiveValue(1, 1, 2, 3, 4),
           pb: getResponsiveValue(2, 3, 4, 5, 6),
         }}
@@ -1157,7 +1157,7 @@ const Cart = () => {
                                   : '1.15rem',
                       }}
                     >
-                      Subtotal: ₹{item.product.price * item.quantity}
+                      ₹{item.product.price * item.quantity}
                     </Typography>
                   </ListItem>
                 ))}
@@ -1329,55 +1329,6 @@ const Cart = () => {
                         sx={{
                           display: 'flex',
                           justifyContent: 'space-between',
-                          mb: 0.25,
-                          p: 0.25,
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            fontSize: getResponsiveValue(
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.65rem'
-                            ),
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          Subtotal:
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            fontSize: getResponsiveValue(
-                              '0.55rem',
-                              '0.6rem',
-                              '0.65rem',
-                              '0.7rem',
-                              '0.75rem',
-                              '0.8rem',
-                              '0.65rem'
-                            ),
-                          }}
-                          className={getResponsiveTextClasses()}
-                        >
-                          ₹{subtotal.toFixed(2)}
-                        </Typography>
-                      </Box>
-                      <Divider
-                        sx={{
-                          my: 0.5,
-                          borderColor: theme.palette.primary.light,
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
                           p: 0.5,
                           background: `${theme.palette.primary.main}20`,
                           borderRadius: getResponsiveValue(
@@ -1407,7 +1358,7 @@ const Cart = () => {
                           }}
                           className={getResponsiveTextClasses()}
                         >
-                          Subtotal:
+                          Cart Subtotal:
                         </Typography>
                         <Typography
                           sx={{
@@ -1429,7 +1380,6 @@ const Cart = () => {
                         </Typography>
                       </Box>
                     </Box>
-
 
                     {/* Checkout Button */}
                     <Button
